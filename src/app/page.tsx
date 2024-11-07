@@ -1,11 +1,16 @@
 import { getCurrentSession } from "@/auth/utils";
+import Link from "next/link";
+import { redirect, RedirectType } from "next/navigation";
 
 export default async function Page() {
   const session = await getCurrentSession();
+  if (session) {
+    redirect("/dashboard", RedirectType.replace);
+  }
 
   return (
     <div>
-      <pre>{JSON.stringify(session, null, 2)}</pre>
+      <Link href="/login">Log In</Link>
     </div>
   );
 }
