@@ -4,6 +4,7 @@ import type { Snippet } from "@/db/schema";
 import { trpc } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
+import { useWorkspace } from "./workspace-provider";
 
 export interface EditorContext {
   snippet: Snippet;
@@ -17,6 +18,7 @@ export interface EditorProviderProps {
 
 export default function EditorProvider({ children }: EditorProviderProps) {
   const { snippetId } = useParams<{ snippetId: string }>();
+  const { workspace } = useWorkspace();
   const snippetQuery = trpc.snippets.getSnippet.useQuery({ snippetId });
 
   if (snippetQuery.isPending) {
@@ -25,6 +27,10 @@ export default function EditorProvider({ children }: EditorProviderProps) {
 
   if (snippetQuery.isError) {
     return <p>{snippetQuery.error.message}</p>;
+  }
+
+  if (workspace.id !== snippetQuery.data.workspaceId) {
+    return <p>Not Found!</p>;
   }
 
   return (
