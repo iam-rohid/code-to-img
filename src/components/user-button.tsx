@@ -22,11 +22,11 @@ export default function UserButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full w-8 h-8 flex-shrink-0"
+          className="flex-shrink-0 rounded-full"
         >
-          <Avatar className="w-8 h-8">
+          <Avatar className="h-8 w-8">
             <AvatarFallback>
-              <UserIcon className="w-4 h-4" />
+              <UserIcon className="h-4 w-4" />
             </AvatarFallback>
             {session?.user.image && (
               <AvatarImage src={session.user.image} alt="Avatar" />
@@ -34,7 +34,7 @@ export default function UserButton() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="end" side="bottom">
         <div className="p-2">
           <p className="font-semibold">{session?.user.name}</p>
           <p className="text-sm text-muted-foreground">{session?.user.email}</p>

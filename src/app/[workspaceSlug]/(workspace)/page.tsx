@@ -1,3 +1,5 @@
+import SnippetsList from "./snippets-list";
+
 export default function Page() {
-  return <div>Page</div>;
+  return <SnippetsList />;
 }

@@ -8,13 +8,40 @@ import { createWorkspaceDto, updateWorkspaceDto } from "../validators";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { unstable_cache } from "next/cache";
+import { db } from "@/db";
+
+export const getWorkspaceById = unstable_cache(
+  async (workspaceId: string, userId: string) => {
+    const [row] = await db
+      .select()
+      .from(workspaceMemberTable)
+      .innerJoin(
+        workspaceTable,
+        eq(workspaceTable.id, workspaceMemberTable.workspaceId),
+      )
+      .where(
+        and(
+          eq(workspaceMemberTable.workspaceId, workspaceId),
+          eq(workspaceMemberTable.userId, userId),
+        ),
+      );
+    if (!row) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Workspace not found!",
+      });
+    }
+    return { workspace: row.workspace, member: row.workspace_member };
+  },
+);
 
 export const workspacesRouter = router({
   getWorkspaceBySlug: protectedProcedure
     .input(
       z.object({
         slug: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const [workspace] = await ctx.db
@@ -35,8 +62,8 @@ export const workspacesRouter = router({
         .where(
           and(
             eq(workspaceMemberTable.workspaceId, workspace.id),
-            eq(workspaceMemberTable.userId, ctx.session.user.id)
-          )
+            eq(workspaceMemberTable.userId, ctx.session.user.id),
+          ),
         );
 
       if (!workspaceMember) {
@@ -54,7 +81,7 @@ export const workspacesRouter = router({
       .from(workspaceMemberTable)
       .innerJoin(
         workspaceTable,
-        eq(workspaceTable.id, workspaceMemberTable.workspaceId)
+        eq(workspaceTable.id, workspaceMemberTable.workspaceId),
       )
       .where(eq(workspaceMemberTable.userId, ctx.session.user.id))
       .orderBy(desc(workspaceMemberTable.createdAt));
@@ -96,37 +123,13 @@ export const workspacesRouter = router({
       z.object({
         workspaceId: z.string(),
         dto: updateWorkspaceDto,
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [workspace] = await ctx.db
-        .select()
-        .from(workspaceTable)
-        .where(eq(workspaceTable.id, input.workspaceId));
-
-      if (!workspace) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Workspace not found!",
-        });
-      }
-
-      const [workspaceMember] = await ctx.db
-        .select()
-        .from(workspaceMemberTable)
-        .where(
-          and(
-            eq(workspaceMemberTable.workspaceId, workspace.id),
-            eq(workspaceMemberTable.userId, ctx.session.user.id)
-          )
-        );
-
-      if (!workspaceMember) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You are not a member of this workspace!",
-        });
-      }
+      const { workspace } = await getWorkspaceById(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
 
       if (input.dto.slug) {
         const [existingOrg] = await ctx.db

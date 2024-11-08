@@ -25,7 +25,7 @@ export default function WorkspaceSidebar() {
   const items = useMemo(
     () => [
       {
-        title: "Apps",
+        title: "Snippets",
         url: `/${workspace.slug}`,
         icon: LayoutGridIcon,
         exact: true,
@@ -36,7 +36,7 @@ export default function WorkspaceSidebar() {
         icon: SettingsIcon,
       },
     ],
-    [workspace.slug]
+    [workspace.slug],
   );
 
   return (
