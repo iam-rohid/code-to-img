@@ -63,7 +63,10 @@ export interface iCanvas {
 }
 
 interface ElementState {
-  hovering: boolean;
+  hovering?: boolean;
+  dragging?: boolean;
+  resizing?: boolean;
+  rotating?: boolean;
 }
 
 export interface EditorState {
@@ -72,6 +75,10 @@ export interface EditorState {
   selectedElementId: string | null;
   zoom: number;
   layersOpen: boolean;
+  viewPortOffset: {
+    x: number;
+    y: number;
+  };
 }
 
 export type Alignment =
@@ -85,9 +92,11 @@ export type Alignment =
 export interface EditorActions {
   setCanvas: (canvas: Partial<EditorState["canvas"]>) => void;
   setZoom: (zoom: EditorState["zoom"]) => void;
+  setViewPortOffset: (offset: EditorState["viewPortOffset"]) => void;
   setLayersOpen: (open: boolean) => void;
   addElement: (element: iElement) => void;
   updateElement: (dto: iElement) => void;
+  updateElementTransform: (elementId: string, dto: iElementTransform) => void;
   updateElementState: (elementId: string, state: Partial<ElementState>) => void;
   setSelectedElement: (elemenntId: EditorState["selectedElementId"]) => void;
   removeElement: (elemenntId: string) => void;

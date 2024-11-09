@@ -22,7 +22,7 @@ import {
   UndoIcon,
   UnlockIcon,
 } from "lucide-react";
-import InspectionPanel from "./inspection-panel";
+import { InspectionPanelMemo } from "./inspection-panel";
 import { Button } from "@/components/ui/button";
 import UserButton from "@/components/user-button";
 import { useEditorStore } from "./store";
@@ -46,10 +46,31 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { memo, useCallback, useMemo } from "react";
 
 export default function UI() {
   const layersOpen = useEditorStore((state) => state.layersOpen);
   const setLayersOpen = useEditorStore((state) => state.setLayersOpen);
+  const zoom = useEditorStore((state) => state.zoom);
+  const setZoom = useEditorStore((state) => state.setZoom);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
+  const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
+
+  const zoomPercentage = useMemo(() => Math.round(zoom * 100), [zoom]);
+
+  const handleZoomIn = useCallback(() => {
+    const newValue = Math.max(zoomPercentage + 10, 10);
+    setZoom(newValue / 100);
+  }, [setZoom, zoomPercentage]);
+
+  const handleZoomOut = useCallback(() => {
+    const newValue = Math.min(zoomPercentage - 10, 300);
+    setZoom(newValue / 100);
+  }, [setZoom, zoomPercentage]);
+
+  const handleResetZoom = useCallback(() => {
+    setZoom(1);
+  }, [setZoom]);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex flex-col gap-4 p-4">
@@ -107,21 +128,42 @@ export default function UI() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <InspectionPanel />
+        <InspectionPanelMemo />
         <div className="flex-1"></div>
-        {layersOpen && <LayersPanel />}
+        {layersOpen && <LayersPanelMemo />}
       </div>
 
       <div className="flex items-center gap-2">
         <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
-          <Button size="icon" variant="ghost">
-            <MinusIcon />
-          </Button>
-          <p className="text-sm text-muted-foreground">100%</p>
-          <Button size="icon" variant="ghost">
-            <PlusIcon />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={handleZoomOut}>
+                <MinusIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Zoom Out</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleResetZoom}
+                className="flex h-10 items-center justify-center text-center text-sm text-muted-foreground"
+              >
+                {zoomPercentage}%
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Reset Zoom</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={handleZoomIn}>
+                <PlusIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Zoom In</TooltipContent>
+          </Tooltip>
         </div>
+
         <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
           <Button size="icon" variant="ghost">
             <UndoIcon />
@@ -131,6 +173,17 @@ export default function UI() {
           </Button>
         </div>
 
+        <div className="flex-1"></div>
+        {(viewPortOffset.x !== 0 || viewPortOffset.y !== 0) && (
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+            <Button
+              onClick={() => setViewPortOffset({ x: 0, y: 0 })}
+              variant="ghost"
+            >
+              Reset Viewport
+            </Button>
+          </div>
+        )}
         <div className="flex-1"></div>
 
         <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
@@ -331,3 +384,5 @@ function LayersPanel() {
     </div>
   );
 }
+
+const LayersPanelMemo = memo(LayersPanel);

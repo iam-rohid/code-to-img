@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/tooltip";
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Input } from "@/components/ui/input";
-import { iElement } from "./types";
+import { iElement, iElementTransform } from "./types";
+import { memo } from "react";
 
 export default function InspectionPanel() {
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
@@ -29,7 +30,7 @@ export default function InspectionPanel() {
   }
 
   if (selectedElementId) {
-    return <ElementInspector elementId={selectedElementId} />;
+    return <ElementInspectorMemo elementId={selectedElementId} />;
   }
 
   return null;
@@ -46,6 +47,8 @@ function CanvasInspector() {
     </div>
   );
 }
+
+export const InspectionPanelMemo = memo(InspectionPanel);
 
 function CanvasTransform() {
   const canvasWidth = useEditorStore((state) => state.canvas.width);
@@ -127,7 +130,7 @@ function ElementInspector({ elementId }: { elementId: string }) {
     <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
       <ElementAlignment elementId={elementId} />
       <Separator />
-      <ElementTransform element={element} />
+      <ElementTransform elementId={elementId} transform={element.transform} />
       {element.type === "text" && (
         <>
           <Separator />
@@ -139,6 +142,8 @@ function ElementInspector({ elementId }: { elementId: string }) {
     </div>
   );
 }
+
+const ElementInspectorMemo = memo(ElementInspector);
 
 function ElementAlignment({ elementId }: { elementId: string }) {
   const alignElement = useEditorStore((state) => state.alignElement);
@@ -224,59 +229,57 @@ function ElementAlignment({ elementId }: { elementId: string }) {
   );
 }
 
-function ElementTransform({ element }: { element: iElement }) {
-  const updateElement = useEditorStore((state) => state.updateElement);
+function ElementTransform({
+  elementId,
+  transform,
+}: {
+  elementId: string;
+  transform: iElementTransform;
+}) {
+  const updateElementTransform = useEditorStore(
+    (state) => state.updateElementTransform,
+  );
 
   return (
     <div className="p-2">
       <p className="mb-2 text-xs text-muted-foreground">Transform</p>
       <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
         <InspectorNumberInput
-          value={element.transform.position.x}
+          value={transform.position.x}
           icon={<span>X</span>}
           onValueChange={(value) => {
-            updateElement({
-              ...element,
-              transform: {
-                ...element.transform,
-                position: { ...element.transform.position, x: value },
-              },
+            updateElementTransform(elementId, {
+              ...transform,
+              position: { ...transform.position, x: value },
             });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={element.transform.position.y}
+          value={transform.position.y}
           icon={<span>Y</span>}
           onValueChange={(value) => {
-            updateElement({
-              ...element,
-              transform: {
-                ...element.transform,
-                position: { ...element.transform.position, y: value },
-              },
+            updateElementTransform(elementId, {
+              ...transform,
+              position: { ...transform.position, y: value },
             });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={element.transform.width}
-          min={element.transform.minWidth}
+          value={transform.width}
+          min={transform.minWidth}
           icon={<span>W</span>}
           onValueChange={(value) => {
             const width = value;
-            let height = element.transform.height;
-            if (element.transform.widthHeightLinked) {
-              height =
-                (element.transform.height * width) / element.transform.width;
+            let height = transform.height;
+            if (transform.widthHeightLinked) {
+              height = (transform.height * width) / transform.width;
             }
-            updateElement({
-              ...element,
-              transform: {
-                ...element.transform,
-                width,
-                height,
-              },
+            updateElementTransform(elementId, {
+              ...transform,
+              width,
+              height,
             });
           }}
         />
@@ -291,49 +294,42 @@ function ElementTransform({ element }: { element: iElement }) {
                 updateElement( {
                 ...element,
                   transform: {
-                    ...element.transform,
-                    widthHeightLinked: !element.transform.widthHeightLinked,
+                    ...transform,
+                    widthHeightLinked: !transform.widthHeightLinked,
                   },
                 })
               }
             >
-              {element.transform.widthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
+              {transform.widthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>Maintain aspect ratio</TooltipContent>
         </Tooltip> */}
         <InspectorNumberInput
-          value={element.transform.height}
-          min={element.transform.minHeight}
+          value={transform.height}
+          min={transform.minHeight}
           icon={<span>H</span>}
           onValueChange={(value) => {
             const height = value;
-            let width = element.transform.width;
-            if (element.transform.widthHeightLinked) {
-              width =
-                (element.transform.width * height) / element.transform.height;
+            let width = transform.width;
+            if (transform.widthHeightLinked) {
+              width = (transform.width * height) / transform.height;
             }
-            updateElement({
-              ...element,
-              transform: {
-                ...element.transform,
-                height,
-                width,
-              },
+            updateElementTransform(elementId, {
+              ...transform,
+              height,
+              width,
             });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={element.transform.rotation}
+          value={transform.rotation}
           icon={<span>R</span>}
           onValueChange={(value) => {
-            updateElement({
-              ...element,
-              transform: {
-                ...element.transform,
-                rotation: value,
-              },
+            updateElementTransform(elementId, {
+              ...transform,
+              rotation: value,
             });
           }}
         />
@@ -344,9 +340,9 @@ function ElementTransform({ element }: { element: iElement }) {
               variant="outline"
               className="h-6 w-6"
               onClick={() => {
-                updateElement({
-                  ...element,
-                  transform: { ...element.transform, rotation: 0 },
+                updateElementTransform(elementId, {
+                  ...transform,
+                  rotation: 0,
                 });
               }}
             >
@@ -356,17 +352,14 @@ function ElementTransform({ element }: { element: iElement }) {
           <TooltipContent>Reset value</TooltipContent>
         </Tooltip>
         <InspectorNumberInput
-          value={element.transform.scale * 100}
+          value={transform.scale * 100}
           min={10}
           max={200}
           icon={<span>S</span>}
           onValueChange={(value) => {
-            updateElement({
-              ...element,
-              transform: {
-                ...element.transform,
-                scale: value / 100,
-              },
+            updateElementTransform(elementId, {
+              ...transform,
+              scale: value / 100,
             });
           }}
         />
@@ -377,9 +370,9 @@ function ElementTransform({ element }: { element: iElement }) {
               variant="outline"
               className="h-6 w-6"
               onClick={() => {
-                updateElement({
-                  ...element,
-                  transform: { ...element.transform, scale: 1 },
+                updateElementTransform(elementId, {
+                  ...transform,
+                  scale: 1,
                 });
               }}
             >

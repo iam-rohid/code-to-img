@@ -1,15 +1,8 @@
-import { useEditorStore } from "../store";
+import { iElement } from "../types";
 import Draggable from "./draggable";
 
-export default function CodeEditorElement({
-  elementId,
-}: {
-  elementId: string;
-}) {
-  const element = useEditorStore((state) =>
-    state.canvas.elements.find((element) => element.id === elementId),
-  );
-  if (element?.type !== "code-editor") {
+export default function CodeEditorElement({ element }: { element: iElement }) {
+  if (element.type !== "code-editor") {
     return null;
   }
 

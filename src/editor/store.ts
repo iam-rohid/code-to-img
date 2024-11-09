@@ -18,6 +18,10 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
     elements: [getCodeEditorElement(600, 400)],
   },
   zoom: 1,
+  viewPortOffset: {
+    x: 0,
+    y: 0,
+  },
   elementState: {},
   selectedElementId: null,
   layersOpen: false,
@@ -27,6 +31,7 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
     set({ canvas: { ...canvas, ...updatedCanvas } });
   },
   setZoom: (zoom) => set({ zoom }),
+  setViewPortOffset: (viewPortOffset) => set({ viewPortOffset }),
   addElement: (element) => {
     const canvas = get().canvas;
     set({
@@ -44,6 +49,16 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
         ),
       },
     });
+  },
+  updateElementTransform: (elementId, transform) => {
+    set((state) => ({
+      canvas: {
+        ...state.canvas,
+        elements: state.canvas.elements.map((el) =>
+          el.id === elementId ? { ...el, transform } : el,
+        ),
+      },
+    }));
   },
   updateElementState: (elementId, state) => {
     const elementState = get().elementState;

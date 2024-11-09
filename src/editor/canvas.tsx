@@ -1,8 +1,8 @@
 "use client";
 
 import { useEditorStore } from "./store";
-import Element from "./elements/element";
-import { Indecators } from "./indecators";
+import { ElementMemo } from "./elements/element";
+import { IndecatorsMemo } from "./indecators";
 import { getBackgroundStyle } from "./utils";
 
 export default function Canvas() {
@@ -28,13 +28,15 @@ export default function Canvas() {
         onClick={() => setSelectedElement("canvas")}
       ></div>
 
-      {elements.map((element) => (
-        <Element elementId={element.id} key={element.id} />
-      ))}
+      <div className="absolute inset-0 z-10">
+        {elements.map((element) => (
+          <ElementMemo element={element} key={element.id} />
+        ))}
+      </div>
 
-      <div className="pointer-events-none absolute inset-0 z-10 ring-[9999px] ring-secondary/80"></div>
+      <div className="pointer-events-none absolute inset-0 z-20 ring-[9999px] ring-secondary/80"></div>
 
-      <Indecators />
+      <IndecatorsMemo />
     </div>
   );
 }

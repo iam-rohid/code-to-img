@@ -20,6 +20,9 @@ export default function Draggable({
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const updateElement = useEditorStore((state) => state.updateElement);
+  const updateElementState = useEditorStore(
+    (state) => state.updateElementState,
+  );
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = useCallback(
@@ -30,17 +33,22 @@ export default function Draggable({
 
       e.preventDefault();
       setIsDragging(true);
+      updateElementState(element.id, { dragging: true });
       setStartMousePos({ x: e.clientX, y: e.clientY });
       document.documentElement.classList.add("cursor-move", "select-none");
     },
-    [element.hidden, element.locked],
+    [element.hidden, element.id, element.locked, updateElementState],
   );
 
-  const handleMouseUp = useCallback((e: globalThis.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    document.documentElement.classList.remove("cursor-move", "select-none");
-  }, []);
+  const handleMouseUp = useCallback(
+    (e: globalThis.MouseEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      updateElementState(element.id, { dragging: false });
+      document.documentElement.classList.remove("cursor-move", "select-none");
+    },
+    [element.id, updateElementState],
+  );
 
   const handleMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {

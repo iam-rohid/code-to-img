@@ -1,12 +1,8 @@
-import { useEditorStore } from "../store";
+import { iElement } from "../types";
 import Draggable from "./draggable";
 
-export default function TextElement({ elementId }: { elementId: string }) {
-  const element = useEditorStore((state) =>
-    state.canvas.elements.find((element) => element.id === elementId),
-  );
-
-  if (element?.type !== "text") {
+export default function TextElement({ element }: { element: iElement }) {
+  if (element.type !== "text") {
     return null;
   }
 

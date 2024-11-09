@@ -1,12 +1,10 @@
-import { MouseEvent, useCallback, useMemo, useRef } from "react";
+import { memo, MouseEvent, useCallback, useMemo, useRef } from "react";
 import { useEditorStore } from "../store";
 import CodeEditorElement from "./code-editor";
 import TextElement from "./text-element";
+import { iElement } from "../types";
 
-export default function Element({ elementId }: { elementId: string }) {
-  const element = useEditorStore((state) =>
-    state.canvas.elements.find((element) => element.id === elementId),
-  );
+export default function Element({ element }: { element: iElement }) {
   const elementRef = useRef<HTMLDivElement>(null);
 
   const updateElementState = useEditorStore(
@@ -17,7 +15,7 @@ export default function Element({ elementId }: { elementId: string }) {
   );
 
   const offset = useMemo(() => {
-    if (!element?.transform) {
+    if (!element.transform) {
       return {
         x: 0,
         y: 0,
@@ -33,40 +31,40 @@ export default function Element({ elementId }: { elementId: string }) {
           element.transform.height) /
         2,
     };
-  }, [element?.transform]);
+  }, [element.transform]);
 
   const handleMouseEnter = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      if (element?.hidden || element?.locked) {
+      if (element.hidden || element.locked) {
         return;
       }
 
       e.preventDefault();
-      updateElementState(elementId, { hovering: true });
+      updateElementState(element.id, { hovering: true });
     },
-    [element?.hidden, element?.locked, elementId, updateElementState],
+    [element.hidden, element.locked, element.id, updateElementState],
   );
 
   const handleMouseLeave = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      if (element?.hidden || element?.locked) {
+      if (element.hidden || element.locked) {
         return;
       }
       e.preventDefault();
-      updateElementState(elementId, { hovering: false });
+      updateElementState(element.id, { hovering: false });
     },
-    [element?.hidden, element?.locked, elementId, updateElementState],
+    [element.hidden, element.locked, element.id, updateElementState],
   );
 
   const handleMouseDown = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      if (element?.hidden || element?.locked) {
+      if (element.hidden || element.locked) {
         return;
       }
       e.preventDefault();
-      setSelectedElement(elementId);
+      setSelectedElement(element.id);
     },
-    [element?.hidden, element?.locked, elementId, setSelectedElement],
+    [element.hidden, element.locked, element.id, setSelectedElement],
   );
 
   if (!element) {
@@ -95,10 +93,12 @@ export default function Element({ elementId }: { elementId: string }) {
       className="absolute"
     >
       {element.type === "code-editor" ? (
-        <CodeEditorElement elementId={elementId} />
+        <CodeEditorElement element={element} />
       ) : element.type === "text" ? (
-        <TextElement elementId={elementId} />
+        <TextElement element={element} />
       ) : null}
     </div>
   );
 }
+
+export const ElementMemo = memo(Element);

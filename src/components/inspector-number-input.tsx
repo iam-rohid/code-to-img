@@ -27,16 +27,6 @@ export function InspectorNumberInput({
   const [isResizing, setIsResizing] = useState(false);
   const [startX, setStartX] = useState(0);
 
-  useEffect(() => {
-    if (isFocused || isResizing) {
-      return;
-    }
-    if (text !== String(value)) {
-      console.log("Settings Value");
-      setText(String(value));
-    }
-  }, [isFocused, isResizing, text, value]);
-
   const clampValue = useCallback(
     (value: number) => {
       if (min !== undefined) {
@@ -101,7 +91,22 @@ export function InspectorNumberInput({
     };
   }, [handleMouseMove, handleMouseUp, isResizing]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (isFocused || isResizing) {
+      return;
+    }
+    if (text === String(value)) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      console.log("Settings Value");
+      setText(String(value));
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [isFocused, isResizing, text, value]);
 
   return (
     <fieldset className="relative">
