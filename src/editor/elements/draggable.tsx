@@ -23,6 +23,8 @@ export default function Draggable({
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
+  const zoom = useEditorStore((state) => state.zoom);
+
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = useCallback(
@@ -31,7 +33,6 @@ export default function Draggable({
         return;
       }
 
-      e.preventDefault();
       setIsDragging(true);
       updateElementState(element.id, { dragging: true });
       setStartMousePos({ x: e.clientX, y: e.clientY });
@@ -40,28 +41,22 @@ export default function Draggable({
     [element.hidden, element.id, element.locked, updateElementState],
   );
 
-  const handleMouseUp = useCallback(
-    (e: globalThis.MouseEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      updateElementState(element.id, { dragging: false });
-      document.documentElement.classList.remove("cursor-move", "select-none");
-    },
-    [element.id, updateElementState],
-  );
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    updateElementState(element.id, { dragging: false });
+    document.documentElement.classList.remove("cursor-move", "select-none");
+  }, [element.id, updateElementState]);
 
   const handleMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {
-      e.preventDefault();
-
       let x = element.transform.position.x;
       let y = element.transform.position.y;
 
       const difX = startMousePos.x - e.clientX;
       const difY = startMousePos.y - e.clientY;
 
-      x -= difX;
-      y -= difY;
+      x -= difX / zoom;
+      y -= difY / zoom;
 
       setStartMousePos({ x: e.clientX, y: e.clientY });
 
@@ -69,11 +64,11 @@ export default function Draggable({
         ...element,
         transform: {
           ...element.transform,
-          position: { x, y },
+          position: { x: Math.round(x), y: Math.round(y) },
         },
       });
     },
-    [element, startMousePos.x, startMousePos.y, updateElement],
+    [element, startMousePos.x, startMousePos.y, updateElement, zoom],
   );
 
   useEffect(() => {

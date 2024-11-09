@@ -16,10 +16,7 @@ export default function Canvas() {
 
   return (
     <div
-      style={{
-        width,
-        height,
-      }}
+      style={{ width, height }}
       className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
     >
       <div
@@ -28,7 +25,7 @@ export default function Canvas() {
         onClick={() => setSelectedElement("canvas")}
       ></div>
 
-      <div className="absolute inset-0 z-10">
+      <div className="pointer-events-none absolute inset-0 z-10">
         {elements.map((element) => (
           <ElementMemo element={element} key={element.id} />
         ))}

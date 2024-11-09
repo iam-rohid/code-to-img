@@ -59,12 +59,12 @@ export default function UI() {
   const zoomPercentage = useMemo(() => Math.round(zoom * 100), [zoom]);
 
   const handleZoomIn = useCallback(() => {
-    const newValue = Math.max(zoomPercentage + 10, 10);
+    const newValue = Math.min(zoomPercentage + 10, 3000);
     setZoom(newValue / 100);
   }, [setZoom, zoomPercentage]);
 
   const handleZoomOut = useCallback(() => {
-    const newValue = Math.min(zoomPercentage - 10, 300);
+    const newValue = Math.max(zoomPercentage - 10, 10);
     setZoom(newValue / 100);
   }, [setZoom, zoomPercentage]);
 

@@ -7,6 +7,8 @@ import {
   AlignVerticalJustifyEndIcon,
   AlignVerticalJustifyStartIcon,
   CopyIcon,
+  MoveHorizontalIcon,
+  MoveVerticalIcon,
   RotateCcwIcon,
   TrashIcon,
 } from "lucide-react";
@@ -21,6 +23,7 @@ import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Input } from "@/components/ui/input";
 import { iElement, iElementTransform } from "./types";
 import { memo } from "react";
+import { cn } from "@/lib/utils";
 
 export default function InspectionPanel() {
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
@@ -249,7 +252,6 @@ function ElementTransform({
           icon={<span>X</span>}
           onValueChange={(value) => {
             updateElementTransform(elementId, {
-              ...transform,
               position: { ...transform.position, x: value },
             });
           }}
@@ -260,7 +262,6 @@ function ElementTransform({
           icon={<span>Y</span>}
           onValueChange={(value) => {
             updateElementTransform(elementId, {
-              ...transform,
               position: { ...transform.position, y: value },
             });
           }}
@@ -276,35 +277,28 @@ function ElementTransform({
             if (transform.widthHeightLinked) {
               height = (transform.height * width) / transform.width;
             }
-            updateElementTransform(elementId, {
-              ...transform,
-              width,
-              height,
-            });
+            updateElementTransform(elementId, { width, height });
           }}
         />
-        <div></div>
-        {/* <Tooltip>
+        <Tooltip>
           <TooltipTrigger asChild>
             <Button
               size="icon"
               variant="outline"
-              className="h-6 w-6"
+              className={cn("h-6 w-6", {
+                "bg-secondary": transform.autoWidth,
+              })}
               onClick={() =>
-                updateElement( {
-                ...element,
-                  transform: {
-                    ...transform,
-                    widthHeightLinked: !transform.widthHeightLinked,
-                  },
+                updateElementTransform(elementId, {
+                  autoWidth: !transform.autoWidth,
                 })
               }
             >
-              {transform.widthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
+              <MoveHorizontalIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Maintain aspect ratio</TooltipContent>
-        </Tooltip> */}
+          <TooltipContent>Auto width</TooltipContent>
+        </Tooltip>
         <InspectorNumberInput
           value={transform.height}
           min={transform.minHeight}
@@ -315,20 +309,34 @@ function ElementTransform({
             if (transform.widthHeightLinked) {
               width = (transform.width * height) / transform.height;
             }
-            updateElementTransform(elementId, {
-              ...transform,
-              height,
-              width,
-            });
+            updateElementTransform(elementId, { height, width });
           }}
         />
-        <div></div>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="outline"
+              className={cn("h-6 w-6", {
+                "bg-secondary": transform.autoHeight,
+              })}
+              onClick={() =>
+                updateElementTransform(elementId, {
+                  autoHeight: !transform.autoHeight,
+                })
+              }
+            >
+              <MoveVerticalIcon />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Auto height</TooltipContent>
+        </Tooltip>
         <InspectorNumberInput
           value={transform.rotation}
           icon={<span>R</span>}
           onValueChange={(value) => {
             updateElementTransform(elementId, {
-              ...transform,
               rotation: value,
             });
           }}
@@ -341,7 +349,6 @@ function ElementTransform({
               className="h-6 w-6"
               onClick={() => {
                 updateElementTransform(elementId, {
-                  ...transform,
                   rotation: 0,
                 });
               }}
@@ -358,7 +365,6 @@ function ElementTransform({
           icon={<span>S</span>}
           onValueChange={(value) => {
             updateElementTransform(elementId, {
-              ...transform,
               scale: value / 100,
             });
           }}
@@ -371,7 +377,6 @@ function ElementTransform({
               className="h-6 w-6"
               onClick={() => {
                 updateElementTransform(elementId, {
-                  ...transform,
                   scale: 1,
                 });
               }}

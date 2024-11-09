@@ -30,6 +30,8 @@ export const getCodeEditorElement = (
     width,
     minHeight: 100,
     minWidth: 100,
+    autoWidth: false,
+    autoHeight: false,
     widthHeightLinked: false,
     position: {
       x: canvasWidth / 2 - width / 2,

@@ -53,14 +53,12 @@ export function InspectorNumberInput({
   }, [clampValue, onValueChange, text, value]);
 
   const handleMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
     setStartX(e.clientX);
     setIsResizing(true);
     document.documentElement.classList.add("cursor-col-resize", "select-none");
   }, []);
 
-  const handleMouseUp = useCallback((e: globalThis.MouseEvent) => {
-    e.preventDefault();
+  const handleMouseUp = useCallback(() => {
     setIsResizing(false);
     document.documentElement.classList.remove(
       "cursor-col-resize",
@@ -120,7 +118,6 @@ export function InspectorNumberInput({
         onKeyDown={(e) => {
           if (e.code === "Enter") {
             handleCommitValue();
-            e.preventDefault();
           }
         }}
         onBlur={() => {

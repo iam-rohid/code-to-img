@@ -18,6 +18,8 @@ export interface iTextElement {
 export interface iElementTransform {
   width: number;
   height: number;
+  autoWidth?: boolean;
+  autoHeight?: boolean;
   minWidth: number;
   minHeight: number;
   widthHeightLinked: boolean;
@@ -96,7 +98,10 @@ export interface EditorActions {
   setLayersOpen: (open: boolean) => void;
   addElement: (element: iElement) => void;
   updateElement: (dto: iElement) => void;
-  updateElementTransform: (elementId: string, dto: iElementTransform) => void;
+  updateElementTransform: (
+    elementId: string,
+    dto: Partial<iElementTransform>,
+  ) => void;
   updateElementState: (elementId: string, state: Partial<ElementState>) => void;
   setSelectedElement: (elemenntId: EditorState["selectedElementId"]) => void;
   removeElement: (elemenntId: string) => void;

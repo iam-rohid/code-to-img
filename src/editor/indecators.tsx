@@ -87,8 +87,19 @@ function CanvasTransformIndecator() {
   const setCanvas = useEditorStore((state) => state.setCanvas);
   const canvasMinWidth = 200;
   const canvasMinHeight = 200;
+  const [isResizing, setIsResizing] = useState(false);
 
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
+
+  const onResizeStart = useCallback((x: number, y: number) => {
+    setStartMousePos({ x, y });
+    setIsResizing(true);
+  }, []);
+
+  const onResizeEnd = useCallback((x: number, y: number) => {
+    setStartMousePos({ x, y });
+    setIsResizing(false);
+  }, []);
 
   const handleCornerResize = useCallback(
     (
@@ -244,46 +255,60 @@ function CanvasTransformIndecator() {
     >
       <BarIndecator
         position="top"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleSideResize({ x, y }, "top")}
       />
       <BarIndecator
         position="right"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleSideResize({ x, y }, "right")}
       />
       <BarIndecator
         position="bottom"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleSideResize({ x, y }, "bottom")}
       />
       <BarIndecator
         position="left"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleSideResize({ x, y }, "left")}
       />
 
       <ScaleIndecator
         position="top-left"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleCornerResize({ x, y }, "top-left")}
       />
       <ScaleIndecator
         position="top-right"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleCornerResize({ x, y }, "top-right")}
       />
 
       <ScaleIndecator
         position="bottom-left"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleCornerResize({ x, y }, "bottom-left")}
       />
       <ScaleIndecator
         position="bottom-right"
-        onResizeStart={(x, y) => setStartMousePos({ x, y })}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
         onResize={(x, y) => handleCornerResize({ x, y }, "bottom-right")}
       />
+
+      {isResizing && (
+        <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
+          {canvasWidth} x {canvasHeight}
+        </div>
+      )}
     </div>
   );
 }
@@ -305,6 +330,8 @@ function ElementTransformIndecator({
   const updateElementTransform = useEditorStore(
     (state) => state.updateElementTransform,
   );
+  const zoom = useEditorStore((state) => state.zoom);
+
   const elementRef = useRef<HTMLDivElement>(null);
 
   const style = useMemo(() => getTransform(transform), [transform]);
@@ -341,8 +368,8 @@ function ElementTransformIndecator({
       let x = transform.position.x;
       let y = transform.position.y;
 
-      const difX = startMousePos.x - pos.x;
-      const difY = startMousePos.y - pos.y;
+      const difX = (startMousePos.x - pos.x) / zoom;
+      const difY = (startMousePos.y - pos.y) / zoom;
 
       switch (position) {
         case "top-left":
@@ -393,10 +420,9 @@ function ElementTransformIndecator({
       }
 
       updateElementTransform(elementId, {
-        ...transform,
-        width: width / transform.scale,
-        height: height / transform.scale,
-        position: { x, y },
+        width: Math.round(width / transform.scale),
+        height: Math.round(height / transform.scale),
+        position: { x: Math.round(x), y: Math.round(y) },
       });
       setStartMousePos(newStartPos);
     },
@@ -404,8 +430,15 @@ function ElementTransformIndecator({
       elementId,
       startMousePos.x,
       startMousePos.y,
-      transform,
+      transform.height,
+      transform.minHeight,
+      transform.minWidth,
+      transform.position.x,
+      transform.position.y,
+      transform.scale,
+      transform.width,
       updateElementTransform,
+      zoom,
     ],
   );
 
@@ -463,7 +496,6 @@ function ElementTransformIndecator({
       }
 
       updateElementTransform(elementId, {
-        ...transform,
         width: width / transform.scale,
         height: height / transform.scale,
         position: { x, y },
@@ -474,7 +506,13 @@ function ElementTransformIndecator({
       elementId,
       startMousePos.x,
       startMousePos.y,
-      transform,
+      transform.height,
+      transform.minHeight,
+      transform.minWidth,
+      transform.position.x,
+      transform.position.y,
+      transform.scale,
+      transform.width,
       updateElementTransform,
     ],
   );
@@ -498,11 +536,10 @@ function ElementTransformIndecator({
       // Convert the angle to degrees if needed
       const angleInDegrees = Math.round(angleInRadians * (180 / Math.PI));
       updateElementTransform(elementId, {
-        ...transform,
         rotation: angleInDegrees + 90,
       });
     },
-    [elementId, transform, updateElementTransform],
+    [elementId, updateElementTransform],
   );
 
   return (
@@ -593,7 +630,6 @@ function ScaleIndecator({
 
   const handleMouseDown = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
       setIsResizing(true);
       onResizeStart?.(e.clientX, e.clientY);
       document.documentElement.classList.add(cursorClass, "select-none");
@@ -603,7 +639,6 @@ function ScaleIndecator({
 
   const handleMouseUp = useCallback(
     (e: globalThis.MouseEvent) => {
-      e.preventDefault();
       setIsResizing(false);
       onResizeEnd?.(e.clientX, e.clientY);
       document.documentElement.classList.remove(cursorClass, "select-none");
@@ -671,7 +706,6 @@ function BarIndecator({
 
   const handleMouseDown = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
       setIsResizing(true);
       onResizeStart?.(e.clientX, e.clientY);
       document.documentElement.classList.add(cursorClass, "select-none");
@@ -681,7 +715,6 @@ function BarIndecator({
 
   const handleMouseUp = useCallback(
     (e: globalThis.MouseEvent) => {
-      e.preventDefault();
       setIsResizing(false);
       onResizeEnd?.(e.clientX, e.clientY);
       document.documentElement.classList.remove(cursorClass, "select-none");
@@ -744,7 +777,6 @@ function RotationIndecator({
 
   const handleMouseDown = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
       setIsRotating(true);
       document.documentElement.classList.add("cursor-grabbing", "select-none");
       onStart?.(e.clientX, e.clientY);
@@ -754,7 +786,6 @@ function RotationIndecator({
 
   const handleMouseUp = useCallback(
     (e: globalThis.MouseEvent) => {
-      e.preventDefault();
       setIsRotating(false);
       document.documentElement.classList.remove(
         "cursor-grabbing",
@@ -831,7 +862,7 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
       style={getTransform(transform)}
       className="pointer-events-none absolute z-20"
     >
-      <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
+      <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
         X: {transform.position.x}, Y: {transform.position.y}
       </div>
     </div>
@@ -853,7 +884,7 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
       style={getTransform(transform)}
       className="pointer-events-none absolute z-20"
     >
-      <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
+      <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
         {transform.width} x {transform.height}
       </div>
     </div>
@@ -875,7 +906,7 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
       style={getTransform(transform)}
       className="pointer-events-none absolute z-20"
     >
-      <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
+      <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
         {transform.rotation}deg
       </div>
     </div>

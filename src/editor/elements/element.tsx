@@ -1,10 +1,18 @@
-import { memo, MouseEvent, useCallback, useMemo, useRef } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useEditorStore } from "../store";
-import CodeEditorElement from "./code-editor";
-import TextElement from "./text-element";
 import { iElement } from "../types";
+import dynamic from "next/dynamic";
+
+const CodeEditorElement = dynamic(() => import("./code-editor"), {
+  ssr: false,
+});
+const TextElement = dynamic(() => import("./text-element"), { ssr: false });
 
 export default function Element({ element }: { element: iElement }) {
+  const updateElementTransform = useEditorStore(
+    (state) => state.updateElementTransform,
+  );
+
   const elementRef = useRef<HTMLDivElement>(null);
 
   const updateElementState = useEditorStore(
@@ -33,39 +41,60 @@ export default function Element({ element }: { element: iElement }) {
     };
   }, [element.transform]);
 
-  const handleMouseEnter = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (element.hidden || element.locked) {
-        return;
-      }
+  const handleMouseEnter = useCallback(() => {
+    if (element.hidden || element.locked) {
+      return;
+    }
+    updateElementState(element.id, { hovering: true });
+  }, [element.hidden, element.locked, element.id, updateElementState]);
 
-      e.preventDefault();
-      updateElementState(element.id, { hovering: true });
-    },
-    [element.hidden, element.locked, element.id, updateElementState],
-  );
+  const handleMouseLeave = useCallback(() => {
+    if (element.hidden || element.locked) {
+      return;
+    }
+    updateElementState(element.id, { hovering: false });
+  }, [element.hidden, element.locked, element.id, updateElementState]);
 
-  const handleMouseLeave = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (element.hidden || element.locked) {
-        return;
-      }
-      e.preventDefault();
-      updateElementState(element.id, { hovering: false });
-    },
-    [element.hidden, element.locked, element.id, updateElementState],
-  );
+  const handleMouseDown = useCallback(() => {
+    if (element.hidden || element.locked) {
+      return;
+    }
+    setSelectedElement(element.id);
+  }, [element.hidden, element.locked, element.id, setSelectedElement]);
 
-  const handleMouseDown = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (element.hidden || element.locked) {
-        return;
-      }
-      e.preventDefault();
-      setSelectedElement(element.id);
-    },
-    [element.hidden, element.locked, element.id, setSelectedElement],
-  );
+  useEffect(() => {
+    if (!elementRef.current) {
+      return;
+    }
+
+    const el = elementRef.current;
+    const resizeObserver = new ResizeObserver((entries) => {
+      const width = entries[0].contentRect.width;
+      const height = entries[0].contentRect.height;
+      console.log({ width, height });
+      updateElementTransform(element.id, {
+        ...(element.transform.autoWidth && element.transform.width !== width
+          ? { width }
+          : {}),
+        ...(element.transform.autoHeight && element.transform.height !== height
+          ? { height }
+          : {}),
+      });
+    });
+
+    resizeObserver.observe(el);
+
+    return () => {
+      resizeObserver.unobserve(el);
+    };
+  }, [
+    element.id,
+    element.transform.autoHeight,
+    element.transform.autoWidth,
+    element.transform.height,
+    element.transform.width,
+    updateElementTransform,
+  ]);
 
   if (!element) {
     return null;
@@ -79,8 +108,12 @@ export default function Element({ element }: { element: iElement }) {
         pointerEvents: element.locked ? "none" : "auto",
         left: element.transform.position.x,
         top: element.transform.position.y,
-        width: element.transform.width,
-        height: element.transform.height,
+        width: element.transform.autoWidth
+          ? "fit-content"
+          : element.transform.width,
+        height: element.transform.autoHeight
+          ? "fit-content"
+          : element.transform.height,
         transform: `
           translate(${offset.x}px, ${offset.y}px) 
           rotate(${element.transform.rotation}deg) 

@@ -55,7 +55,9 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
       canvas: {
         ...state.canvas,
         elements: state.canvas.elements.map((el) =>
-          el.id === elementId ? { ...el, transform } : el,
+          el.id === elementId
+            ? { ...el, transform: { ...el.transform, ...transform } }
+            : el,
         ),
       },
     }));
