@@ -7,10 +7,8 @@ import {
   AlignVerticalJustifyEndIcon,
   AlignVerticalJustifyStartIcon,
   CopyIcon,
-  Link2Icon,
   RotateCcwIcon,
   TrashIcon,
-  Unlink2Icon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useEditorStore } from "./store";
@@ -20,20 +18,30 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { InspectorNumberInput } from "@/components/inspector-number-input";
+import { Input } from "@/components/ui/input";
+import { iElement } from "./types";
 
 export default function InspectionPanel() {
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
+
+  if (selectedElementId === "canvas") {
+    return <CanvasInspector />;
+  }
 
   if (selectedElementId) {
     return <ElementInspector elementId={selectedElementId} />;
   }
 
-  return <CanvasInspector />;
+  return null;
 }
 
 function CanvasInspector() {
   return (
-    <div className="pointer-events-auto flex w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
+    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
+      <div className="p-2">
+        <p className="text-sm font-medium text-muted-foreground">Canvas</p>
+      </div>
+      <Separator />
       <CanvasTransform />
     </div>
   );
@@ -48,23 +56,27 @@ function CanvasTransform() {
   const setCanvas = useEditorStore((state) => state.setCanvas);
 
   return (
-    <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2 p-2">
-      <InspectorNumberInput
-        value={canvasWidth}
-        icon={<span>W</span>}
-        onValueChange={(value) => {
-          const width = value;
-          let height = canvasHeight;
-          if (canvasWidthHeightLinked) {
-            height = (canvasHeight * width) / canvasWidth;
-          }
-          setCanvas({
-            width,
-            height,
-          });
-        }}
-      />
-      <Tooltip>
+    <div className="p-2">
+      <p className="mb-2 text-xs text-muted-foreground">Transform</p>
+      <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
+        <InspectorNumberInput
+          value={canvasWidth}
+          min={200}
+          icon={<span>W</span>}
+          onValueChange={(value) => {
+            const width = value;
+            let height = canvasHeight;
+            if (canvasWidthHeightLinked) {
+              height = (canvasHeight * width) / canvasWidth;
+            }
+            setCanvas({
+              width,
+              height,
+            });
+          }}
+        />
+        <div></div>
+        {/* <Tooltip>
         <TooltipTrigger asChild>
           <Button
             size="icon"
@@ -80,33 +92,48 @@ function CanvasTransform() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>Maintain aspect ratio</TooltipContent>
-      </Tooltip>
-      <InspectorNumberInput
-        value={canvasHeight}
-        icon={<span>H</span>}
-        onValueChange={(value) => {
-          const height = value;
-          let width = canvasWidth;
-          if (canvasWidthHeightLinked) {
-            width = (canvasWidth * height) / canvasHeight;
-          }
-          setCanvas({
-            height,
-            width,
-          });
-        }}
-      />
-      <div></div>
+      </Tooltip> */}
+        <InspectorNumberInput
+          value={canvasHeight}
+          min={200}
+          icon={<span>H</span>}
+          onValueChange={(value) => {
+            const height = value;
+            let width = canvasWidth;
+            if (canvasWidthHeightLinked) {
+              width = (canvasWidth * height) / canvasHeight;
+            }
+            setCanvas({
+              height,
+              width,
+            });
+          }}
+        />
+        <div></div>
+      </div>
     </div>
   );
 }
 
 function ElementInspector({ elementId }: { elementId: string }) {
+  const element = useEditorStore((state) =>
+    state.canvas.elements.find((element) => element.id === elementId),
+  );
+  if (!element) {
+    return null;
+  }
+
   return (
-    <div className="pointer-events-auto flex w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
+    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
       <ElementAlignment elementId={elementId} />
       <Separator />
-      <ElementTransform elementId={elementId} />
+      <ElementTransform element={element} />
+      {element.type === "text" && (
+        <>
+          <Separator />
+          <TextElementOptions element={element} />
+        </>
+      )}
       <Separator />
       <ElementActions elementId={elementId} />
     </div>
@@ -197,97 +224,99 @@ function ElementAlignment({ elementId }: { elementId: string }) {
   );
 }
 
-function ElementTransform({ elementId }: { elementId: string }) {
-  const transform = useEditorStore(
-    (state) =>
-      state.canvas.elements.find((el) => el.id === elementId)?.transform,
-  );
+function ElementTransform({ element }: { element: iElement }) {
   const updateElement = useEditorStore((state) => state.updateElement);
-
-  if (!transform) {
-    return null;
-  }
 
   return (
     <div className="p-2">
       <p className="mb-2 text-xs text-muted-foreground">Transform</p>
       <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
         <InspectorNumberInput
-          value={transform.position.x}
+          value={element.transform.position.x}
           icon={<span>X</span>}
           onValueChange={(value) => {
-            updateElement(elementId, {
+            updateElement({
+              ...element,
               transform: {
-                ...transform,
-                position: { ...transform.position, x: value },
+                ...element.transform,
+                position: { ...element.transform.position, x: value },
               },
             });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={transform.position.y}
+          value={element.transform.position.y}
           icon={<span>Y</span>}
           onValueChange={(value) => {
-            updateElement(elementId, {
+            updateElement({
+              ...element,
               transform: {
-                ...transform,
-                position: { ...transform.position, y: value },
+                ...element.transform,
+                position: { ...element.transform.position, y: value },
               },
             });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={transform.width}
+          value={element.transform.width}
+          min={element.transform.minWidth}
           icon={<span>W</span>}
           onValueChange={(value) => {
             const width = value;
-            let height = transform.height;
-            if (transform.widthHeightLinked) {
-              height = (transform.height * width) / transform.width;
+            let height = element.transform.height;
+            if (element.transform.widthHeightLinked) {
+              height =
+                (element.transform.height * width) / element.transform.width;
             }
-            updateElement(elementId, {
+            updateElement({
+              ...element,
               transform: {
-                ...transform,
+                ...element.transform,
                 width,
                 height,
               },
             });
           }}
         />
-        <Tooltip>
+        <div></div>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               size="icon"
               variant="outline"
               className="h-6 w-6"
               onClick={() =>
-                updateElement(elementId, {
+                updateElement( {
+                ...element,
                   transform: {
-                    ...transform,
-                    widthHeightLinked: !transform.widthHeightLinked,
+                    ...element.transform,
+                    widthHeightLinked: !element.transform.widthHeightLinked,
                   },
                 })
               }
             >
-              {transform.widthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
+              {element.transform.widthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>Maintain aspect ratio</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
         <InspectorNumberInput
-          value={transform.height}
+          value={element.transform.height}
+          min={element.transform.minHeight}
           icon={<span>H</span>}
           onValueChange={(value) => {
             const height = value;
-            let width = transform.width;
-            if (transform.widthHeightLinked) {
-              width = (transform.width * height) / transform.height;
+            let width = element.transform.width;
+            if (element.transform.widthHeightLinked) {
+              width =
+                (element.transform.width * height) / element.transform.height;
             }
-            updateElement(elementId, {
+            updateElement({
+              ...element,
               transform: {
-                ...transform,
+                ...element.transform,
                 height,
                 width,
               },
@@ -296,12 +325,13 @@ function ElementTransform({ elementId }: { elementId: string }) {
         />
         <div></div>
         <InspectorNumberInput
-          value={transform.rotation}
+          value={element.transform.rotation}
           icon={<span>R</span>}
           onValueChange={(value) => {
-            updateElement(elementId, {
+            updateElement({
+              ...element,
               transform: {
-                ...transform,
+                ...element.transform,
                 rotation: value,
               },
             });
@@ -314,8 +344,9 @@ function ElementTransform({ elementId }: { elementId: string }) {
               variant="outline"
               className="h-6 w-6"
               onClick={() => {
-                updateElement(elementId, {
-                  transform: { ...transform, rotation: 0 },
+                updateElement({
+                  ...element,
+                  transform: { ...element.transform, rotation: 0 },
                 });
               }}
             >
@@ -325,12 +356,15 @@ function ElementTransform({ elementId }: { elementId: string }) {
           <TooltipContent>Reset value</TooltipContent>
         </Tooltip>
         <InspectorNumberInput
-          value={transform.scale * 100}
+          value={element.transform.scale * 100}
+          min={10}
+          max={200}
           icon={<span>S</span>}
           onValueChange={(value) => {
-            updateElement(elementId, {
+            updateElement({
+              ...element,
               transform: {
-                ...transform,
+                ...element.transform,
                 scale: value / 100,
               },
             });
@@ -343,8 +377,9 @@ function ElementTransform({ elementId }: { elementId: string }) {
               variant="outline"
               className="h-6 w-6"
               onClick={() => {
-                updateElement(elementId, {
-                  transform: { ...transform, scale: 1 },
+                updateElement({
+                  ...element,
+                  transform: { ...element.transform, scale: 1 },
                 });
               }}
             >
@@ -394,5 +429,119 @@ function ElementActions({ elementId }: { elementId: string }) {
         </Tooltip>
       </div>
     </div>
+  );
+}
+
+function TextElementOptions({ element }: { element: iElement }) {
+  const updateElement = useEditorStore((state) => state.updateElement);
+
+  if (element?.type !== "text") {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Value</p>
+        <Input
+          value={element.value}
+          onChange={(e) => {
+            updateElement({
+              ...element,
+              value: e.currentTarget.value,
+            });
+          }}
+        />
+      </div>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Font Size</p>
+        <InspectorNumberInput
+          icon={<>FS</>}
+          value={element.fontSize ?? 16}
+          onValueChange={(fontSize) => {
+            updateElement({
+              ...element,
+              fontSize,
+            });
+          }}
+        />
+      </div>
+
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Text Color</p>
+        <Input
+          value={element.color ?? ""}
+          onChange={(e) => {
+            updateElement({
+              ...element,
+              color: e.currentTarget.value,
+            });
+          }}
+        />
+      </div>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Background Color</p>
+        <Input
+          value={element.backgroundColor ?? ""}
+          onChange={(e) => {
+            updateElement({
+              ...element,
+              backgroundColor: e.currentTarget.value,
+            });
+          }}
+        />
+      </div>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Font Weight</p>
+        <Input
+          value={element.fontWeight ?? ""}
+          onChange={(e) => {
+            updateElement({
+              ...element,
+              fontWeight: e.currentTarget.value,
+            });
+          }}
+        />
+      </div>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Font Family</p>
+        <Input
+          value={element.fontFamily ?? ""}
+          onChange={(e) => {
+            updateElement({
+              ...element,
+              fontFamily: e.currentTarget.value,
+            });
+          }}
+        />
+      </div>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Letter Spacing</p>
+        <InspectorNumberInput
+          icon={<>L</>}
+          value={element.letterSpacing ?? 1}
+          onValueChange={(letterSpacing) => {
+            updateElement({
+              ...element,
+              letterSpacing,
+            });
+          }}
+        />
+      </div>
+      <div className="p-2">
+        <p className="mb-2 text-xs text-muted-foreground">Line Height</p>
+        <InspectorNumberInput
+          icon={<>L</>}
+          min={0}
+          value={element.lineHeight ?? 1}
+          onValueChange={(lineHeight) => {
+            updateElement({
+              ...element,
+              lineHeight,
+            });
+          }}
+        />
+      </div>
+    </>
   );
 }

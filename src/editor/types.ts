@@ -1,6 +1,19 @@
 export interface iCodeEditorElement {
   type: "code-editor";
 }
+export interface iTextElement {
+  type: "text";
+  value: string;
+  textAlign?: "start" | "center" | "end";
+  color?: string;
+  backgroundColor?: string;
+  fontSize?: number;
+  fontWeight?: string;
+  fontFamily?: string;
+  letterSpacing?: number;
+  lineHeight?: number;
+  padding?: number;
+}
 
 export interface iElementTransform {
   width: number;
@@ -16,16 +29,36 @@ export interface iElementTransform {
   };
 }
 
-export interface iElement extends iCodeEditorElement {
+export type iElement = (iCodeEditorElement | iTextElement) & {
   id: string;
   name: string;
   transform: iElementTransform;
+  hidden?: boolean;
+  locked?: boolean;
+};
+
+export interface iSolidColor {
+  type: "solid";
+  color: string;
+}
+export interface iLinearGradientColor {
+  type: "gradient";
+  colors: string[];
+  angle: number;
+}
+
+export type iColor = iSolidColor | iLinearGradientColor;
+
+export interface iBackground {
+  color?: iColor | null;
+  image?: string | null;
 }
 
 export interface iCanvas {
   width: number;
   height: number;
   widthHeightLinked: boolean;
+  background: iBackground;
   elements: iElement[];
 }
 
@@ -38,6 +71,7 @@ export interface EditorState {
   elementState: Record<string, ElementState>;
   selectedElementId: string | null;
   zoom: number;
+  layersOpen: boolean;
 }
 
 export type Alignment =
@@ -51,11 +85,9 @@ export type Alignment =
 export interface EditorActions {
   setCanvas: (canvas: Partial<EditorState["canvas"]>) => void;
   setZoom: (zoom: EditorState["zoom"]) => void;
+  setLayersOpen: (open: boolean) => void;
   addElement: (element: iElement) => void;
-  updateElement: (
-    elementId: string,
-    dto: Partial<Omit<iElement, "id">>,
-  ) => void;
+  updateElement: (dto: iElement) => void;
   updateElementState: (elementId: string, state: Partial<ElementState>) => void;
   setSelectedElement: (elemenntId: EditorState["selectedElementId"]) => void;
   removeElement: (elemenntId: string) => void;

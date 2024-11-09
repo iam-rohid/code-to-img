@@ -3,10 +3,12 @@
 import { useEditorStore } from "./store";
 import Element from "./elements/element";
 import { Indecators } from "./indecators";
+import { getBackgroundStyle } from "./utils";
 
 export default function Canvas() {
   const width = useEditorStore((state) => state.canvas.width);
   const height = useEditorStore((state) => state.canvas.height);
+  const background = useEditorStore((state) => state.canvas.background);
   const elements = useEditorStore((state) => state.canvas.elements);
   const setSelectedElement = useEditorStore(
     (state) => state.setSelectedElement,
@@ -21,13 +23,16 @@ export default function Canvas() {
       className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
     >
       <div
-        className="absolute inset-0 bg-background"
-        onClick={() => setSelectedElement(null)}
+        className="absolute inset-0"
+        style={background.color ? getBackgroundStyle(background.color) : {}}
+        onClick={() => setSelectedElement("canvas")}
       ></div>
 
       {elements.map((element) => (
         <Element elementId={element.id} key={element.id} />
       ))}
+
+      <div className="pointer-events-none absolute inset-0 z-10 ring-[9999px] ring-secondary/80"></div>
 
       <Indecators />
     </div>

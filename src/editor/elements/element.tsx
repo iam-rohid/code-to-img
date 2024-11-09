@@ -1,11 +1,13 @@
-import { MouseEvent, useCallback, useMemo } from "react";
+import { MouseEvent, useCallback, useMemo, useRef } from "react";
 import { useEditorStore } from "../store";
 import CodeEditorElement from "./code-editor";
+import TextElement from "./text-element";
 
 export default function Element({ elementId }: { elementId: string }) {
   const element = useEditorStore((state) =>
     state.canvas.elements.find((element) => element.id === elementId),
   );
+  const elementRef = useRef<HTMLDivElement>(null);
 
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
@@ -35,26 +37,36 @@ export default function Element({ elementId }: { elementId: string }) {
 
   const handleMouseEnter = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
+      if (element?.hidden || element?.locked) {
+        return;
+      }
+
       e.preventDefault();
       updateElementState(elementId, { hovering: true });
     },
-    [elementId, updateElementState],
+    [element?.hidden, element?.locked, elementId, updateElementState],
   );
 
   const handleMouseLeave = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
+      if (element?.hidden || element?.locked) {
+        return;
+      }
       e.preventDefault();
       updateElementState(elementId, { hovering: false });
     },
-    [elementId, updateElementState],
+    [element?.hidden, element?.locked, elementId, updateElementState],
   );
 
   const handleMouseDown = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
+      if (element?.hidden || element?.locked) {
+        return;
+      }
       e.preventDefault();
       setSelectedElement(elementId);
     },
-    [elementId, setSelectedElement],
+    [element?.hidden, element?.locked, elementId, setSelectedElement],
   );
 
   if (!element) {
@@ -63,7 +75,10 @@ export default function Element({ elementId }: { elementId: string }) {
 
   return (
     <div
+      ref={elementRef}
       style={{
+        display: element.hidden ? "none" : undefined,
+        pointerEvents: element.locked ? "none" : "auto",
         left: element.transform.position.x,
         top: element.transform.position.y,
         width: element.transform.width,
@@ -81,6 +96,8 @@ export default function Element({ elementId }: { elementId: string }) {
     >
       {element.type === "code-editor" ? (
         <CodeEditorElement elementId={elementId} />
+      ) : element.type === "text" ? (
+        <TextElement elementId={elementId} />
       ) : null}
     </div>
   );

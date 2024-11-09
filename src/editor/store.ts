@@ -8,11 +8,20 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
     width: 600,
     height: 400,
     widthHeightLinked: false,
+    background: {
+      color: {
+        type: "gradient",
+        colors: ["#3B41C5FF", "#A981BBFF", "#CA62FAFF", "#FFC8A9FF"],
+        angle: 147,
+      },
+    },
     elements: [getCodeEditorElement(600, 400)],
   },
   zoom: 1,
   elementState: {},
   selectedElementId: null,
+  layersOpen: false,
+  setLayersOpen: (layersOpen) => set({ layersOpen }),
   setCanvas: (updatedCanvas) => {
     const canvas = get().canvas;
     set({ canvas: { ...canvas, ...updatedCanvas } });
@@ -20,21 +29,18 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
   setZoom: (zoom) => set({ zoom }),
   addElement: (element) => {
     const canvas = get().canvas;
-    set({ canvas: { ...canvas, elements: [...canvas.elements, element] } });
+    set({
+      selectedElementId: element.id,
+      canvas: { ...canvas, elements: [...canvas.elements, element] },
+    });
   },
-  updateElement: (elementId, dto) => {
+  updateElement: (updatedElement) => {
     const canvas = get().canvas;
     set({
       canvas: {
         ...canvas,
         elements: canvas.elements.map((el) =>
-          el.id === elementId
-            ? {
-                ...el,
-                ...dto,
-                transform: { ...el.transform, ...dto.transform },
-              }
-            : el,
+          el.id === updatedElement.id ? updatedElement : el,
         ),
       },
     });

@@ -12,10 +12,14 @@ export function InspectorNumberInput({
   icon,
   onValueChange,
   value,
+  max,
+  min,
 }: {
   value: number;
   onValueChange: (value: number) => void;
   icon: ReactNode;
+  min?: number;
+  max?: number;
 }) {
   const [text, setText] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
@@ -33,16 +37,30 @@ export function InspectorNumberInput({
     }
   }, [isFocused, isResizing, text, value]);
 
+  const clampValue = useCallback(
+    (value: number) => {
+      if (min !== undefined) {
+        value = Math.max(value, min);
+      }
+      if (max !== undefined) {
+        value = Math.min(value, max);
+      }
+      return value;
+    },
+    [max, min],
+  );
+
   const handleCommitValue = useCallback(() => {
-    const newValue = parseFloat(text);
+    let newValue = parseFloat(text);
     if (!isNaN(newValue)) {
+      newValue = clampValue(newValue);
       onValueChange(newValue);
       setText(String(newValue));
     } else {
       setText(String(value));
     }
     ref.current?.blur();
-  }, [onValueChange, text, value]);
+  }, [clampValue, onValueChange, text, value]);
 
   const handleMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -63,12 +81,13 @@ export function InspectorNumberInput({
   const handleMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {
       const currentX = e.clientX;
-      const newValue = Math.floor(value + (currentX - startX));
+      let newValue = Math.floor(value + (currentX - startX));
+      newValue = clampValue(newValue);
       onValueChange(newValue);
       setText(String(newValue));
       setStartX(currentX);
     },
-    [onValueChange, startX, value],
+    [clampValue, onValueChange, startX, value],
   );
 
   useEffect(() => {
