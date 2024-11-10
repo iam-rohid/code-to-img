@@ -20,18 +20,17 @@ export const getCodeEditorElement = (
   canvasWidth: number,
   canvasHeight: number,
   width = 400,
-  height = 250,
+  height = 86,
 ): iElement => ({
-  type: "code-editor",
   id: nanoid(),
   name: "Code Editor",
   transform: {
     height,
     width,
-    minHeight: 100,
-    minWidth: 100,
+    minHeight: 20,
+    minWidth: 20,
     autoWidth: false,
-    autoHeight: false,
+    autoHeight: true,
     widthHeightLinked: false,
     position: {
       x: canvasWidth / 2 - width / 2,
@@ -39,6 +38,19 @@ export const getCodeEditorElement = (
     },
     rotation: 0,
     scale: 1,
+  },
+  type: "code-editor",
+  code: 'console.log("Hello, World")',
+  fontSize: 16,
+  language: "javascript",
+  lineHeight: 24,
+  lineNumbers: false,
+  theme: "tokyo-night",
+  padding: {
+    top: 0,
+    left: 0,
+    right: 12,
+    bottom: 12,
   },
 });
 

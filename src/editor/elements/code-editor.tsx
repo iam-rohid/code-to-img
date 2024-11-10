@@ -1,34 +1,140 @@
-import { highlight, languages } from "prismjs";
 import { iElement } from "../types";
 import Draggable from "./draggable";
-import { useState } from "react";
-import Editor from "react-simple-code-editor";
+import { useEditorStore } from "../store";
+import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
+import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
+import { loadLanguage } from "@uiw/codemirror-extensions-langs";
+
+import { CSSProperties, useMemo } from "react";
+
+const themes: {
+  id: string;
+  theme: Extension;
+  window?: {
+    background?: string;
+    backgroundImage?: string;
+    foreground?: string;
+    titleBarBackground?: string;
+    titleBarForeground?: string;
+    titleBarTraficLightColor1?: string;
+    titleBarTraficLightColor2?: string;
+    titleBarTraficLightColor3?: string;
+    style?: CSSProperties;
+    titleBarStyle?: CSSProperties;
+    codeMirrorContainerStyle?: CSSProperties;
+    codeMirrorStyle?: CSSProperties;
+  };
+}[] = [
+  {
+    id: "tokyo-night",
+    theme: tokyoNightInit(),
+    window: {
+      background: "#1A1B26",
+      foreground: "#BBC5EE",
+      titleBarBackground: "#1A1B26",
+      titleBarTraficLightColor1: "#444764",
+      titleBarTraficLightColor2: "#444764",
+      titleBarTraficLightColor3: "#444764",
+    },
+  },
+];
 
 export default function CodeEditorElement({ element }: { element: iElement }) {
-  const [code, setCode] = useState(`function add(a, b) {\n  return a + b;\n}`);
-
   if (element.type !== "code-editor") {
-    return null;
+    throw new Error("Invalid type");
   }
 
+  const updateElement = useEditorStore((state) => state.updateElement);
+  const theme = useMemo(
+    () => themes.find((theme) => theme.id === element.theme),
+    [element.theme],
+  );
+
+  const extensions = useMemo(() => {
+    const extensions: Extension[] = [];
+    const lang = loadLanguage(element.language);
+    if (lang) {
+      extensions.push(lang);
+    }
+    if (!element.transform.autoWidth) {
+      extensions.push(EditorView.lineWrapping);
+    }
+    return extensions;
+  }, [element.language, element.transform.autoWidth]);
+
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-700 text-slate-200 shadow-xl">
-      <Draggable element={element} className="h-11 flex-shrink-0 bg-slate-600">
-        <div className="flex h-full items-center gap-2 pl-4">
-          <div className="h-3.5 w-3.5 rounded-full bg-[#FF5F57]"></div>
-          <div className="h-3.5 w-3.5 rounded-full bg-[#FEBC2E]"></div>
-          <div className="h-3.5 w-3.5 rounded-full bg-[#28C840]"></div>
-        </div>
-      </Draggable>
-      <div className="flex-1 overflow-hidden">
-        <Editor
-          value={code}
-          onValueChange={(code) => setCode(code)}
-          highlight={(code) => highlight(code, languages.js, "js")}
-          padding={10}
+    <div
+      className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-200 shadow-xl"
+      style={{
+        background: theme?.window?.background,
+        backgroundImage: theme?.window?.backgroundImage,
+        color: theme?.window?.foreground,
+        ...theme?.window?.style,
+      }}
+    >
+      <div
+        style={{
+          background: theme?.window?.titleBarBackground,
+          color: theme?.window?.titleBarForeground,
+          ...theme?.window?.titleBarStyle,
+        }}
+        className="flex-shrink-0 overflow-hidden"
+      >
+        <Draggable element={element}>
+          <div className="flex h-full items-center gap-2 py-4 pl-4">
+            <div
+              className="h-3.5 w-3.5 flex-shrink-0 rounded-full bg-[#FEBC2E]"
+              style={{
+                backgroundColor: theme?.window?.titleBarTraficLightColor1,
+              }}
+            ></div>
+            <div
+              className="h-3.5 w-3.5 flex-shrink-0 rounded-full bg-[#FF5F57]"
+              style={{
+                backgroundColor: theme?.window?.titleBarTraficLightColor2,
+              }}
+            ></div>
+            <div
+              className="h-3.5 w-3.5 flex-shrink-0 rounded-full bg-[#28C840]"
+              style={{
+                backgroundColor: theme?.window?.titleBarTraficLightColor3,
+              }}
+            ></div>
+          </div>
+        </Draggable>
+      </div>
+      <div
+        className="flex flex-1 overflow-hidden"
+        style={{
+          ...theme?.window?.codeMirrorContainerStyle,
+          paddingLeft: element.padding.left,
+          paddingRight: element.padding.right,
+          paddingTop: element.padding.top,
+          paddingBottom: element.padding.bottom,
+        }}
+      >
+        <CodeMirror
+          value={element.code}
+          theme={theme?.theme}
+          height={element.transform.autoHeight ? undefined : "100%"}
+          width={
+            element.transform.autoWidth
+              ? undefined
+              : `${element.transform.width}px`
+          }
+          extensions={extensions}
+          onChange={(value) => {
+            updateElement({ ...element, code: value });
+          }}
+          basicSetup={{
+            lineNumbers: element.lineNumbers,
+            highlightActiveLine: false,
+            highlightActiveLineGutter: false,
+          }}
           style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 14,
+            fontSize: element.fontSize,
+            lineHeight: element.lineHeight,
+            ...theme?.window?.codeMirrorStyle,
           }}
         />
       </div>

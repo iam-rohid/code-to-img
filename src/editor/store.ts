@@ -33,11 +33,13 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
   setZoom: (zoom) => set({ zoom }),
   setViewPortOffset: (viewPortOffset) => set({ viewPortOffset }),
   addElement: (element) => {
-    const canvas = get().canvas;
-    set({
+    set((state) => ({
       selectedElementId: element.id,
-      canvas: { ...canvas, elements: [...canvas.elements, element] },
-    });
+      canvas: {
+        ...state.canvas,
+        elements: [element, ...state.canvas.elements],
+      },
+    }));
   },
   updateElement: (updatedElement) => {
     const canvas = get().canvas;

@@ -1,12 +1,8 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useEditorStore } from "../store";
-import { iElement } from "../types";
-import dynamic from "next/dynamic";
-
-const CodeEditorElement = dynamic(() => import("./code-editor"), {
-  ssr: false,
-});
-const TextElement = dynamic(() => import("./text-element"), { ssr: false });
+import { iElement, iElementTransform } from "../types";
+import CodeEditorElement from "./code-editor";
+import TextElement from "./text-element";
 
 export default function Element({ element }: { element: iElement }) {
   const updateElementTransform = useEditorStore(
@@ -63,23 +59,32 @@ export default function Element({ element }: { element: iElement }) {
   }, [element.hidden, element.locked, element.id, setSelectedElement]);
 
   useEffect(() => {
-    if (!elementRef.current) {
+    const el = elementRef.current;
+    if (!el) {
       return;
     }
 
-    const el = elementRef.current;
     const resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[0].contentRect.width;
-      const height = entries[0].contentRect.height;
-      console.log({ width, height });
-      updateElementTransform(element.id, {
-        ...(element.transform.autoWidth && element.transform.width !== width
-          ? { width }
-          : {}),
-        ...(element.transform.autoHeight && element.transform.height !== height
-          ? { height }
-          : {}),
-      });
+      const entry = entries[0];
+      if (entry) {
+        const width = entry.contentRect.width;
+        const height = entry.contentRect.height;
+
+        const data: Partial<iElementTransform> = {};
+        if (element.transform.autoWidth) {
+          data.width = width;
+        }
+        if (element.transform.autoHeight) {
+          data.height = height;
+        }
+        if (
+          typeof data.width === "undefined" &&
+          typeof data.height === "undefined"
+        ) {
+          return;
+        }
+        updateElementTransform(element.id, data);
+      }
     });
 
     resizeObserver.observe(el);
@@ -91,8 +96,6 @@ export default function Element({ element }: { element: iElement }) {
     element.id,
     element.transform.autoHeight,
     element.transform.autoWidth,
-    element.transform.height,
-    element.transform.width,
     updateElementTransform,
   ]);
 
@@ -114,6 +117,8 @@ export default function Element({ element }: { element: iElement }) {
         height: element.transform.autoHeight
           ? "fit-content"
           : element.transform.height,
+        minWidth: element.transform.minWidth,
+        minHeight: element.transform.minHeight,
         transform: `
           translate(${offset.x}px, ${offset.y}px) 
           rotate(${element.transform.rotation}deg) 

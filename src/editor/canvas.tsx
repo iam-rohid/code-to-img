@@ -26,7 +26,7 @@ export default function Canvas() {
       ></div>
 
       <div className="pointer-events-none absolute inset-0 z-10">
-        {elements.map((element) => (
+        {elements.toReversed().map((element) => (
           <ElementMemo element={element} key={element.id} />
         ))}
       </div>

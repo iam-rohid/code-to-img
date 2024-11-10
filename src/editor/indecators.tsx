@@ -423,6 +423,8 @@ function ElementTransformIndecator({
         width: Math.round(width / transform.scale),
         height: Math.round(height / transform.scale),
         position: { x: Math.round(x), y: Math.round(y) },
+        autoWidth: false,
+        autoHeight: false,
       });
       setStartMousePos(newStartPos);
     },
@@ -495,17 +497,33 @@ function ElementTransformIndecator({
         newStartPos.y = startMousePos.y;
       }
 
-      updateElementTransform(elementId, {
-        width: width / transform.scale,
-        height: height / transform.scale,
-        position: { x, y },
-      });
+      const updatedTransform: Partial<iElementTransform> = {
+        width: Math.round(width / transform.scale),
+        height: Math.round(height / transform.scale),
+        position: { x: Math.round(x), y: Math.round(y) },
+      };
+
+      if (
+        transform.autoWidth &&
+        (position === "left" || position === "right")
+      ) {
+        updatedTransform.autoWidth = false;
+      }
+      if (
+        transform.autoHeight &&
+        (position === "top" || position === "bottom")
+      ) {
+        updatedTransform.autoHeight = false;
+      }
+      updateElementTransform(elementId, updatedTransform);
       setStartMousePos(newStartPos);
     },
     [
       elementId,
       startMousePos.x,
       startMousePos.y,
+      transform.autoHeight,
+      transform.autoWidth,
       transform.height,
       transform.minHeight,
       transform.minWidth,

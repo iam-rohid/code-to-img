@@ -47,6 +47,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { memo, useCallback, useMemo } from "react";
+import { Reorder } from "framer-motion";
 
 export default function UI() {
   const layersOpen = useEditorStore((state) => state.layersOpen);
@@ -134,46 +135,46 @@ export default function UI() {
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" onClick={handleZoomOut}>
-                <MinusIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Zoom Out</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleResetZoom}
-                className="flex h-10 items-center justify-center text-center text-sm text-muted-foreground"
-              >
-                {zoomPercentage}%
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Reset Zoom</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" onClick={handleZoomIn}>
-                <PlusIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Zoom In</TooltipContent>
-          </Tooltip>
-        </div>
+        <div className="flex flex-1 items-center gap-2">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={handleZoomOut}>
+                  <MinusIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Zoom Out</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleResetZoom}
+                  className="flex h-10 items-center justify-center text-center text-sm text-muted-foreground"
+                >
+                  {zoomPercentage}%
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Reset Zoom</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={handleZoomIn}>
+                  <PlusIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Zoom In</TooltipContent>
+            </Tooltip>
+          </div>
 
-        <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
-          <Button size="icon" variant="ghost">
-            <UndoIcon />
-          </Button>
-          <Button size="icon" variant="ghost">
-            <RedoIcon />
-          </Button>
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+            <Button size="icon" variant="ghost">
+              <UndoIcon />
+            </Button>
+            <Button size="icon" variant="ghost">
+              <RedoIcon />
+            </Button>
+          </div>
         </div>
-
-        <div className="flex-1"></div>
         {(viewPortOffset.x !== 0 || viewPortOffset.y !== 0) && (
           <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
             <Button
@@ -184,12 +185,12 @@ export default function UI() {
             </Button>
           </div>
         )}
-        <div className="flex-1"></div>
-
-        <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
-          <Button size="icon" variant="ghost">
-            <InfoIcon />
-          </Button>
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+            <Button size="icon" variant="ghost">
+              <InfoIcon />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -256,6 +257,7 @@ function Toolbar() {
 }
 
 function LayersPanel() {
+  const setCanvas = useEditorStore((state) => state.setCanvas);
   const elements = useEditorStore((state) => state.canvas.elements);
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
   const setSelectedElement = useEditorStore(
@@ -275,97 +277,112 @@ function LayersPanel() {
       </div>
       <Separator />
       <div className="grid gap-2 p-2">
-        <div className="grid gap-px">
-          {elements.toReversed().map((element) => (
-            <div key={element.id} className="group relative">
-              <ContextMenu>
-                <ContextMenuTrigger asChild>
-                  <Button
-                    onClick={() => setSelectedElement(element.id)}
-                    variant="ghost"
-                    className={cn(
-                      "flex h-9 w-full items-center justify-start rounded-md px-2 text-left text-muted-foreground",
-                      {
-                        "bg-secondary text-foreground":
-                          element.id === selectedElementId,
-                        "text-muted-foreground/50 hover:text-muted-foreground/50":
-                          element.hidden,
-                      },
-                    )}
-                    onMouseEnter={() => {
-                      if (!element.hidden && !element.locked) {
-                        updateElementState(element.id, { hovering: true });
+        <Reorder.Group
+          axis="y"
+          values={elements}
+          onReorder={(elements) => {
+            setCanvas({ elements });
+          }}
+        >
+          <div className="grid gap-px">
+            {elements.map((element) => (
+              <Reorder.Item key={element.id} value={element}>
+                <div className="group relative">
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
+                      <Button
+                        onClick={() => setSelectedElement(element.id)}
+                        variant="ghost"
+                        className={cn(
+                          "flex h-9 w-full items-center justify-start rounded-md px-2 text-left text-muted-foreground",
+                          {
+                            "bg-secondary text-foreground":
+                              element.id === selectedElementId,
+                            "text-muted-foreground/50 hover:text-muted-foreground/50":
+                              element.hidden,
+                          },
+                        )}
+                        onMouseEnter={() => {
+                          if (!element.hidden && !element.locked) {
+                            updateElementState(element.id, { hovering: true });
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (!element.hidden && !element.locked) {
+                            updateElementState(element.id, { hovering: false });
+                          }
+                        }}
+                      >
+                        {element.type === "code-editor" ? (
+                          <AppWindowMacIcon />
+                        ) : element.type === "text" ? (
+                          <TypeIcon />
+                        ) : null}
+                        <p>{element.name}</p>
+                      </Button>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem
+                        onClick={() => duplicateElement(element.id)}
+                      >
+                        <CopyIcon />
+                        Duplicate
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() =>
+                          updateElement({ ...element, hidden: !element.hidden })
+                        }
+                      >
+                        {element.hidden ? <EyeIcon /> : <EyeClosedIcon />}
+                        {element.hidden ? "Show" : "Hide"}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => removeElement(element.id)}
+                      >
+                        <TrashIcon />
+                        Delete
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-end gap-1 px-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "pointer-events-auto h-6 w-6 group-hover:visible",
+                        {
+                          invisible: !element.locked,
+                        },
+                      )}
+                      onClick={() =>
+                        updateElement({ ...element, locked: !element.locked })
                       }
-                    }}
-                    onMouseLeave={() => {
-                      if (!element.hidden && !element.locked) {
-                        updateElementState(element.id, { hovering: false });
-                      }
-                    }}
-                  >
-                    {element.type === "code-editor" ? (
-                      <AppWindowMacIcon />
-                    ) : element.type === "text" ? (
-                      <TypeIcon />
-                    ) : null}
-                    <p>{element.name}</p>
-                  </Button>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem onClick={() => duplicateElement(element.id)}>
-                    <CopyIcon />
-                    Duplicate
-                  </ContextMenuItem>
-                  <ContextMenuItem
-                    onClick={() =>
-                      updateElement({ ...element, hidden: !element.hidden })
-                    }
-                  >
-                    {element.hidden ? <EyeIcon /> : <EyeClosedIcon />}
-                    {element.hidden ? "Show" : "Hide"}
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={() => removeElement(element.id)}>
-                    <TrashIcon />
-                    Delete
-                  </ContextMenuItem>
-                </ContextMenuContent>
-              </ContextMenu>
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-end gap-1 px-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "pointer-events-auto h-6 w-6 group-hover:visible",
-                    {
-                      invisible: !element.locked,
-                    },
-                  )}
-                  onClick={() =>
-                    updateElement({ ...element, locked: !element.locked })
-                  }
-                >
-                  {element.locked ? <LockIcon /> : <UnlockIcon />}
-                </Button>
+                    >
+                      {element.locked ? <LockIcon /> : <UnlockIcon />}
+                    </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "pointer-events-auto h-6 w-6 group-hover:visible",
-                    {
-                      invisible: !element.hidden,
-                    },
-                  )}
-                  onClick={() =>
-                    updateElement({ ...element, hidden: !element.hidden })
-                  }
-                >
-                  {element.hidden ? <EyeClosedIcon /> : <EyeIcon />}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "pointer-events-auto h-6 w-6 group-hover:visible",
+                        {
+                          invisible: !element.hidden,
+                        },
+                      )}
+                      onClick={() =>
+                        updateElement({ ...element, hidden: !element.hidden })
+                      }
+                    >
+                      {element.hidden ? <EyeClosedIcon /> : <EyeIcon />}
+                    </Button>
+                  </div>
+                </div>
+              </Reorder.Item>
+            ))}
+          </div>
+        </Reorder.Group>
+
         <Separator />
         <Button
           onClick={() => setSelectedElement("canvas")}

@@ -1,6 +1,25 @@
+import { LanguageName } from "@uiw/codemirror-extensions-langs";
+
+export interface iPadding {
+  left: number;
+  right: number;
+  bottom: number;
+  top: number;
+  horizontalLinked?: boolean;
+  verticalLinked?: boolean;
+}
+
 export interface iCodeEditorElement {
   type: "code-editor";
+  code: string;
+  fontSize: number;
+  lineHeight: number;
+  lineNumbers: boolean;
+  language: LanguageName;
+  theme: string;
+  padding: iPadding;
 }
+
 export interface iTextElement {
   type: "text";
   value: string;
