@@ -9,20 +9,39 @@ import {
   useState,
 } from "react";
 
+import { useWindowSize } from "@/hooks/use-window-size";
 import { iElementTransform } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/editor-store";
 
-function getTransform(element: iElementTransform): CSSProperties {
-  const width = element.width * element.scale;
-  const height = element.height * element.scale;
+function getTransform(
+  element: iElementTransform,
+  canvasSize: { width: number; height: number },
+  windowSize: { width: number; height: number },
+  viewPortOffset: { x: number; y: number },
+  zoom: number,
+): CSSProperties {
+  const width = element.width * element.scale * zoom;
+  const height = element.height * element.scale * zoom;
+
+  const xOffset =
+    windowSize.width / 2 +
+    viewPortOffset.x -
+    (canvasSize.width * zoom) / 2 +
+    element.position.x * zoom;
+
+  const yOffset =
+    windowSize.height / 2 +
+    viewPortOffset.y -
+    (canvasSize.height * zoom) / 2 +
+    element.position.y * zoom;
 
   return {
     width,
     height,
 
-    left: element.position.x,
-    top: element.position.y,
+    left: xOffset,
+    top: yOffset,
 
     transform: `rotate(${element.rotation}deg)`,
   };
@@ -80,8 +99,12 @@ export function Indecators() {
 export const IndecatorsMemo = memo(Indecators);
 
 function CanvasTransformIndecator() {
+  const windowSize = useWindowSize();
   const canvasWidth = useEditorStore((state) => state.canvas.width);
   const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
+  const zoom = useEditorStore((state) => state.zoom);
+
   const canvasWidthHeightLinked = useEditorStore(
     (state) => state.canvas.widthHeightLinked,
   );
@@ -110,8 +133,8 @@ function CanvasTransformIndecator() {
       let width = canvasWidth;
       let height = canvasHeight;
 
-      const difX = (startMousePos.x - pos.x) * 2;
-      const difY = (startMousePos.y - pos.y) * 2;
+      const difX = ((startMousePos.x - pos.x) * 2) / zoom;
+      const difY = ((startMousePos.y - pos.y) * 2) / zoom;
 
       switch (position) {
         case "top-left":
@@ -153,7 +176,14 @@ function CanvasTransformIndecator() {
       });
       setStartMousePos(newStartPos);
     },
-    [canvasWidth, canvasHeight, startMousePos.x, startMousePos.y, setCanvas],
+    [
+      canvasWidth,
+      zoom,
+      canvasHeight,
+      startMousePos.x,
+      startMousePos.y,
+      setCanvas,
+    ],
   );
 
   const handleSideResize = useCallback(
@@ -164,8 +194,8 @@ function CanvasTransformIndecator() {
       let width = canvasWidth;
       let height = canvasHeight;
 
-      const difX = (startMousePos.x - pos.x) * 2;
-      const difY = (startMousePos.y - pos.y) * 2;
+      const difX = ((startMousePos.x - pos.x) * 2) / zoom;
+      const difY = ((startMousePos.y - pos.y) * 2) / zoom;
 
       switch (position) {
         case "left":
@@ -232,6 +262,7 @@ function CanvasTransformIndecator() {
     },
     [
       canvasWidth,
+      zoom,
       canvasHeight,
       startMousePos.x,
       startMousePos.y,
@@ -242,16 +273,25 @@ function CanvasTransformIndecator() {
 
   return (
     <div
-      style={getTransform({
-        height: canvasHeight,
-        width: canvasWidth,
-        minHeight: 0,
-        minWidth: 0,
-        position: { x: 0, y: 0 },
-        rotation: 0,
-        scale: 1,
-        widthHeightLinked: false,
-      })}
+      style={getTransform(
+        {
+          height: canvasHeight,
+          width: canvasWidth,
+          minHeight: 0,
+          minWidth: 0,
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          scale: 1,
+          widthHeightLinked: false,
+        },
+        {
+          height: canvasHeight,
+          width: canvasWidth,
+        },
+        windowSize,
+        viewPortOffset,
+        zoom,
+      )}
       className="pointer-events-none absolute z-20"
     >
       <BarIndecator
@@ -323,19 +363,20 @@ function ElementTransformIndecator({
   elementId: string;
   transform: iElementTransform;
 }) {
+  const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
+  const windowSize = useWindowSize();
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
-
-  const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
   const updateElementTransform = useEditorStore(
     (state) => state.updateElementTransform,
   );
+  const canvasWidth = useEditorStore((state) => state.canvas.width);
+  const canvasHeight = useEditorStore((state) => state.canvas.height);
   const zoom = useEditorStore((state) => state.zoom);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
 
   const elementRef = useRef<HTMLDivElement>(null);
-
-  const style = useMemo(() => getTransform(transform), [transform]);
 
   const handleResizeStart = useCallback(
     (x: number, y: number) => {
@@ -460,8 +501,8 @@ function ElementTransformIndecator({
       let x = transform.position.x;
       let y = transform.position.y;
 
-      const difX = startMousePos.x - pos.x;
-      const difY = startMousePos.y - pos.y;
+      const difX = (startMousePos.x - pos.x) / zoom;
+      const difY = (startMousePos.y - pos.y) / zoom;
 
       switch (position) {
         case "left":
@@ -533,6 +574,7 @@ function ElementTransformIndecator({
       transform.scale,
       transform.width,
       updateElementTransform,
+      zoom,
     ],
   );
 
@@ -564,8 +606,17 @@ function ElementTransformIndecator({
   return (
     <div
       ref={elementRef}
-      style={style}
-      className="pointer-events-none absolute z-20"
+      style={getTransform(
+        transform,
+        {
+          height: canvasHeight,
+          width: canvasWidth,
+        },
+        windowSize,
+        viewPortOffset,
+        zoom,
+      )}
+      className="z-2 pointer-events-none absolute"
     >
       <BarIndecator
         position="top"
@@ -853,13 +904,26 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
         ?.transform,
   );
 
+  const zoom = useEditorStore((state) => state.zoom);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
+  const windowSize = useWindowSize();
+
+  const canvasWidth = useEditorStore((state) => state.canvas.width);
+  const canvasHeight = useEditorStore((state) => state.canvas.height);
+
   if (!transform) {
     return null;
   }
 
   return (
     <div
-      style={getTransform(transform)}
+      style={getTransform(
+        transform,
+        { width: canvasWidth, height: canvasHeight },
+        windowSize,
+        viewPortOffset,
+        zoom,
+      )}
       className="pointer-events-none absolute z-20 ring-2 ring-blue-500"
     ></div>
   );
@@ -871,14 +935,25 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
       state.canvas.elements.find((element) => element.id === elementId)
         ?.transform,
   );
+  const zoom = useEditorStore((state) => state.zoom);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
+  const windowSize = useWindowSize();
 
+  const canvasWidth = useEditorStore((state) => state.canvas.width);
+  const canvasHeight = useEditorStore((state) => state.canvas.height);
   if (!transform) {
     return null;
   }
 
   return (
     <div
-      style={getTransform(transform)}
+      style={getTransform(
+        transform,
+        { width: canvasWidth, height: canvasHeight },
+        windowSize,
+        viewPortOffset,
+        zoom,
+      )}
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
@@ -893,14 +968,25 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
       state.canvas.elements.find((element) => element.id === elementId)
         ?.transform,
   );
+  const zoom = useEditorStore((state) => state.zoom);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
+  const windowSize = useWindowSize();
 
+  const canvasWidth = useEditorStore((state) => state.canvas.width);
+  const canvasHeight = useEditorStore((state) => state.canvas.height);
   if (!transform) {
     return null;
   }
 
   return (
     <div
-      style={getTransform(transform)}
+      style={getTransform(
+        transform,
+        { width: canvasWidth, height: canvasHeight },
+        windowSize,
+        viewPortOffset,
+        zoom,
+      )}
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
@@ -916,13 +1002,25 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
         ?.transform,
   );
 
+  const zoom = useEditorStore((state) => state.zoom);
+  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
+  const windowSize = useWindowSize();
+
+  const canvasWidth = useEditorStore((state) => state.canvas.width);
+  const canvasHeight = useEditorStore((state) => state.canvas.height);
   if (!transform) {
     return null;
   }
 
   return (
     <div
-      style={getTransform(transform)}
+      style={getTransform(
+        transform,
+        { width: canvasWidth, height: canvasHeight },
+        windowSize,
+        viewPortOffset,
+        zoom,
+      )}
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">

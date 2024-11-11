@@ -6,6 +6,7 @@ import { useEditorStore } from "@/store/editor-store";
 
 import Canvas from "./canvas";
 import EditorUI from "./editor-ui";
+import { IndecatorsMemo } from "./indecators";
 
 export default function Editor() {
   const setSelectedElement = useEditorStore(
@@ -40,6 +41,7 @@ export default function Editor() {
           className="absolute inset-0"
           onClick={() => setSelectedElement(null)}
         ></div>
+
         <div
           className="absolute left-1/2 top-1/2"
           style={{
@@ -51,6 +53,8 @@ export default function Editor() {
         >
           <Canvas />
         </div>
+
+        <IndecatorsMemo />
       </div>
       <EditorUI />
     </div>
