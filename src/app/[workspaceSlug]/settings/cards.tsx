@@ -1,5 +1,12 @@
 "use client";
 
+import { useCallback, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckIcon, CopyIcon, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,13 +27,7 @@ import { Input } from "@/components/ui/input";
 import { APP_NAME } from "@/lib/constants";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
-import { updateWorkspaceDto, UpdateWorkspaceDTO } from "@/trpc/validators";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckIcon, CopyIcon, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { UpdateWorkspaceDTO, updateWorkspaceDto } from "@/validators";
 
 export function WorkspaceNameCard() {
   const { workspace } = useWorkspace();
@@ -68,7 +69,7 @@ export function WorkspaceNameCard() {
             updateWorkspaceMut.mutate({
               workspaceId: workspace.id,
               dto: { name: data.name },
-            })
+            }),
           )}
         >
           <CardContent>
@@ -88,7 +89,7 @@ export function WorkspaceNameCard() {
           <CardFooter>
             <Button disabled={!form.formState.isDirty}>
               {updateWorkspaceMut.isPending && (
-                <Loader2 className="animate-spin w-4 h-4 mr-2 -ml-1" />
+                <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
               )}
               Save
             </Button>
@@ -138,7 +139,7 @@ export function WorkspaceSlugCard() {
             updateWorkspaceMut.mutate({
               workspaceId: workspace.id,
               dto: { slug: data.slug },
-            })
+            }),
           )}
         >
           <CardContent>
@@ -158,7 +159,7 @@ export function WorkspaceSlugCard() {
           <CardFooter>
             <Button disabled={!form.formState.isDirty}>
               {updateWorkspaceMut.isPending && (
-                <Loader2 className="animate-spin w-4 h-4 mr-2 -ml-1" />
+                <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
               )}
               Save
             </Button>
@@ -200,13 +201,13 @@ export function WorkspaceIdCard() {
           <Button
             size="icon"
             variant="ghost"
-            className="w-8 h-8 absolute right-1 top-1/2 -translate-y-1/2"
+            className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
             onClick={handleCopy}
           >
             {copied ? (
-              <CheckIcon className="w-4 h-4" />
+              <CheckIcon className="h-4 w-4" />
             ) : (
-              <CopyIcon className="w-4 h-4" />
+              <CopyIcon className="h-4 w-4" />
             )}
           </Button>
         </fieldset>

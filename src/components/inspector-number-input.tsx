@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import {
   MouseEvent,
   ReactNode,
@@ -7,6 +6,8 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { Input } from "@/components/ui/input";
 
 export function InspectorNumberInput({
   icon,

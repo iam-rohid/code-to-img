@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, WheelEvent } from "react";
+
+import { useEditorStore } from "@/store/editor-store";
+
 import Canvas from "./canvas";
-import { useEditorStore } from "./store";
-import UI from "./ui";
+import EditorUI from "./editor-ui";
 
 export default function Editor() {
   const setSelectedElement = useEditorStore(
@@ -17,7 +19,7 @@ export default function Editor() {
   const handleScroll = useCallback(
     (e: WheelEvent<HTMLDivElement>) => {
       if (e.metaKey) {
-        setZoom(Math.min(3, Math.max(0.1, zoom - e.deltaY * 0.01)));
+        setZoom(Math.min(30, Math.max(0.1, zoom - e.deltaY * 0.01)));
       } else {
         setViewPortOffset({
           x: viewPortOffset.x - e.deltaX,
@@ -50,7 +52,7 @@ export default function Editor() {
           <Canvas />
         </div>
       </div>
-      <UI />
+      <EditorUI />
     </div>
   );
 }

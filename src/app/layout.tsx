@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { TRPCProvider } from "@/trpc/client";
-import AuthProvider from "@/providers/auth-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
+
+import type { Metadata } from "next";
+
 import { getCurrentSession } from "@/auth/utils";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import AuthProvider from "@/providers/auth-provider";
+import { TRPCProvider } from "@/trpc/client";
 
 export const metadata: Metadata = {
   title: "Code To Img",

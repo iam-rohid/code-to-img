@@ -1,3 +1,7 @@
+import { useCallback, useState } from "react";
+import { CheckIcon, ChevronsUpDown, PlusIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import {
   Command,
   CommandEmpty,
@@ -12,16 +16,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "./ui/button";
-import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
-import { trpc } from "@/trpc/client";
-import { CheckIcon, ChevronsUpDown, PlusIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "./ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import CreateWorkspaceForm from "./forms/create-workspace-form";
 import { useWorkspace } from "@/providers/workspace-provider";
+import { trpc } from "@/trpc/client";
+
+import CreateWorkspaceForm from "./forms/create-workspace-form";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Skeleton } from "./ui/skeleton";
 
 export default function WorkspaceSwitcher() {
   const [open, setOpen] = useState(false);
@@ -36,7 +38,7 @@ export default function WorkspaceSwitcher() {
     async (slug: string) => {
       router.push(`/${slug}`);
     },
-    [router]
+    [router],
   );
 
   return (
@@ -50,7 +52,7 @@ export default function WorkspaceSwitcher() {
             className="w-full justify-between"
           >
             {workspace.name}
-            <ChevronsUpDown className="ml-2 -mr-1 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown className="-mr-1 ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-60 p-0">
@@ -82,7 +84,7 @@ export default function WorkspaceSwitcher() {
                           "mr-2 h-4 w-4",
                           workspace.slug === org.workspace.slug
                             ? "opacity-100"
-                            : "opacity-0"
+                            : "opacity-0",
                         )}
                       />
                       {org.workspace.name}
@@ -100,7 +102,7 @@ export default function WorkspaceSwitcher() {
                     setCreateWorkspaceOpen(true);
                   }}
                 >
-                  <PlusIcon className="w-4 h-4" />
+                  <PlusIcon className="h-4 w-4" />
                   Create new workspace
                 </CommandItem>
               </CommandGroup>

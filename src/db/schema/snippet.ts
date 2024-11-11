@@ -1,4 +1,5 @@
 import { jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+
 import { createdAt, id } from "./shared";
 import { workspaceTable } from "./workspace";
 

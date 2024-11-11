@@ -1,5 +1,6 @@
-import { iElement } from "../types";
-import Draggable from "./draggable";
+import { iElement } from "@/lib/types/editor";
+
+import Draggable from "./shared/draggable";
 
 export default function TextElement({ element }: { element: iElement }) {
   if (element.type !== "text") {

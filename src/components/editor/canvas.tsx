@@ -1,9 +1,10 @@
 "use client";
 
-import { useEditorStore } from "./store";
-import { ElementMemo } from "./elements/element";
+import { getBackgroundStyle } from "@/lib/utils/editor";
+import { useEditorStore } from "@/store/editor-store";
+
+import { ElementMemo } from "./element";
 import { IndecatorsMemo } from "./indecators";
-import { getBackgroundStyle } from "./utils";
 
 export default function Canvas() {
   const width = useEditorStore((state) => state.canvas.width);

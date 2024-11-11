@@ -1,7 +1,55 @@
-import { getCodeEditorElement } from "@/editor/utils";
-import { create } from "zustand";
-import { EditorStore } from "./types";
 import { nanoid } from "nanoid";
+import { create } from "zustand";
+
+import { iCanvas, iElement, iElementTransform } from "@/lib/types/editor";
+import { getCodeEditorElement } from "@/lib/utils/editor";
+
+export interface ElementState {
+  hovering?: boolean;
+  dragging?: boolean;
+  resizing?: boolean;
+  rotating?: boolean;
+}
+
+export interface EditorState {
+  canvas: iCanvas;
+  elementState: Record<string, ElementState>;
+  selectedElementId: string | null;
+  zoom: number;
+  layersOpen: boolean;
+  viewPortOffset: {
+    x: number;
+    y: number;
+  };
+}
+
+export type Alignment =
+  | "start-horizontal"
+  | "center-horizontal"
+  | "end-horizontal"
+  | "start-vertical"
+  | "center-vertical"
+  | "end-vertical";
+
+export interface EditorActions {
+  setCanvas: (canvas: Partial<EditorState["canvas"]>) => void;
+  setZoom: (zoom: EditorState["zoom"]) => void;
+  setViewPortOffset: (offset: EditorState["viewPortOffset"]) => void;
+  setLayersOpen: (open: boolean) => void;
+  addElement: (element: iElement) => void;
+  updateElement: (dto: iElement) => void;
+  updateElementTransform: (
+    elementId: string,
+    dto: Partial<iElementTransform>,
+  ) => void;
+  updateElementState: (elementId: string, state: Partial<ElementState>) => void;
+  setSelectedElement: (elemenntId: EditorState["selectedElementId"]) => void;
+  removeElement: (elemenntId: string) => void;
+  duplicateElement: (elemenntId: string) => void;
+  alignElement: (elementId: string, alignment: Alignment) => void;
+}
+
+export type EditorStore = EditorState & EditorActions;
 
 export const useEditorStore = create<EditorStore>()((set, get) => ({
   canvas: {
@@ -64,24 +112,24 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
       },
     }));
   },
-  updateElementState: (elementId, state) => {
-    const elementState = get().elementState;
-    const stateToUpdate = elementState[elementId] ?? {};
-    set({
-      elementState: {
-        ...elementState,
-        [elementId]: { ...stateToUpdate, ...state },
-      },
+  updateElementState: (elementId, data) => {
+    set((state) => {
+      const stateToUpdate = state.elementState[elementId] ?? {};
+      return {
+        elementState: {
+          ...state.elementState,
+          [elementId]: { ...stateToUpdate, ...data },
+        },
+      };
     });
   },
   removeElement: (elementId) => {
-    const canvas = get().canvas;
-    set({
+    set((state) => ({
       canvas: {
-        ...canvas,
-        elements: canvas.elements.filter((el) => el.id !== elementId),
+        ...state.canvas,
+        elements: state.canvas.elements.filter((el) => el.id !== elementId),
       },
-    });
+    }));
   },
   duplicateElement: (elementId) => {
     const canvas = get().canvas;

@@ -1,9 +1,10 @@
+import { eq } from "drizzle-orm";
+import { redirect, RedirectType } from "next/navigation";
+
 import { getCurrentSession } from "@/auth/utils";
 import { db } from "@/db";
 import { workspaceMemberTable, workspaceTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { getWorkspaceSlugFromCookie } from "@/server/actions";
-import { redirect, RedirectType } from "next/navigation";
+import { getWorkspaceSlugFromCookie } from "@/lib/server/actions";
 
 export default async function Page() {
   const session = await getCurrentSession();
@@ -28,7 +29,7 @@ export default async function Page() {
     .from(workspaceMemberTable)
     .innerJoin(
       workspaceTable,
-      eq(workspaceTable.id, workspaceMemberTable.workspaceId)
+      eq(workspaceTable.id, workspaceMemberTable.workspaceId),
     )
     .where(eq(workspaceMemberTable.userId, session.user.id));
 

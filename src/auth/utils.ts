@@ -1,3 +1,12 @@
+import { sha256 } from "@oslojs/crypto/sha2";
+import {
+  encodeBase32LowerCaseNoPadding,
+  encodeHexLowerCase,
+} from "@oslojs/encoding";
+import { and, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+
+import { db } from "@/db";
 import {
   accountTable,
   Session,
@@ -5,14 +14,6 @@ import {
   User,
   userTable,
 } from "@/db/schema";
-import {
-  encodeBase32LowerCaseNoPadding,
-  encodeHexLowerCase,
-} from "@oslojs/encoding";
-import { sha256 } from "@oslojs/crypto/sha2";
-import { db } from "@/db";
-import { and, eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);

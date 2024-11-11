@@ -1,6 +1,7 @@
 import { pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
-import { createdAt } from "./shared";
+
 import { userTable } from "./auth";
+import { createdAt } from "./shared";
 
 export const workspaceTable = pgTable("workspace", {
   createdAt,

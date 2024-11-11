@@ -1,12 +1,14 @@
 "use server";
 
-import { deleteWorkspaceSlugFromCookie } from "@/server/actions";
+import { redirect } from "next/navigation";
+
+import { deleteWorkspaceSlugFromCookie } from "@/lib/server/actions";
+
 import {
   deleteSessionTokenCookie,
   getCurrentSession,
   invalidateSession,
 } from "./utils";
-import { redirect } from "next/navigation";
 
 export async function signOut() {
   const session = await getCurrentSession();

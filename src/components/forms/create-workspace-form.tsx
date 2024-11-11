@@ -1,5 +1,13 @@
 "use client";
 
+import React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -9,17 +17,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CreateWorkspaceDTO, createWorkspaceDto } from "@/trpc/validators";
-import { trpc } from "@/trpc/client";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { APP_NAME } from "@/lib/constants";
+import { trpc } from "@/trpc/client";
+import { CreateWorkspaceDTO, createWorkspaceDto } from "@/validators";
 
 export default function CreateWorkspaceForm() {
   const form = useForm<CreateWorkspaceDTO>({
@@ -75,7 +76,7 @@ export default function CreateWorkspaceForm() {
             <FormItem>
               <FormLabel>Workspace Slug</FormLabel>
               <div className="flex">
-                <div className="h-10 px-3 bg-secondary border border-r-0 rounded-md rounded-r-none flex items-center text-sm text-muted-foreground">
+                <div className="flex h-10 items-center rounded-md rounded-r-none border border-r-0 bg-secondary px-3 text-sm text-muted-foreground">
                   <p>rowdash.com/</p>
                 </div>
                 <FormControl>

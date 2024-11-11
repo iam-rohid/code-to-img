@@ -1,13 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useWorkspace } from "@/providers/workspace-provider";
-import { trpc } from "@/trpc/client";
+import { useCallback } from "react";
 import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { useWorkspace } from "@/providers/workspace-provider";
+import { trpc } from "@/trpc/client";
 
 export default function SnippetsList() {
   const { workspace } = useWorkspace();

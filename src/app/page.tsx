@@ -1,6 +1,7 @@
-import { getCurrentSession } from "@/auth/utils";
 import Link from "next/link";
 import { redirect, RedirectType } from "next/navigation";
+
+import { getCurrentSession } from "@/auth/utils";
 
 export default async function Page() {
   const session = await getCurrentSession();

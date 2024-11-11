@@ -1,4 +1,11 @@
 import React from "react";
+import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import Link from "next/link";
+
+import { useAuth } from "@/providers/auth-provider";
+
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,11 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
-import { useAuth } from "@/providers/auth-provider";
-import Link from "next/link";
 
 export default function UserButton() {
   const { session, signOut } = useAuth();

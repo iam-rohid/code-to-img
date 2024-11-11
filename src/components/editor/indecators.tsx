@@ -8,9 +8,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { iElementTransform } from "./types";
-import { useEditorStore } from "./store";
+
+import { iElementTransform } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
+import { useEditorStore } from "@/store/editor-store";
 
 function getTransform(element: iElementTransform): CSSProperties {
   const width = element.width * element.scale;

@@ -1,9 +1,10 @@
 "use client";
 
+import { createContext, ReactNode, useCallback, useContext } from "react";
+import { useRouter } from "next/navigation";
+
 import { signOut } from "@/auth/actions";
 import { SessionValidationResult } from "@/auth/utils";
-import { useRouter } from "next/navigation";
-import { createContext, ReactNode, useCallback, useContext } from "react";
 
 export type AuthContextValue = {
   session: SessionValidationResult | null;

@@ -1,3 +1,5 @@
+import { memo, useCallback, useMemo } from "react";
+import { Reorder } from "framer-motion";
 import {
   AppWindowMacIcon,
   ArrowRightIcon,
@@ -22,11 +24,14 @@ import {
   UndoIcon,
   UnlockIcon,
 } from "lucide-react";
-import { InspectionPanelMemo } from "./inspection-panel";
+
 import { Button } from "@/components/ui/button";
-import UserButton from "@/components/user-button";
-import { useEditorStore } from "./store";
-import { getCodeEditorElement, getTextElement } from "./utils";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,22 +39,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { memo, useCallback, useMemo } from "react";
-import { Reorder } from "framer-motion";
+import UserButton from "@/components/user-button";
+import { cn } from "@/lib/utils";
+import { getCodeEditorElement, getTextElement } from "@/lib/utils/editor";
+import { useEditorStore } from "@/store/editor-store";
 
-export default function UI() {
+import { InspectionPanelMemo } from "./inspection-panel";
+
+export default function EditorUI() {
   const layersOpen = useEditorStore((state) => state.layersOpen);
   const setLayersOpen = useEditorStore((state) => state.setLayersOpen);
   const zoom = useEditorStore((state) => state.zoom);

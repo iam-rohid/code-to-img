@@ -1,10 +1,11 @@
 "use client";
 
-import { setWorkspaceSlugInCookie } from "@/server/actions";
-import { Workspace, WorkspaceMember } from "@/db/schema";
-import { trpc } from "@/trpc/client";
-import { useParams } from "next/navigation";
 import { createContext, ReactNode, useContext, useEffect } from "react";
+import { useParams } from "next/navigation";
+
+import { Workspace, WorkspaceMember } from "@/db/schema";
+import { setWorkspaceSlugInCookie } from "@/lib/server/actions";
+import { trpc } from "@/trpc/client";
 
 export type AuthContextValue = {
   workspace: Workspace;

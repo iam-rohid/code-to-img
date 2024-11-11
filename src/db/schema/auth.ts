@@ -2,6 +2,7 @@ import { jsonb } from "drizzle-orm/pg-core";
 import { primaryKey } from "drizzle-orm/pg-core";
 import { text } from "drizzle-orm/pg-core";
 import { pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+
 import { createdAt, id } from "./shared";
 
 export const userTable = pgTable("user", {

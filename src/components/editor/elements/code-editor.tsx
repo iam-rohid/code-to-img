@@ -1,11 +1,12 @@
-import { iElement } from "../types";
-import Draggable from "./draggable";
-import { useEditorStore } from "../store";
-import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
-import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
-import { loadLanguage } from "@uiw/codemirror-extensions-langs";
-
 import { CSSProperties, useMemo } from "react";
+import { loadLanguage } from "@uiw/codemirror-extensions-langs";
+import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
+import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
+
+import { iElement } from "@/lib/types/editor";
+import { useEditorStore } from "@/store/editor-store";
+
+import Draggable from "./shared/draggable";
 
 const themes: {
   id: string;

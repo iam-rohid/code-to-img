@@ -1,5 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
+import { ChevronLeftIcon, SettingsIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
   Sidebar,
   SidebarContent,
@@ -13,10 +18,6 @@ import {
 } from "@/components/ui/sidebar";
 import UserButton from "@/components/user-button";
 import { useWorkspace } from "@/providers/workspace-provider";
-import { ChevronLeftIcon, SettingsIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useMemo } from "react";
 
 export default function SettingsSidebar() {
   const pathname = usePathname();

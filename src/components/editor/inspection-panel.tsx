@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { memo } from "react";
 import {
   AlignHorizontalJustifyCenterIcon,
   AlignHorizontalJustifyEndIcon,
@@ -12,18 +12,19 @@ import {
   RotateCcwIcon,
   TrashIcon,
 } from "lucide-react";
+
+import { InspectorNumberInput } from "@/components/inspector-number-input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useEditorStore } from "./store";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { InspectorNumberInput } from "@/components/inspector-number-input";
-import { Input } from "@/components/ui/input";
-import { iElement, iElementTransform } from "./types";
-import { memo } from "react";
+import { iElement, iElementTransform } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
+import { useEditorStore } from "@/store/editor-store";
 
 export default function InspectionPanel() {
   const selectedElementId = useEditorStore((state) => state.selectedElementId);

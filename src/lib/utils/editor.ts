@@ -1,6 +1,7 @@
-import { nanoid } from "nanoid";
-import { iColor, iElement } from "./types";
 import { CSSProperties } from "react";
+import { nanoid } from "nanoid";
+
+import { iColor, iElement } from "@/lib/types/editor";
 
 export function getBackgroundStyle(color: iColor): CSSProperties {
   switch (color.type) {

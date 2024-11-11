@@ -1,8 +1,10 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { useEditorStore } from "../store";
-import { iElement, iElementTransform } from "../types";
-import CodeEditorElement from "./code-editor";
-import TextElement from "./text-element";
+
+import { iElement, iElementTransform } from "@/lib/types/editor";
+import { useEditorStore } from "@/store/editor-store";
+
+import CodeEditorElement from "./elements/code-editor";
+import TextElement from "./elements/text-element";
 
 export default function Element({ element }: { element: iElement }) {
   const updateElementTransform = useEditorStore(

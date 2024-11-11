@@ -1,7 +1,8 @@
+import { ReactNode } from "react";
+import { notFound } from "next/navigation";
+
 import WorkspaceProvider from "@/providers/workspace-provider";
 import { HydrateClient, trpc } from "@/trpc/server";
-import { notFound } from "next/navigation";
-import { ReactNode } from "react";
 
 export default async function Layout({
   children,

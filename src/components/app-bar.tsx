@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
-import { SidebarTrigger } from "./ui/sidebar";
+import Link from "next/link";
+
 import {
   Breadcrumb,
   BreadcrumbLink,
@@ -7,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
-import Link from "next/link";
+import { SidebarTrigger } from "./ui/sidebar";
 
 export default function AppBar({
   title,

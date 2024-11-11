@@ -1,9 +1,11 @@
 "use client";
 
+import { createContext, type ReactNode,useContext } from "react";
+import { useParams } from "next/navigation";
+
 import type { Snippet } from "@/db/schema";
 import { trpc } from "@/trpc/client";
-import { useParams } from "next/navigation";
-import { createContext, useContext, type ReactNode } from "react";
+
 import { useWorkspace } from "./workspace-provider";
 
 export interface EditorContext {

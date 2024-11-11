@@ -1,3 +1,8 @@
+import "server-only";
+
+import { and, eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
+
 import { getCurrentSession } from "@/auth/utils";
 import { db } from "@/db";
 import {
@@ -5,9 +10,6 @@ import {
   workspaceMemberTable,
   workspaceTable,
 } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
-import "server-only";
 
 export const getWorkspaceBySlug = unstable_cache(
   async (workspaceSlug: string) => {

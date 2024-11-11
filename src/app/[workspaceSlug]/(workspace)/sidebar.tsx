@@ -1,6 +1,10 @@
 "use client";
 
-import WorkspaceSwitcher from "@/components/workspace-switcher";
+import { useMemo } from "react";
+import { LayoutGridIcon, SettingsIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
   Sidebar,
   SidebarContent,
@@ -12,10 +16,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import UserButton from "@/components/user-button";
-import { LayoutGridIcon, SettingsIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import WorkspaceSwitcher from "@/components/workspace-switcher";
 import { useWorkspace } from "@/providers/workspace-provider";
 
 export default function WorkspaceSidebar() {

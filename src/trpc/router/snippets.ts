@@ -1,12 +1,14 @@
+import { TRPCError } from "@trpc/server";
+import { desc, eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
+
+import { db } from "@/db";
+import { snippetTable } from "@/db/schema";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
-import { unstable_cache } from "next/cache";
-import { TRPCError } from "@trpc/server";
-import { snippetTable } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+
 import { getWorkspaceById } from "./workspaces";
-import { db } from "@/db";
 
 export const getSnippet = unstable_cache(
   async (snippetId: string, userId: string) => {

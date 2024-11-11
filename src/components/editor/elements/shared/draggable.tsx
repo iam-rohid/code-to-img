@@ -5,9 +5,10 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { iElement } from "../types";
+
+import { iElement } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
-import { useEditorStore } from "../store";
+import { useEditorStore } from "@/store/editor-store";
 
 export default function Draggable({
   element,

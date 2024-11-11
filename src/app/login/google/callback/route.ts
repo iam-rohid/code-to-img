@@ -1,6 +1,8 @@
 import { decodeIdToken, OAuth2Tokens } from "arctic";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
+import { google } from "@/auth/providers";
 import {
   createSession,
   createUserAndAccount,
@@ -8,7 +10,6 @@ import {
   getUserAccount,
   setSessionTokenCookie,
 } from "@/auth/utils";
-import { google } from "@/auth/providers";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");

@@ -1,4 +1,5 @@
 import AppBar from "@/components/app-bar";
+
 import { WorkspaceIdCard, WorkspaceNameCard, WorkspaceSlugCard } from "./cards";
 
 export default async function Page({

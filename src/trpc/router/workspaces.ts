@@ -1,15 +1,16 @@
+import { TRPCError } from "@trpc/server";
+import { and, desc, eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
+import { z } from "zod";
+
+import { db } from "@/db";
 import {
   workspaceMemberTable as workspaceMemberTable,
   workspaceTable as workspaceTable,
 } from "@/db/schema";
+import { createWorkspaceDto, updateWorkspaceDto } from "@/validators";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
-import { createWorkspaceDto, updateWorkspaceDto } from "../validators";
-import { TRPCError } from "@trpc/server";
-import { and, desc, eq } from "drizzle-orm";
-import { z } from "zod";
-import { unstable_cache } from "next/cache";
-import { db } from "@/db";
 
 export const getWorkspaceById = unstable_cache(
   async (workspaceId: string, userId: string) => {
