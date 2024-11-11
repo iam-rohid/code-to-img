@@ -44,7 +44,7 @@ export const getCodeEditorElement = (
   fontSize: 16,
   language: "javascript",
   lineHeight: 24,
-  lineNumbers: false,
+  lineNumbers: true,
   theme: "tokyo-night",
   padding: {
     top: 0,

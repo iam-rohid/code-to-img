@@ -130,6 +130,7 @@ export default function CodeEditorElement({ element }: { element: iElement }) {
             lineNumbers: element.lineNumbers,
             highlightActiveLine: false,
             highlightActiveLineGutter: false,
+            foldGutter: false,
           }}
           style={{
             fontSize: element.fontSize,

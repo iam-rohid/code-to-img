@@ -101,7 +101,7 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
       selectedElementId: element.id,
       canvas: {
         ...canvas,
-        elements: [...canvas.elements, element],
+        elements: [element, ...canvas.elements],
       },
     });
   },
