@@ -10,31 +10,32 @@ import {
 } from "react";
 
 import { useWindowSize } from "@/hooks/use-window-size";
-import { iElementTransform } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
+import { iTransform } from "@/lib/validator/transform";
+import { useSnippetStore } from "@/providers/snippet-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 function getTransform(
-  element: iElementTransform,
+  transform: iTransform,
   canvasSize: { width: number; height: number },
   windowSize: { width: number; height: number },
   viewPortOffset: { x: number; y: number },
   zoom: number,
 ): CSSProperties {
-  const width = element.width * element.scale * zoom;
-  const height = element.height * element.scale * zoom;
+  const width = transform.width * transform.scale * zoom;
+  const height = transform.height * transform.scale * zoom;
 
   const xOffset =
     windowSize.width / 2 +
     viewPortOffset.x -
     (canvasSize.width * zoom) / 2 +
-    element.position.x * zoom;
+    transform.position.x * zoom;
 
   const yOffset =
     windowSize.height / 2 +
     viewPortOffset.y -
     (canvasSize.height * zoom) / 2 +
-    element.position.y * zoom;
+    transform.position.y * zoom;
 
   return {
     width,
@@ -43,18 +44,17 @@ function getTransform(
     left: xOffset,
     top: yOffset,
 
-    transform: `rotate(${element.rotation}deg)`,
+    transform: `rotate(${transform.rotation}deg)`,
   };
 }
 
 export function Indecators() {
   const elementState = useEditorStore((state) => state.elementState);
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
-  const selectedElement = useEditorStore((state) =>
+  const selectedElement = useSnippetStore((state) =>
     selectedElementId
-      ? (state.canvas.elements.find(
-          (element) => element.id === selectedElementId,
-        ) ?? null)
+      ? (state.elements.find((element) => element.id === selectedElementId) ??
+        null)
       : null,
   );
 
@@ -100,15 +100,17 @@ export const IndecatorsMemo = memo(Indecators);
 
 function CanvasTransformIndecator() {
   const windowSize = useWindowSize();
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const zoom = useEditorStore((state) => state.zoom);
 
-  const canvasWidthHeightLinked = useEditorStore(
-    (state) => state.canvas.widthHeightLinked,
+  const canvasWidthHeightLinked = useSnippetStore(
+    (state) => state.transform.widthHeightLinked,
   );
-  const setCanvas = useEditorStore((state) => state.setCanvas);
+  const setCanvasTransform = useSnippetStore(
+    (state) => state.updateSnippetTransform,
+  );
   const canvasMinWidth = 200;
   const canvasMinHeight = 200;
   const [isResizing, setIsResizing] = useState(false);
@@ -170,7 +172,7 @@ function CanvasTransformIndecator() {
         newStartPos.y = startMousePos.y;
       }
 
-      setCanvas({
+      setCanvasTransform({
         width,
         height,
       });
@@ -182,7 +184,7 @@ function CanvasTransformIndecator() {
       canvasHeight,
       startMousePos.x,
       startMousePos.y,
-      setCanvas,
+      setCanvasTransform,
     ],
   );
 
@@ -257,7 +259,7 @@ function CanvasTransformIndecator() {
         }
       }
 
-      setCanvas({ width, height });
+      setCanvasTransform({ width, height });
       setStartMousePos(newStartPos);
     },
     [
@@ -267,7 +269,7 @@ function CanvasTransformIndecator() {
       startMousePos.x,
       startMousePos.y,
       canvasWidthHeightLinked,
-      setCanvas,
+      setCanvasTransform,
     ],
   );
 
@@ -277,8 +279,6 @@ function CanvasTransformIndecator() {
         {
           height: canvasHeight,
           width: canvasWidth,
-          minHeight: 0,
-          minWidth: 0,
           position: { x: 0, y: 0 },
           rotation: 0,
           scale: 1,
@@ -361,18 +361,18 @@ function ElementTransformIndecator({
   elementId,
 }: {
   elementId: string;
-  transform: iElementTransform;
+  transform: iTransform;
 }) {
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
   const windowSize = useWindowSize();
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
-  const updateElementTransform = useEditorStore(
+  const updateElementTransform = useSnippetStore(
     (state) => state.updateElementTransform,
   );
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
 
@@ -401,8 +401,8 @@ function ElementTransformIndecator({
     ) => {
       const elementWidth = transform.width * transform.scale;
       const elementHeight = transform.height * transform.scale;
-      const elementMinWidth = transform.minWidth * transform.scale;
-      const elementMinHeight = transform.minHeight * transform.scale;
+      const elementMinWidth = 20 * transform.scale;
+      const elementMinHeight = 20 * transform.scale;
 
       let width = elementWidth;
       let height = elementHeight;
@@ -475,8 +475,6 @@ function ElementTransformIndecator({
       startMousePos.x,
       startMousePos.y,
       transform.height,
-      transform.minHeight,
-      transform.minWidth,
       transform.position.x,
       transform.position.y,
       transform.scale,
@@ -493,8 +491,8 @@ function ElementTransformIndecator({
     ) => {
       const elementWidth = transform.width * transform.scale;
       const elementHeight = transform.height * transform.scale;
-      const elementMinWidth = transform.minWidth * transform.scale;
-      const elementMinHeight = transform.minHeight * transform.scale;
+      const elementMinWidth = 20 * transform.scale;
+      const elementMinHeight = 20 * transform.scale;
 
       let width = elementWidth;
       let height = elementHeight;
@@ -539,7 +537,7 @@ function ElementTransformIndecator({
         newStartPos.y = startMousePos.y;
       }
 
-      const updatedTransform: Partial<iElementTransform> = {
+      const updatedTransform: Partial<iTransform> = {
         width: Math.round(width / transform.scale),
         height: Math.round(height / transform.scale),
         position: { x: Math.round(x), y: Math.round(y) },
@@ -567,8 +565,6 @@ function ElementTransformIndecator({
       transform.autoHeight,
       transform.autoWidth,
       transform.height,
-      transform.minHeight,
-      transform.minWidth,
       transform.position.x,
       transform.position.y,
       transform.scale,
@@ -898,18 +894,17 @@ function RotationIndecator({
 }
 
 function HovernigIndecator({ elementId }: { elementId: string }) {
-  const transform = useEditorStore(
+  const transform = useSnippetStore(
     (state) =>
-      state.canvas.elements.find((element) => element.id === elementId)
-        ?.transform,
+      state.elements.find((element) => element.id === elementId)?.transform,
   );
 
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const windowSize = useWindowSize();
 
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
 
   if (!transform) {
     return null;
@@ -930,17 +925,16 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
 }
 
 function DraggingIndecator({ elementId }: { elementId: string }) {
-  const transform = useEditorStore(
+  const transform = useSnippetStore(
     (state) =>
-      state.canvas.elements.find((element) => element.id === elementId)
-        ?.transform,
+      state.elements.find((element) => element.id === elementId)?.transform,
   );
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const windowSize = useWindowSize();
 
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
   if (!transform) {
     return null;
   }
@@ -963,17 +957,16 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
   );
 }
 function ResizeIndecator({ elementId }: { elementId: string }) {
-  const transform = useEditorStore(
+  const transform = useSnippetStore(
     (state) =>
-      state.canvas.elements.find((element) => element.id === elementId)
-        ?.transform,
+      state.elements.find((element) => element.id === elementId)?.transform,
   );
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const windowSize = useWindowSize();
 
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
   if (!transform) {
     return null;
   }
@@ -996,18 +989,17 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
   );
 }
 function RotatingIndecator({ elementId }: { elementId: string }) {
-  const transform = useEditorStore(
+  const transform = useSnippetStore(
     (state) =>
-      state.canvas.elements.find((element) => element.id === elementId)
-        ?.transform,
+      state.elements.find((element) => element.id === elementId)?.transform,
   );
 
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const windowSize = useWindowSize();
 
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
   if (!transform) {
     return null;
   }

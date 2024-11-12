@@ -1,15 +1,16 @@
 "use client";
 
 import { getBackgroundStyle } from "@/lib/utils/editor";
+import { useSnippetStore } from "@/providers/snippet-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import { ElementMemo } from "./element";
 
 export default function Canvas() {
-  const width = useEditorStore((state) => state.canvas.width);
-  const height = useEditorStore((state) => state.canvas.height);
-  const background = useEditorStore((state) => state.canvas.background);
-  const elements = useEditorStore((state) => state.canvas.elements);
+  const width = useSnippetStore((state) => state.transform.width);
+  const height = useSnippetStore((state) => state.transform.height);
+  const background = useSnippetStore((state) => state.background);
+  const elements = useSnippetStore((state) => state.elements);
   const setSelectedElement = useEditorStore(
     (state) => state.setSelectedElement,
   );

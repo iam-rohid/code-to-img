@@ -6,8 +6,9 @@ import React, {
   useState,
 } from "react";
 
-import { iElement } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
+import { iElement } from "@/lib/validator/element";
+import { useSnippetStore } from "@/providers/snippet-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 export default function Draggable({
@@ -20,7 +21,9 @@ export default function Draggable({
   className?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
-  const updateElement = useEditorStore((state) => state.updateElement);
+  const updateElementTransform = useSnippetStore(
+    (state) => state.updateElementTransform,
+  );
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
@@ -61,15 +64,19 @@ export default function Draggable({
 
       setStartMousePos({ x: e.clientX, y: e.clientY });
 
-      updateElement({
-        ...element,
-        transform: {
-          ...element.transform,
-          position: { x: Math.round(x), y: Math.round(y) },
-        },
+      updateElementTransform(element.id, {
+        position: { x: Math.round(x), y: Math.round(y) },
       });
     },
-    [element, startMousePos.x, startMousePos.y, updateElement, zoom],
+    [
+      element.id,
+      element.transform.position.x,
+      element.transform.position.y,
+      startMousePos.x,
+      startMousePos.y,
+      updateElementTransform,
+      zoom,
+    ],
   );
 
   useEffect(() => {

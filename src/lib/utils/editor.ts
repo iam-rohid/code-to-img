@@ -1,7 +1,18 @@
 import { CSSProperties } from "react";
 import { nanoid } from "nanoid";
 
-import { iColor, iElement } from "@/lib/types/editor";
+import { iColor } from "../validator/color";
+import { iCodeEditorElement, iTextElement } from "../validator/element";
+import { iPadding } from "../validator/padding";
+
+export function getPaddingStyle(padding: iPadding): CSSProperties {
+  return {
+    paddingLeft: padding.left,
+    paddingRight: padding.right,
+    paddingTop: padding.top,
+    paddingBottom: padding.bottom,
+  };
+}
 
 export function getBackgroundStyle(color: iColor): CSSProperties {
   switch (color.type) {
@@ -22,14 +33,12 @@ export const getCodeEditorElement = (
   canvasHeight: number,
   width = 400,
   height = 86,
-): iElement => ({
+): iCodeEditorElement => ({
   id: nanoid(),
   name: "Code Editor",
   transform: {
     height,
     width,
-    minHeight: 20,
-    minWidth: 20,
     autoWidth: false,
     autoHeight: true,
     widthHeightLinked: false,
@@ -60,22 +69,19 @@ export const getTextElement = (
   canvasHeight: number,
   width = 72,
   height = 44,
-): iElement => ({
+): iTextElement => ({
   id: nanoid(),
   type: "text",
   name: "Text",
-  value: "Text",
-  color: "#000",
-  backgroundColor: "#fff",
+  text: "Text",
+  foregrounnd: "#000",
+  background: { color: { type: "solid", color: "#FFFFFF" } },
   fontWeight: "900",
   lineHeight: 1,
   fontSize: 24,
-  padding: 8,
   transform: {
     height,
     width,
-    minHeight: 20,
-    minWidth: 20,
     widthHeightLinked: false,
     position: {
       x: canvasWidth / 2 - width / 2,
@@ -84,4 +90,14 @@ export const getTextElement = (
     rotation: 0,
     scale: 1,
   },
+  fontFamily: "Inter",
+  padding: {
+    bottom: 8,
+    left: 8,
+    right: 8,
+    top: 8,
+  },
+  horizontalAlignment: "center",
+  verticalAlignment: "center",
+  letterSpacing: 1,
 });

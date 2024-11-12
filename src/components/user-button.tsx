@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -17,6 +18,14 @@ import {
 
 export default function UserButton() {
   const { session, signOut } = useAuth();
+
+  if (!session) {
+    return (
+      <Button variant="secondary" asChild>
+        <Link href="/login">Sign In</Link>
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>

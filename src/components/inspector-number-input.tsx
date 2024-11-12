@@ -98,7 +98,6 @@ export function InspectorNumberInput({
       return;
     }
     const timeout = setTimeout(() => {
-      console.log("Settings Value");
       setText(String(value));
     }, 100);
 

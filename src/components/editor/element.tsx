@@ -1,13 +1,15 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 
-import { iElement, iElementTransform } from "@/lib/types/editor";
+import { iElement } from "@/lib/validator/element";
+import { iTransform } from "@/lib/validator/transform";
+import { useSnippetStore } from "@/providers/snippet-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import CodeEditorElement from "./elements/code-editor";
 import TextElement from "./elements/text-element";
 
 export default function Element({ element }: { element: iElement }) {
-  const updateElementTransform = useEditorStore(
+  const updateElementTransform = useSnippetStore(
     (state) => state.updateElementTransform,
   );
 
@@ -72,7 +74,7 @@ export default function Element({ element }: { element: iElement }) {
         const width = entry.contentRect.width;
         const height = entry.contentRect.height;
 
-        const data: Partial<iElementTransform> = {};
+        const data: Partial<iTransform> = {};
         if (element.transform.autoWidth) {
           data.width = width;
         }
@@ -119,8 +121,8 @@ export default function Element({ element }: { element: iElement }) {
         height: element.transform.autoHeight
           ? "fit-content"
           : element.transform.height,
-        minWidth: element.transform.minWidth,
-        minHeight: element.transform.minHeight,
+        minWidth: 20,
+        minHeight: 20,
         transform: `
           translate(${offset.x}px, ${offset.y}px) 
           rotate(${element.transform.rotation}deg) 

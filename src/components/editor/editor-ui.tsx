@@ -47,6 +47,7 @@ import {
 import UserButton from "@/components/user-button";
 import { cn } from "@/lib/utils";
 import { getCodeEditorElement, getTextElement } from "@/lib/utils/editor";
+import { useSnippetStore } from "@/providers/snippet-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import { InspectionPanelMemo } from "./inspection-panel";
@@ -88,9 +89,9 @@ export default function EditorUI() {
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="start">
                 <DropdownMenuItem
-                  onClick={() =>
-                    useEditorStore.setState(useEditorStore.getInitialState())
-                  }
+                  onClick={() => {
+                    useEditorStore.setState(useEditorStore.getInitialState());
+                  }}
                 >
                   <TrashIcon />
                   Reset to canvas
@@ -200,9 +201,9 @@ export default function EditorUI() {
 }
 
 function Toolbar() {
-  const addElement = useEditorStore((state) => state.addElement);
-  const canvasWidth = useEditorStore((state) => state.canvas.width);
-  const canvasHeight = useEditorStore((state) => state.canvas.height);
+  const addElement = useSnippetStore((state) => state.addElement);
+  const canvasWidth = useSnippetStore((state) => state.transform.width);
+  const canvasHeight = useSnippetStore((state) => state.transform.height);
 
   return (
     <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
@@ -259,8 +260,8 @@ function Toolbar() {
 }
 
 function LayersPanel() {
-  const setCanvas = useEditorStore((state) => state.setCanvas);
-  const elements = useEditorStore((state) => state.canvas.elements);
+  const updateSnippet = useSnippetStore((state) => state.updateSnippet);
+  const elements = useSnippetStore((state) => state.elements);
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
   const setSelectedElement = useEditorStore(
     (state) => state.setSelectedElement,
@@ -268,9 +269,9 @@ function LayersPanel() {
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
-  const duplicateElement = useEditorStore((state) => state.duplicateElement);
-  const removeElement = useEditorStore((state) => state.removeElement);
-  const updateElement = useEditorStore((state) => state.updateElement);
+  const duplicateElement = useSnippetStore((state) => state.duplicateElement);
+  const removeElement = useSnippetStore((state) => state.removeElement);
+  const updateElement = useSnippetStore((state) => state.updateElement);
 
   return (
     <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
@@ -283,7 +284,7 @@ function LayersPanel() {
           axis="y"
           values={elements}
           onReorder={(elements) => {
-            setCanvas({ elements });
+            updateSnippet({ elements: elements });
           }}
         >
           <div className="grid gap-px">
@@ -332,7 +333,7 @@ function LayersPanel() {
                       </ContextMenuItem>
                       <ContextMenuItem
                         onClick={() =>
-                          updateElement({ ...element, hidden: !element.hidden })
+                          updateElement(element.id, { hidden: !element.hidden })
                         }
                       >
                         {element.hidden ? <EyeIcon /> : <EyeClosedIcon />}
@@ -357,7 +358,7 @@ function LayersPanel() {
                         },
                       )}
                       onClick={() =>
-                        updateElement({ ...element, locked: !element.locked })
+                        updateElement(element.id, { locked: !element.locked })
                       }
                     >
                       {element.locked ? <LockIcon /> : <UnlockIcon />}
@@ -373,7 +374,7 @@ function LayersPanel() {
                         },
                       )}
                       onClick={() =>
-                        updateElement({ ...element, hidden: !element.hidden })
+                        updateElement(element.id, { hidden: !element.hidden })
                       }
                     >
                       {element.hidden ? <EyeClosedIcon /> : <EyeIcon />}

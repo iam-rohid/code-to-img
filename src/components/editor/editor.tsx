@@ -2,6 +2,7 @@
 
 import { useCallback, WheelEvent } from "react";
 
+import { SnippetProvider } from "@/providers/snippet-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import Canvas from "./canvas";
@@ -9,6 +10,14 @@ import EditorUI from "./editor-ui";
 import { IndecatorsMemo } from "./indecators";
 
 export default function Editor() {
+  return (
+    <SnippetProvider>
+      <Snippet />
+    </SnippetProvider>
+  );
+}
+
+const Snippet = () => {
   const setSelectedElement = useEditorStore(
     (state) => state.setSelectedElement,
   );
@@ -46,9 +55,9 @@ export default function Editor() {
           className="absolute left-1/2 top-1/2"
           style={{
             transform: `
-              translate(${viewPortOffset.x}px, ${viewPortOffset.y}px) 
-              scale(${zoom})
-            `,
+          translate(${viewPortOffset.x}px, ${viewPortOffset.y}px) 
+          scale(${zoom})
+        `,
           }}
         >
           <Canvas />
@@ -59,4 +68,4 @@ export default function Editor() {
       <EditorUI />
     </div>
   );
-}
+};

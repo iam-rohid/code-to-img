@@ -3,8 +3,8 @@ import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
 import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
 
-import { iElement } from "@/lib/types/editor";
-import { useEditorStore } from "@/store/editor-store";
+import { iCodeEditorElement } from "@/lib/validator/element";
+import { useSnippetStore } from "@/providers/snippet-provider";
 
 import Draggable from "./shared/draggable";
 
@@ -40,12 +40,12 @@ const themes: {
   },
 ];
 
-export default function CodeEditorElement({ element }: { element: iElement }) {
-  if (element.type !== "code-editor") {
-    throw new Error("Invalid type");
-  }
-
-  const updateElement = useEditorStore((state) => state.updateElement);
+export default function CodeEditorElement({
+  element,
+}: {
+  element: iCodeEditorElement;
+}) {
+  const updateElement = useSnippetStore((state) => state.updateElement);
   const theme = useMemo(
     () => themes.find((theme) => theme.id === element.theme),
     [element.theme],
@@ -125,7 +125,7 @@ export default function CodeEditorElement({ element }: { element: iElement }) {
           }
           extensions={extensions}
           onChange={(value) => {
-            updateElement({ ...element, code: value });
+            updateElement(element.id, { code: value });
           }}
           basicSetup={{
             lineNumbers: element.lineNumbers,
