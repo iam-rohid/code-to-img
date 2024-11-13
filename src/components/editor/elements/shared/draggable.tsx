@@ -8,7 +8,7 @@ import React, {
 
 import { cn } from "@/lib/utils";
 import { iElement } from "@/lib/validator/element";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 export default function Draggable({

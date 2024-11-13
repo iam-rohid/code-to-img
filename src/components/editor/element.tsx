@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { iElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import CodeEditorElement from "./elements/code-editor";
@@ -71,8 +71,8 @@ export default function Element({ element }: { element: iElement }) {
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const width = entry.contentRect.width;
-        const height = entry.contentRect.height;
+        const width = Math.round(entry.contentRect.width);
+        const height = Math.round(entry.contentRect.height);
 
         const data: Partial<iTransform> = {};
         if (element.transform.autoWidth) {

@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
 
-import { getCodeEditorElement } from "@/lib/utils/editor";
+import { getDefaultSnippetData } from "@/lib/utils/editor";
 import { iElement } from "@/lib/validator/element";
 import { iSnippetData } from "@/lib/validator/snippet";
 import { iTransform } from "@/lib/validator/transform";
@@ -28,35 +28,13 @@ export type SnipetActions = {
   alignElement: (elementId: string, alignment: Alignment) => void;
 };
 
-export const defaultSnippetState: iSnippetData = {
-  transform: {
-    width: 600,
-    height: 400,
-    widthHeightLinked: false,
-    position: {
-      x: 0,
-      y: 0,
-    },
-    rotation: 0,
-    scale: 1,
-  },
-  background: {
-    color: {
-      type: "gradient",
-      colors: ["#3B41C5FF", "#A981BBFF", "#CA62FAFF", "#FFC8A9FF"],
-      angle: 147,
-    },
-  },
-  elements: [getCodeEditorElement(600, 400)],
-};
-
 export type SnippetState = iSnippetData & SnipetActions;
 
 export type SnippetStore = ReturnType<typeof createSnippetStore>;
 
 export const createSnippetStore = (initProps?: Partial<iSnippetData>) => {
   return create<SnippetState>()((set, get) => ({
-    ...defaultSnippetState,
+    ...getDefaultSnippetData(),
     ...initProps,
     updateSnippet: (data) => {
       set({ ...data });

@@ -12,7 +12,7 @@ import {
 import { useWindowSize } from "@/hooks/use-window-size";
 import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 function getTransform(

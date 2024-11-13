@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useContext, useMemo } from "react";
 import { Reorder } from "framer-motion";
 import {
   AppWindowMacIcon,
@@ -46,8 +46,15 @@ import {
 } from "@/components/ui/tooltip";
 import UserButton from "@/components/user-button";
 import { cn } from "@/lib/utils";
-import { getCodeEditorElement, getTextElement } from "@/lib/utils/editor";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import {
+  getCodeEditorElement,
+  getDefaultSnippetData,
+  getTextElement,
+} from "@/lib/utils/editor";
+import {
+  SnippetStoreContext,
+  useSnippetStore,
+} from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import { InspectionPanelMemo } from "./inspection-panel";
@@ -59,6 +66,7 @@ export default function EditorUI() {
   const setZoom = useEditorStore((state) => state.setZoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
+  const snippetStore = useContext(SnippetStoreContext);
 
   const zoomPercentage = useMemo(() => Math.round(zoom * 100), [zoom]);
 
@@ -90,7 +98,7 @@ export default function EditorUI() {
               <DropdownMenuContent side="bottom" align="start">
                 <DropdownMenuItem
                   onClick={() => {
-                    useEditorStore.setState(useEditorStore.getInitialState());
+                    snippetStore?.setState(getDefaultSnippetData());
                   }}
                 >
                   <TrashIcon />

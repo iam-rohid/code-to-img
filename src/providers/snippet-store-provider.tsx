@@ -10,9 +10,9 @@ import {
   SnippetStore,
 } from "@/store/snippet-store";
 
-export const SnippetContext = createContext<SnippetStore | null>(null);
+export const SnippetStoreContext = createContext<SnippetStore | null>(null);
 
-export const SnippetProvider = ({
+export const SnippetStoreProvider = ({
   children,
   snippet,
 }: {
@@ -22,18 +22,24 @@ export const SnippetProvider = ({
   const storeRef = useRef<SnippetStore>();
 
   if (!storeRef.current) {
+    if (!snippet) {
+      const snippetString = localStorage.getItem("snippet-data");
+      if (snippetString) {
+        snippet = JSON.parse(snippetString);
+      }
+    }
     storeRef.current = createSnippetStore(snippet);
   }
 
   return (
-    <SnippetContext.Provider value={storeRef.current}>
+    <SnippetStoreContext.Provider value={storeRef.current}>
       {children}
-    </SnippetContext.Provider>
+    </SnippetStoreContext.Provider>
   );
 };
 
 export function useSnippetStore<T>(selector: (state: SnippetState) => T): T {
-  const store = useContext(SnippetContext);
+  const store = useContext(SnippetStoreContext);
   if (!store) throw new Error("Missing SnippetContext.Provider in the tree");
   return useStore(store, selector);
 }

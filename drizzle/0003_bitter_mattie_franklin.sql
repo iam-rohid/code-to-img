@@ -1,0 +1,1 @@
+ALTER TABLE "snippet" ALTER COLUMN "data" DROP DEFAULT;

@@ -1,11 +1,24 @@
-import EditorProvider from "@/providers/editor-provider";
+import { notFound } from "next/navigation";
 
-import ClientEditorPage from "./client-page";
+import Editor from "@/components/editor/editor";
+import { CloudEditorProvider } from "@/providers/editor-provider";
+import { trpc } from "@/trpc/server";
 
-export default function Page() {
-  return (
-    <EditorProvider>
-      <ClientEditorPage />
-    </EditorProvider>
-  );
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ snippetId: string }>;
+}) {
+  const { snippetId } = await params;
+  try {
+    await trpc.snippets.getSnippet.prefetch({ snippetId });
+    return (
+      <CloudEditorProvider snippetId={snippetId}>
+        <Editor />
+      </CloudEditorProvider>
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    notFound();
+  }
 }

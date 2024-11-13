@@ -1,30 +1,27 @@
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
 import { snippetTable } from "@/db/schema";
+import { snippetSchema } from "@/lib/validator/snippet";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
 
 import { getWorkspaceById } from "./workspaces";
 
-export const getSnippet = unstable_cache(
-  async (snippetId: string, userId: string) => {
-    const [snippet] = await db
-      .select()
-      .from(snippetTable)
-      .where(eq(snippetTable.id, snippetId));
-    if (!snippet) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Snippet not found!" });
-    }
+export const getSnippet = async (snippetId: string, userId: string) => {
+  const [snippet] = await db
+    .select()
+    .from(snippetTable)
+    .where(eq(snippetTable.id, snippetId));
+  if (!snippet) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "Snippet not found!" });
+  }
 
-    await getWorkspaceById(snippet.workspaceId, userId);
-    return snippet;
-  },
-  ["snippet"],
-);
+  await getWorkspaceById(snippet.workspaceId, userId);
+  return snippet;
+};
 
 export const snippetsRouter = router({
   getSnippet: protectedProcedure
@@ -72,5 +69,30 @@ export const snippetsRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
       return snippet;
+    }),
+  updateSnippet: protectedProcedure
+    .input(
+      z.object({
+        snippetId: z.string(),
+        dto: z.object({
+          title: z.string().optional(),
+          data: snippetSchema.optional(),
+        }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const [updatedSnippet] = await ctx.db
+        .update(snippetTable)
+        .set({
+          title: input.dto.title,
+          data: input.dto.data,
+        })
+        .where(eq(snippetTable.id, snippet.id))
+        .returning();
+      if (!updatedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return updatedSnippet;
     }),
 });

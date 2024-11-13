@@ -25,7 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { iTextElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 export default function InspectionPanel() {

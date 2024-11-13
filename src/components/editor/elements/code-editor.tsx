@@ -4,7 +4,7 @@ import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
 import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
 
 import { iCodeEditorElement } from "@/lib/validator/element";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 
 import Draggable from "./shared/draggable";
 

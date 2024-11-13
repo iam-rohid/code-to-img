@@ -1,7 +1,7 @@
 "use client";
 
 import { getBackgroundStyle } from "@/lib/utils/editor";
-import { useSnippetStore } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
 import { ElementMemo } from "./element";

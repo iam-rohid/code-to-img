@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { iColor } from "../validator/color";
 import { iCodeEditorElement, iTextElement } from "../validator/element";
 import { iPadding } from "../validator/padding";
+import { iSnippetData } from "../validator/snippet";
 
 export function getPaddingStyle(padding: iPadding): CSSProperties {
   return {
@@ -100,4 +101,26 @@ export const getTextElement = (
   horizontalAlignment: "center",
   verticalAlignment: "center",
   letterSpacing: 1,
+});
+
+export const getDefaultSnippetData = (): iSnippetData => ({
+  transform: {
+    width: 600,
+    height: 400,
+    widthHeightLinked: false,
+    position: {
+      x: 0,
+      y: 0,
+    },
+    rotation: 0,
+    scale: 1,
+  },
+  background: {
+    color: {
+      type: "gradient",
+      colors: ["#3B41C5FF", "#A981BBFF", "#CA62FAFF", "#FFC8A9FF"],
+      angle: 147,
+    },
+  },
+  elements: [getCodeEditorElement(600, 400)],
 });
