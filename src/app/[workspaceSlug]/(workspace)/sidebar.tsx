@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import UserButton from "@/components/user-button";
 import WorkspaceSwitcher from "@/components/workspace-switcher";
+import { APP_NAME } from "@/lib/constants";
 import { useWorkspace } from "@/providers/workspace-provider";
 
 export default function WorkspaceSidebar() {
@@ -47,7 +48,7 @@ export default function WorkspaceSidebar() {
           <div className="flex items-center px-2">
             <div className="flex-1">
               <Link href="/app" className="font-semibold">
-                Row Dash
+                {APP_NAME}
               </Link>
             </div>
             <UserButton />

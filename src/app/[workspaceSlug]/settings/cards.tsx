@@ -60,7 +60,7 @@ export function WorkspaceNameCard() {
       <CardHeader>
         <CardTitle>Workspace Name</CardTitle>
         <CardDescription>
-          This is the name of your workspace on Row Dash.
+          This is the name of your workspace on {APP_NAME}.
         </CardDescription>
       </CardHeader>
       <Form {...form}>

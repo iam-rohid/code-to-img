@@ -77,7 +77,7 @@ export default function CreateWorkspaceForm() {
               <FormLabel>Workspace Slug</FormLabel>
               <div className="flex">
                 <div className="flex h-10 items-center rounded-md rounded-r-none border border-r-0 bg-secondary px-3 text-sm text-muted-foreground">
-                  <p>rowdash.com/</p>
+                  <p>codetoimg.com/</p>
                 </div>
                 <FormControl>
                   <Input
