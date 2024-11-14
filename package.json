@@ -43,6 +43,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",

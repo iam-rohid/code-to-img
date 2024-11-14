@@ -83,6 +83,8 @@ export const getTextElement = (
   transform: {
     height,
     width,
+    autoHeight: true,
+    autoWidth: true,
     widthHeightLinked: false,
     position: {
       x: canvasWidth / 2 - width / 2,

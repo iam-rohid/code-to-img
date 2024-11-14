@@ -1,44 +1,12 @@
-import { CSSProperties, useMemo } from "react";
+import { useMemo } from "react";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
-import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
 import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
 
+import { codeEditorThemes } from "@/lib/constants/code-editor-themes";
 import { iCodeEditorElement } from "@/lib/validator/element";
 import { useSnippetStore } from "@/providers/snippet-store-provider";
 
 import Draggable from "./shared/draggable";
-
-const themes: {
-  id: string;
-  theme: Extension;
-  window?: {
-    background?: string;
-    backgroundImage?: string;
-    foreground?: string;
-    titleBarBackground?: string;
-    titleBarForeground?: string;
-    titleBarTraficLightColor1?: string;
-    titleBarTraficLightColor2?: string;
-    titleBarTraficLightColor3?: string;
-    style?: CSSProperties;
-    titleBarStyle?: CSSProperties;
-    codeMirrorContainerStyle?: CSSProperties;
-    codeMirrorStyle?: CSSProperties;
-  };
-}[] = [
-  {
-    id: "tokyo-night",
-    theme: tokyoNightInit(),
-    window: {
-      background: "#1A1B26",
-      foreground: "#BBC5EE",
-      titleBarBackground: "#1A1B26",
-      titleBarTraficLightColor1: "#444764",
-      titleBarTraficLightColor2: "#444764",
-      titleBarTraficLightColor3: "#444764",
-    },
-  },
-];
 
 export default function CodeEditorElement({
   element,
@@ -47,7 +15,7 @@ export default function CodeEditorElement({
 }) {
   const updateElement = useSnippetStore((state) => state.updateElement);
   const theme = useMemo(
-    () => themes.find((theme) => theme.id === element.theme),
+    () => codeEditorThemes.find((theme) => theme.id === element.theme),
     [element.theme],
   );
 

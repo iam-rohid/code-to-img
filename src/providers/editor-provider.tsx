@@ -3,13 +3,10 @@
 import {
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
-import { nanoid } from "nanoid";
-import { toast } from "sonner";
 
 import { getDefaultSnippetData } from "@/lib/utils/editor";
 import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
@@ -18,6 +15,8 @@ import { trpc } from "@/trpc/client";
 import { useWorkspace } from "./workspace-provider";
 
 export interface EditorContext {
+  isSaving: boolean;
+  isDurty: boolean;
   snippetData: iSnippetData;
   updateSnippetData: (snippet: iSnippetData) => void;
 }
@@ -34,39 +33,16 @@ export function CloudEditorProvider({
   snippetId,
 }: CloudEditorProviderProps) {
   const { workspace } = useWorkspace();
+  const [newData, setNewData] = useState<iSnippetData | null>(null);
   const snippetQuery = trpc.snippets.getSnippet.useQuery({ snippetId });
+  const { mutate, isPending } = trpc.snippets.updateSnippet.useMutation();
 
-  const updateSnippetMut = trpc.snippets.updateSnippet.useMutation({
-    onMutate: () => {
-      const tid = nanoid();
-      toast.loading("Saving...", { id: tid });
-      return {
-        tid,
-      };
-    },
-    onSuccess(_, _vars, ctx) {
-      toast.dismiss(ctx.tid);
-      toast.success("Saved");
-    },
-    onError(error, _vars, ctx) {
-      if (ctx?.tid) {
-        toast.dismiss(ctx.tid);
-      }
-      toast.error("Failed to save", {
-        description: error.message,
-      });
-    },
-  });
-
-  const updateSnippetData = useCallback(
-    (data: iSnippetData) => {
-      updateSnippetMut.mutate({
-        snippetId: snippetId,
-        dto: { data },
-      });
-    },
-    [snippetId, updateSnippetMut],
-  );
+  useEffect(() => {
+    if (!isPending && newData) {
+      mutate({ snippetId, dto: { data: newData } });
+      setNewData(null);
+    }
+  }, [isPending, mutate, newData, snippetId]);
 
   if (snippetQuery.isPending) {
     return <p>Loading...</p>;
@@ -82,7 +58,12 @@ export function CloudEditorProvider({
 
   return (
     <Context.Provider
-      value={{ snippetData: snippetQuery.data.data, updateSnippetData }}
+      value={{
+        snippetData: snippetQuery.data.data,
+        updateSnippetData: setNewData,
+        isDurty: !!newData,
+        isSaving: isPending,
+      }}
     >
       {children}
     </Context.Provider>
@@ -95,11 +76,14 @@ export interface LocalEditorProviderProps {
 
 export function LocalEditorProvider({ children }: LocalEditorProviderProps) {
   const [snippetData, setSnippetData] = useState<iSnippetData | null>(null);
+  const [newData, setNewData] = useState<iSnippetData | null>(null);
 
-  const updateSnippetData = useCallback((data: iSnippetData) => {
-    localStorage.setItem("snippet-data", JSON.stringify(data));
-    toast.success("Saved");
-  }, []);
+  useEffect(() => {
+    if (newData) {
+      localStorage.setItem("snippet-data", JSON.stringify(newData));
+      setNewData(null);
+    }
+  }, [newData]);
 
   useEffect(() => {
     const json = localStorage.getItem("snippet-data");
@@ -123,7 +107,14 @@ export function LocalEditorProvider({ children }: LocalEditorProviderProps) {
   }
 
   return (
-    <Context.Provider value={{ snippetData, updateSnippetData }}>
+    <Context.Provider
+      value={{
+        snippetData,
+        updateSnippetData: setNewData,
+        isDurty: !!newData,
+        isSaving: false,
+      }}
+    >
       {children}
     </Context.Provider>
   );

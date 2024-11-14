@@ -63,7 +63,12 @@ const Snippet = () => {
         }, 500);
       }
     });
-    return unsub;
+    return () => {
+      unsub();
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
   }, [snippetStore, updateSnippetData]);
 
   return (

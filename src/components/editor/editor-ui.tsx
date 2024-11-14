@@ -51,6 +51,7 @@ import {
   getDefaultSnippetData,
   getTextElement,
 } from "@/lib/utils/editor";
+import { useEditor } from "@/providers/editor-provider";
 import {
   SnippetStoreContext,
   useSnippetStore,
@@ -67,6 +68,7 @@ export default function EditorUI() {
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
   const snippetStore = useContext(SnippetStoreContext);
+  const { isDurty, isSaving } = useEditor();
 
   const zoomPercentage = useMemo(() => Math.round(zoom * 100), [zoom]);
 
@@ -197,6 +199,11 @@ export default function EditorUI() {
           </div>
         )}
         <div className="flex flex-1 items-center justify-end gap-2">
+          {isSaving ? (
+            <p className="text-sm text-muted-foreground">Saving...</p>
+          ) : isDurty ? (
+            <p className="text-sm text-muted-foreground">Unsaved changes</p>
+          ) : null}
           <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
             <Button size="icon" variant="ghost">
               <InfoIcon />
