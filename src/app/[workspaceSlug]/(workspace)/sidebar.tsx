@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { LayoutGridIcon, SettingsIcon } from "lucide-react";
+import { HomeIcon, ImagesIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -29,7 +29,13 @@ export default function WorkspaceSidebar() {
       {
         title: "Snippets",
         url: `/${workspace.slug}`,
-        icon: LayoutGridIcon,
+        icon: HomeIcon,
+        exact: true,
+      },
+      {
+        title: "Templates",
+        url: `/${workspace.slug}/templates`,
+        icon: ImagesIcon,
         exact: true,
       },
       {

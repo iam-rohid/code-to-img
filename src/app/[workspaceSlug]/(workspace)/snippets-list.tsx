@@ -50,7 +50,7 @@ export default function SnippetsList() {
       {
         onSuccess: (snippet) => {
           toast("Snippet created");
-          router.push(`/${workspace.slug}/editor/${snippet.id}`);
+          router.push(`/editor?snippetId=${encodeURIComponent(snippet.id)}`);
           utils.snippets.getSnippets.invalidate({ workspaceId: workspace.id });
         },
         onError: (error) => {
@@ -58,13 +58,7 @@ export default function SnippetsList() {
         },
       },
     );
-  }, [
-    createSnippetMut,
-    router,
-    utils.snippets.getSnippets,
-    workspace.id,
-    workspace.slug,
-  ]);
+  }, [createSnippetMut, router, utils.snippets.getSnippets, workspace.id]);
 
   return (
     <div className="mx-auto my-16 w-full max-w-screen-xl space-y-8 px-4">
@@ -103,15 +97,20 @@ export default function SnippetsList() {
         ) : snippetsQuery.data.length < 1 ? (
           <p>No snippets found</p>
         ) : (
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {snippetsQuery.data.map((snippet) => (
               <div
                 key={snippet.id}
-                className="group relative overflow-hidden rounded-lg border"
+                className="group relative rounded-lg border transition-shadow hover:shadow-lg"
               >
+                <Link
+                  href={`/editor?snippetId=${encodeURIComponent(snippet.id)}`}
+                  className="absolute inset-0 z-10 rounded-lg ring-offset-background transition-colors focus:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                ></Link>
+
                 <SnippetViewer
                   data={snippet.data}
-                  className="aspect-video bg-secondary"
+                  className="aspect-[3/2] overflow-hidden rounded-t-lg bg-secondary"
                 />
 
                 <div className="flex items-center gap-2 py-2 pl-4 pr-2">
@@ -152,11 +151,6 @@ export default function SnippetsList() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-
-                <Link
-                  href={`/${workspace.slug}/editor/${snippet.id}`}
-                  className="absolute inset-0 z-0"
-                ></Link>
               </div>
             ))}
           </div>

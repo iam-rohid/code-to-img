@@ -8,11 +8,10 @@ import {
   useState,
 } from "react";
 
+import { Snippet } from "@/db/schema";
 import { getDefaultSnippetData } from "@/lib/utils/editor";
 import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
 import { trpc } from "@/trpc/client";
-
-import { useWorkspace } from "./workspace-provider";
 
 export interface EditorContext {
   isSaving: boolean;
@@ -25,41 +24,27 @@ const Context = createContext<EditorContext | null>(null);
 
 export interface CloudEditorProviderProps {
   children: ReactNode;
-  snippetId: string;
+  snippet: Snippet;
 }
 
 export function CloudEditorProvider({
   children,
-  snippetId,
+  snippet,
 }: CloudEditorProviderProps) {
-  const { workspace } = useWorkspace();
   const [newData, setNewData] = useState<iSnippetData | null>(null);
-  const snippetQuery = trpc.snippets.getSnippet.useQuery({ snippetId });
   const { mutate, isPending } = trpc.snippets.updateSnippet.useMutation();
 
   useEffect(() => {
     if (!isPending && newData) {
-      mutate({ snippetId, dto: { data: newData } });
+      mutate({ snippetId: snippet.id, dto: { data: newData } });
       setNewData(null);
     }
-  }, [isPending, mutate, newData, snippetId]);
-
-  if (snippetQuery.isPending) {
-    return <p>Loading...</p>;
-  }
-
-  if (snippetQuery.isError) {
-    return <p>{snippetQuery.error.message}</p>;
-  }
-
-  if (workspace.id !== snippetQuery.data.workspaceId) {
-    return <p>Not Found!</p>;
-  }
+  }, [isPending, mutate, newData, snippet.id]);
 
   return (
     <Context.Provider
       value={{
-        snippetData: snippetQuery.data.data,
+        snippetData: snippet.data,
         updateSnippetData: setNewData,
         isDurty: !!newData,
         isSaving: isPending,

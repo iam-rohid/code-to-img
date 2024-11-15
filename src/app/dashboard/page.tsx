@@ -15,13 +15,7 @@ export default async function Page() {
   const workspaceSlug = await getWorkspaceSlugFromCookie();
 
   if (workspaceSlug) {
-    const orgs = await db
-      .select({ orgId: workspaceTable.id })
-      .from(workspaceTable)
-      .where(eq(workspaceTable.slug, workspaceSlug));
-    if (orgs.length > 0) {
-      redirect(`/${workspaceSlug}`, RedirectType.replace);
-    }
+    redirect(`/${workspaceSlug}`, RedirectType.replace);
   }
 
   const workspaces = await db

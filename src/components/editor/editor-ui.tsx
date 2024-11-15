@@ -11,7 +11,9 @@ import {
   ImageIcon,
   InfoIcon,
   LayersIcon,
+  LayoutGridIcon,
   LockIcon,
+  LogInIcon,
   MenuIcon,
   MinusIcon,
   PlusIcon,
@@ -24,6 +26,7 @@ import {
   UndoIcon,
   UnlockIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +39,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
@@ -51,6 +55,7 @@ import {
   getDefaultSnippetData,
   getTextElement,
 } from "@/lib/utils/editor";
+import { useAuth } from "@/providers/auth-provider";
 import { useEditor } from "@/providers/editor-provider";
 import {
   SnippetStoreContext,
@@ -61,6 +66,7 @@ import { useEditorStore } from "@/store/editor-store";
 import { InspectionPanelMemo } from "./inspection-panel";
 
 export default function EditorUI() {
+  const { session } = useAuth();
   const layersOpen = useEditorStore((state) => state.layersOpen);
   const setLayersOpen = useEditorStore((state) => state.setLayersOpen);
   const zoom = useEditorStore((state) => state.zoom);
@@ -98,13 +104,29 @@ export default function EditorUI() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="start">
+                {session ? (
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                      <LayoutGridIcon />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link href="/login">
+                      <LogInIcon />
+                      Log In
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
                     snippetStore?.setState(getDefaultSnippetData());
                   }}
                 >
                   <TrashIcon />
-                  Reset to canvas
+                  Reset the canvas
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

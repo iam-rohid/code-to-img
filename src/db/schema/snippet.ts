@@ -1,4 +1,4 @@
-import { jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { getDefaultSnippetData } from "@/lib/utils/editor";
 import { iSnippetData } from "@/lib/validator/snippet";
@@ -17,6 +17,10 @@ export const snippetTable = pgTable("snippet", {
     .notNull()
     .$type<iSnippetData>()
     .$defaultFn(() => getDefaultSnippetData()),
+  lastSeenAt: timestamp("last_seen_at", {
+    withTimezone: true,
+    mode: "date",
+  }),
 });
 
 export type Snippet = typeof snippetTable.$inferSelect;
