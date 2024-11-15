@@ -1,42 +1,28 @@
 "use client";
 
 import { useCallback } from "react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import {
   ChevronDownIcon,
-  CopyIcon,
-  EditIcon,
   FilterIcon,
   Loader2,
-  MoreVertical,
   Plus,
   SearchIcon,
-  ShareIcon,
-  TrashIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import SnippetViewer from "@/components/snippet-viewer";
+import { SnippetCard } from "@/components/snippet-card";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
-dayjs.extend(relativeTime);
 
 export default function SnippetsList() {
   const { workspace } = useWorkspace();
   const snippetsQuery = trpc.snippets.getSnippets.useQuery({
     workspaceId: workspace.id,
+    trashed: false,
   });
 
   const router = useRouter();
@@ -91,7 +77,11 @@ export default function SnippetsList() {
 
       <div>
         {snippetsQuery.isPending ? (
-          <p>Loading...</p>
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-[3/2.5] rounded-lg" />
+            ))}
+          </div>
         ) : snippetsQuery.isError ? (
           <p>{snippetsQuery.error.message}</p>
         ) : snippetsQuery.data.length < 1 ? (
@@ -99,59 +89,7 @@ export default function SnippetsList() {
         ) : (
           <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {snippetsQuery.data.map((snippet) => (
-              <div
-                key={snippet.id}
-                className="group relative rounded-lg border transition-shadow hover:shadow-lg"
-              >
-                <Link
-                  href={`/editor?snippetId=${encodeURIComponent(snippet.id)}`}
-                  className="absolute inset-0 z-10 rounded-lg ring-offset-background transition-colors focus:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                ></Link>
-
-                <SnippetViewer
-                  data={snippet.data}
-                  className="aspect-[3/2] overflow-hidden rounded-t-lg bg-secondary"
-                />
-
-                <div className="flex items-center gap-2 py-2 pl-4 pr-2">
-                  <div className="flex-1 overflow-hidden">
-                    <p className="truncate font-semibold">{snippet.title}</p>
-                    <p className="truncate text-sm text-muted-foreground">
-                      {dayjs(snippet.createdAt).fromNow()}
-                    </p>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="z-10 h-8 w-8 group-hover:border"
-                      >
-                        <MoreVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem>
-                        <ShareIcon />
-                        Share
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <CopyIcon />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <EditIcon />
-                        Rename
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <TrashIcon />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
+              <SnippetCard snippet={snippet} key={snippet.id} />
             ))}
           </div>
         )}

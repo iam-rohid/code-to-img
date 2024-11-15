@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
@@ -30,7 +30,12 @@ export const snippetsRouter = router({
       return getSnippet(input.snippetId, ctx.session.user.id);
     }),
   getSnippets: protectedProcedure
-    .input(z.object({ workspaceId: z.string() }))
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        trashed: z.boolean().default(false),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const { workspace } = await getWorkspaceById(
         input.workspaceId,
@@ -40,7 +45,14 @@ export const snippetsRouter = router({
       const snippets = await db
         .select()
         .from(snippetTable)
-        .where(eq(snippetTable.workspaceId, workspace.id))
+        .where(
+          and(
+            eq(snippetTable.workspaceId, workspace.id),
+            ...(input.trashed
+              ? [isNotNull(snippetTable.trashedAt)]
+              : [isNull(snippetTable.trashedAt)]),
+          ),
+        )
         .orderBy(desc(snippetTable.createdAt));
       return snippets;
     }),
@@ -94,5 +106,67 @@ export const snippetsRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
       return updatedSnippet;
+    }),
+  duplicateSnippet: protectedProcedure
+    .input(z.object({ snippetId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const [duplicatedSnippet] = await ctx.db
+        .insert(snippetTable)
+        .values({
+          title: `${snippet.title} (Copy)`,
+          workspaceId: snippet.workspaceId,
+          data: snippet.data,
+        })
+        .returning();
+      if (!duplicatedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return duplicatedSnippet;
+    }),
+  moveToTrash: protectedProcedure
+    .input(z.object({ snippetId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const [updateedSnippet] = await ctx.db
+        .update(snippetTable)
+        .set({ trashedAt: new Date() })
+        .where(eq(snippetTable.id, snippet.id))
+        .returning();
+      if (!updateedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return updateedSnippet;
+    }),
+  restoreFromTrash: protectedProcedure
+    .input(z.object({ snippetId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const [updateedSnippet] = await ctx.db
+        .update(snippetTable)
+        .set({ trashedAt: null })
+        .where(eq(snippetTable.id, snippet.id))
+        .returning();
+      if (!updateedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return updateedSnippet;
+    }),
+  deleteSnippet: protectedProcedure
+    .input(
+      z.object({
+        snippetId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const [deletedSnippet] = await ctx.db
+        .delete(snippetTable)
+        .where(eq(snippetTable.id, snippet.id))
+        .returning();
+      if (!deletedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return deletedSnippet;
     }),
 });

@@ -21,6 +21,7 @@ export const snippetTable = pgTable("snippet", {
     withTimezone: true,
     mode: "date",
   }),
+  trashedAt: timestamp("trashed_at", { withTimezone: true, mode: "date" }),
 });
 
 export type Snippet = typeof snippetTable.$inferSelect;
