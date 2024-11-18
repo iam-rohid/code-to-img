@@ -33,7 +33,7 @@ export default function CodeEditorElement({
 
   return (
     <div
-      className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-200 shadow-xl"
+      className="flex h-full w-full flex-col overflow-hidden"
       style={{
         background: theme?.window?.background,
         backgroundImage: theme?.window?.backgroundImage,
@@ -50,21 +50,21 @@ export default function CodeEditorElement({
         className="flex-shrink-0 overflow-hidden"
       >
         <Draggable element={element}>
-          <div className="flex h-full items-center gap-2 py-4 pl-4">
+          <div className="flex h-full items-center gap-2 py-[15px] pl-[14px]">
             <div
-              className="h-3.5 w-3.5 flex-shrink-0 rounded-full bg-[#FEBC2E]"
+              className="h-[12px] w-[12px] flex-shrink-0 rounded-full bg-[#FEBC2E]"
               style={{
                 backgroundColor: theme?.window?.titleBarTraficLightColor1,
               }}
             ></div>
             <div
-              className="h-3.5 w-3.5 flex-shrink-0 rounded-full bg-[#FF5F57]"
+              className="h-[12px] w-[12px] flex-shrink-0 rounded-full bg-[#FF5F57]"
               style={{
                 backgroundColor: theme?.window?.titleBarTraficLightColor2,
               }}
             ></div>
             <div
-              className="h-3.5 w-3.5 flex-shrink-0 rounded-full bg-[#28C840]"
+              className="h-[12px] w-[12px] flex-shrink-0 rounded-full bg-[#28C840]"
               style={{
                 backgroundColor: theme?.window?.titleBarTraficLightColor3,
               }}

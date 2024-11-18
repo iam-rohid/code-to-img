@@ -15,7 +15,6 @@ import {
 
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -23,108 +22,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { iTextElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
 import { useSnippetStore } from "@/providers/snippet-store-provider";
-import { useEditorStore } from "@/store/editor-store";
 
-export default function InspectionPanel() {
-  const selectedElementId = useEditorStore((state) => state.selectedElementId);
-
-  if (selectedElementId === "canvas") {
-    return <CanvasInspector />;
-  }
-
-  if (selectedElementId) {
-    return <ElementInspectorMemo elementId={selectedElementId} />;
-  }
-
-  return null;
-}
-
-function CanvasInspector() {
-  return (
-    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
-      <div className="p-2">
-        <p className="text-sm font-medium text-muted-foreground">Canvas</p>
-      </div>
-      <Separator />
-      <CanvasTransform />
-    </div>
-  );
-}
-
-export const InspectionPanelMemo = memo(InspectionPanel);
-
-function CanvasTransform() {
-  const canvasWidth = useSnippetStore((state) => state.transform.width);
-  const canvasHeight = useSnippetStore((state) => state.transform.height);
-  const canvasWidthHeightLinked = useSnippetStore(
-    (state) => state.transform.widthHeightLinked,
-  );
-  const setCanvasTransform = useSnippetStore(
-    (state) => state.updateSnippetTransform,
-  );
-
-  return (
-    <div className="p-2">
-      <p className="mb-2 text-xs text-muted-foreground">Transform</p>
-      <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
-        <InspectorNumberInput
-          value={canvasWidth}
-          min={200}
-          icon={<span>W</span>}
-          onValueChange={(value) => {
-            const width = value;
-            let height = canvasHeight;
-            if (canvasWidthHeightLinked) {
-              height = (canvasHeight * width) / canvasWidth;
-            }
-            setCanvasTransform({
-              width,
-              height,
-            });
-          }}
-        />
-        <div></div>
-        {/* <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-6 w-6"
-            onClick={() =>
-              setCanvas({
-                widthHeightLinked: !canvasWidthHeightLinked,
-              })
-            }
-          >
-            {canvasWidthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Maintain aspect ratio</TooltipContent>
-      </Tooltip> */}
-        <InspectorNumberInput
-          value={canvasHeight}
-          min={200}
-          icon={<span>H</span>}
-          onValueChange={(value) => {
-            const height = value;
-            let width = canvasWidth;
-            if (canvasWidthHeightLinked) {
-              width = (canvasWidth * height) / canvasHeight;
-            }
-            setCanvasTransform({
-              height,
-              width,
-            });
-          }}
-        />
-        <div></div>
-      </div>
-    </div>
-  );
-}
+import { TextElementOptions } from "./text-element-options";
 
 function ElementInspector({ elementId }: { elementId: string }) {
   const element = useSnippetStore((state) =>
@@ -151,7 +52,7 @@ function ElementInspector({ elementId }: { elementId: string }) {
   );
 }
 
-const ElementInspectorMemo = memo(ElementInspector);
+export const ElementInspectorMemo = memo(ElementInspector);
 
 function ElementAlignment({ elementId }: { elementId: string }) {
   const alignElement = useSnippetStore((state) => state.alignElement);
@@ -432,112 +333,5 @@ function ElementActions({ elementId }: { elementId: string }) {
         </Tooltip>
       </div>
     </div>
-  );
-}
-
-function TextElementOptions({ element }: { element: iTextElement }) {
-  const updateElement = useSnippetStore((state) => state.updateElement);
-
-  if (element?.type !== "text") {
-    return null;
-  }
-
-  return (
-    <>
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Value</p>
-        <Input
-          value={element.text}
-          onChange={(e) => {
-            updateElement(element.id, {
-              text: e.currentTarget.value,
-            });
-          }}
-        />
-      </div>
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Font Size</p>
-        <InspectorNumberInput
-          icon={<>FS</>}
-          value={element.fontSize ?? 16}
-          onValueChange={(fontSize) => {
-            updateElement(element.id, {
-              fontSize,
-            });
-          }}
-        />
-      </div>
-
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Text Color</p>
-        <Input
-          value={element.foregrounnd}
-          onChange={(e) => {
-            updateElement(element.id, {
-              foregrounnd: e.currentTarget.value,
-            });
-          }}
-        />
-      </div>
-      {/* <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Background Color</p>
-        <Input
-          value={element.background ?? ""}
-          onChange={(e) => {
-            updateElement({
-              ...element,
-              backgroundColor: e.currentTarget.value,
-            });
-          }}
-        />
-      </div> */}
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Font Weight</p>
-        <Input
-          value={element.fontWeight ?? ""}
-          onChange={(e) => {
-            updateElement(element.id, {
-              fontWeight: e.currentTarget.value,
-            });
-          }}
-        />
-      </div>
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Font Family</p>
-        <Input
-          value={element.fontFamily ?? ""}
-          onChange={(e) => {
-            updateElement(element.id, {
-              fontFamily: e.currentTarget.value,
-            });
-          }}
-        />
-      </div>
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Letter Spacing</p>
-        <InspectorNumberInput
-          icon={<>L</>}
-          value={element.letterSpacing ?? 1}
-          onValueChange={(letterSpacing) => {
-            updateElement(element.id, {
-              letterSpacing,
-            });
-          }}
-        />
-      </div>
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Line Height</p>
-        <InspectorNumberInput
-          icon={<>L</>}
-          min={0}
-          value={element.lineHeight ?? 1}
-          onValueChange={(lineHeight) => {
-            updateElement(element.id, {
-              lineHeight,
-            });
-          }}
-        />
-      </div>
-    </>
   );
 }

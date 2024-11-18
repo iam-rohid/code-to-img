@@ -1,32 +1,33 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
+import { cache } from "react";
+import { and, asc, eq } from "drizzle-orm";
 
-import { getCurrentSession } from "@/auth/utils";
+import { getCurrentSession, SessionValidationResult } from "@/auth/utils";
 import { db } from "@/db";
-import {
-  snippetTable,
-  workspaceMemberTable,
-  workspaceTable,
-} from "@/db/schema";
+import { workspaceMemberTable, workspaceTable } from "@/db/schema";
 
-export const getWorkspaceBySlug = unstable_cache(
-  async (workspaceSlug: string) => {
-    const session = await getCurrentSession();
-    if (!session) {
-      return null;
+import { getWorkspaceSlugFromCookie } from "./actions";
+
+export const hasAccessToWorkspaceSlug = cache(
+  async (workspaceSlug: string, session?: SessionValidationResult | null) => {
+    if (session === undefined) {
+      session = await getCurrentSession();
+    }
+
+    if (session === null) {
+      return false;
     }
 
     const [workspace] = await db
-      .select()
+      .select({ id: workspaceTable.id })
       .from(workspaceTable)
       .where(eq(workspaceTable.slug, workspaceSlug));
     if (!workspace) {
-      return null;
+      return false;
     }
 
-    const [workspaceMember] = await db
+    const workspaceMembers = await db
       .select()
       .from(workspaceMemberTable)
       .where(
@@ -35,23 +36,36 @@ export const getWorkspaceBySlug = unstable_cache(
           eq(workspaceMemberTable.workspaceId, workspace.id),
         ),
       );
-    if (!workspaceMember) {
+
+    return workspaceMembers.length > 0;
+  },
+);
+
+export const getFirstWorkspaceSlug = cache(
+  async (session?: SessionValidationResult | null): Promise<string | null> => {
+    if (session === undefined) {
+      session = await getCurrentSession();
+    }
+
+    if (session === null) {
       return null;
     }
 
-    return { workspace, workspaceMember };
+    const workspaceSlug = await getWorkspaceSlugFromCookie();
+    if (workspaceSlug) {
+      return workspaceSlug;
+    }
+
+    const [workspace] = await db
+      .select({ slug: workspaceTable.slug })
+      .from(workspaceMemberTable)
+      .innerJoin(
+        workspaceTable,
+        eq(workspaceTable.id, workspaceMemberTable.workspaceId),
+      )
+      .where(eq(workspaceMemberTable.userId, session.user.id))
+      .orderBy(asc(workspaceMemberTable.createdAt))
+      .limit(1);
+    return workspace?.slug ?? null;
   },
-  ["workspace"],
 );
-
-export const getSnippets = unstable_cache(async (workspaceSlug: string) => {
-  const workspace = await getWorkspaceBySlug(workspaceSlug);
-  if (!workspace) {
-    return [];
-  }
-
-  return db
-    .select()
-    .from(snippetTable)
-    .where(eq(snippetTable.workspaceId, workspace.workspace.id));
-});

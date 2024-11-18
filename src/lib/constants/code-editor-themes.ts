@@ -4,6 +4,7 @@ import { Extension } from "@uiw/react-codemirror";
 
 export const codeEditorThemes: {
   id: string;
+  name: string;
   theme: Extension;
   window?: {
     background?: string;
@@ -21,15 +22,29 @@ export const codeEditorThemes: {
   };
 }[] = [
   {
-    id: "tokyo-night",
-    theme: tokyoNightInit(),
+    id: "theme-1",
+    name: "Theme 1",
+    theme: tokyoNightInit({
+      settings: {
+        background: "transparent",
+        gutterBackground: "transparent",
+      },
+    }),
     window: {
       background: "#1A1B26",
       foreground: "#BBC5EE",
       titleBarBackground: "#1A1B26",
-      titleBarTraficLightColor1: "#444764",
-      titleBarTraficLightColor2: "#444764",
-      titleBarTraficLightColor3: "#444764",
+      style: {
+        border: "1px solid rgba(255,255,255,0.3)",
+        boxShadow: "0 0 0 0.5px rgba(0,0,0,0.8)",
+        borderRadius: 10,
+      },
+      titleBarStyle: {
+        backgroundColor: "transparent",
+      },
+      codeMirrorContainerStyle: {
+        backgroundColor: "transparent",
+      },
     },
   },
 ];

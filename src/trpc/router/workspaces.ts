@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
@@ -12,30 +11,28 @@ import { createWorkspaceDto, updateWorkspaceDto } from "@/validators";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
 
-export const getWorkspaceById = unstable_cache(
-  async (workspaceId: string, userId: string) => {
-    const [row] = await db
-      .select()
-      .from(workspaceMemberTable)
-      .innerJoin(
-        workspaceTable,
-        eq(workspaceTable.id, workspaceMemberTable.workspaceId),
-      )
-      .where(
-        and(
-          eq(workspaceMemberTable.workspaceId, workspaceId),
-          eq(workspaceMemberTable.userId, userId),
-        ),
-      );
-    if (!row) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Workspace not found!",
-      });
-    }
-    return { workspace: row.workspace, member: row.workspace_member };
-  },
-);
+export const getWorkspaceById = async (workspaceId: string, userId: string) => {
+  const [row] = await db
+    .select()
+    .from(workspaceMemberTable)
+    .innerJoin(
+      workspaceTable,
+      eq(workspaceTable.id, workspaceMemberTable.workspaceId),
+    )
+    .where(
+      and(
+        eq(workspaceMemberTable.workspaceId, workspaceId),
+        eq(workspaceMemberTable.userId, userId),
+      ),
+    );
+  if (!row) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Workspace not found!",
+    });
+  }
+  return { workspace: row.workspace, member: row.workspace_member };
+};
 
 export const workspacesRouter = router({
   getWorkspaceBySlug: protectedProcedure
@@ -45,6 +42,7 @@ export const workspacesRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
+      console.log("getWorkspaceBySlug", input);
       const [workspace] = await ctx.db
         .select()
         .from(workspaceTable)

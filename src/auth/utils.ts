@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { sha256 } from "@oslojs/crypto/sha2";
 import {
   encodeBase32LowerCaseNoPadding,
@@ -24,7 +25,7 @@ export function generateSessionToken(): string {
 
 export async function createSession(
   token: string,
-  userId: string
+  userId: string,
 ): Promise<Session> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   const value: typeof sessionTable.$inferInsert = {
@@ -40,18 +41,19 @@ export async function createSession(
 }
 
 export async function validateSessionToken(
-  token: string
+  token: string,
 ): Promise<SessionValidationResult | null> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-  const result = await db
+  const [result] = await db
     .select({ user: userTable, session: sessionTable })
     .from(sessionTable)
     .innerJoin(userTable, eq(sessionTable.userId, userTable.id))
-    .where(eq(sessionTable.token, sessionId));
-  if (result.length < 1) {
+    .where(eq(sessionTable.token, sessionId))
+    .limit(1);
+  if (!result) {
     return null;
   }
-  const { user, session } = result[0]!;
+  const { user, session } = result;
   if (Date.now() >= session.expiresAt.getTime()) {
     await db.delete(sessionTable).where(eq(sessionTable.token, session.token));
     return null;
@@ -74,7 +76,7 @@ export async function invalidateSession(token: string): Promise<void> {
 
 export async function getUserAccount(
   provider: string,
-  providerAccountId: string
+  providerAccountId: string,
 ) {
   const [account] = await db
     .select()
@@ -82,8 +84,8 @@ export async function getUserAccount(
     .where(
       and(
         eq(accountTable.provider, provider),
-        eq(accountTable.providerAccountId, providerAccountId)
-      )
+        eq(accountTable.providerAccountId, providerAccountId),
+      ),
     );
   return account ?? null;
 }
@@ -164,19 +166,20 @@ export async function createUserAndAccount({
 
 export type SessionValidationResult = { session: Session; user: User };
 
-export async function getCurrentSession(): Promise<SessionValidationResult | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  if (!token) {
-    return null;
-  }
-  const result = await validateSessionToken(token);
-  return result;
-}
+export const getCurrentSession = cache(
+  async (): Promise<SessionValidationResult | null> => {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("session")?.value;
+    if (!token) {
+      return null;
+    }
+    return validateSessionToken(token);
+  },
+);
 
 export async function setSessionTokenCookie(
   token: string,
-  expiresAt: Date
+  expiresAt: Date,
 ): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set("session", token, {
