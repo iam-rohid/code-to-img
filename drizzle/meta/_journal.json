@@ -43,6 +43,13 @@
       "when": 1731645051239,
       "tag": "0005_amazing_vin_gonzales",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1731912013188,
+      "tag": "0006_careful_star_brand",
+      "breakpoints": true
     }
   ]
 }

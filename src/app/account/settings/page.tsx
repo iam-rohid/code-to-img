@@ -1,12 +1,5 @@
-import AppBar from "@/components/app-bar";
+import PageClient from "./page-client";
 
 export default function Page() {
-  return (
-    <>
-      <AppBar
-        links={[{ title: "Account", url: "/account/settings" }]}
-        title="General"
-      />
-    </>
-  );
+  return <PageClient />;
 }

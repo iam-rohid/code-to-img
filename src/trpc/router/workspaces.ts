@@ -42,7 +42,6 @@ export const workspacesRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      console.log("getWorkspaceBySlug", input);
       const [workspace] = await ctx.db
         .select()
         .from(workspaceTable)

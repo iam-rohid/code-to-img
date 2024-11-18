@@ -1,11 +1,13 @@
 import { createContext } from "../context";
 import { createCallerFactory, router } from "../trpc";
 
+import { authRouter } from "./auth";
 import { snippetsRouter } from "./snippets";
 import { usersRouter } from "./users";
 import { workspacesRouter } from "./workspaces";
 
 export const appRouter = router({
+  auth: authRouter,
   users: usersRouter,
   workspaces: workspacesRouter,
   snippets: snippetsRouter,

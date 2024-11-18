@@ -1,5 +1,5 @@
-import TrashList from "./trash-list";
+import PageClient from "./page-client";
 
 export default function TrashPage() {
-  return <TrashList />;
+  return <PageClient />;
 }

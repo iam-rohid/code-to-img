@@ -10,7 +10,6 @@ import {
   workspaceMemberTable,
   workspaceTable,
 } from "@/db/schema";
-import { getWorkspaceSlugFromCookie } from "@/lib/server/actions";
 import {
   CloudEditorProvider,
   LocalEditorProvider,
@@ -38,14 +37,13 @@ export default async function Page({
   }
 
   if (!snippetId) {
-    const workspaceSlug = await getWorkspaceSlugFromCookie();
     let workspaceId: string | null = null;
 
-    if (workspaceSlug) {
+    if (session.user.defaultWorkspace) {
       const [workspace] = await db
         .select({ id: workspaceTable.id })
         .from(workspaceTable)
-        .where(eq(workspaceTable.slug, workspaceSlug));
+        .where(eq(workspaceTable.slug, session.user.defaultWorkspace));
       workspaceId = workspace.id;
     }
 

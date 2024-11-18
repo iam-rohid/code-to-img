@@ -2,8 +2,6 @@
 
 import { redirect } from "next/navigation";
 
-import { deleteWorkspaceSlugFromCookie } from "@/lib/server/actions";
-
 import {
   deleteSessionTokenCookie,
   getCurrentSession,
@@ -18,6 +16,5 @@ export async function signOut() {
 
   await invalidateSession(session.session.token);
   await deleteSessionTokenCookie();
-  await deleteWorkspaceSlugFromCookie();
   return redirect("/login");
 }

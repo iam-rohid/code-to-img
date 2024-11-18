@@ -15,11 +15,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Skeleton } from "./ui/skeleton";
 
 export default function UserButton() {
-  const { session, signOut } = useAuth();
+  const { status, session, signOut } = useAuth();
 
-  if (!session) {
+  if (status === "loading") {
+    return <Skeleton className="h-10 w-10 rounded-full" />;
+  }
+
+  if (status === "unauthorized") {
     return (
       <Button variant="secondary" asChild>
         <Link href="/login">Sign In</Link>

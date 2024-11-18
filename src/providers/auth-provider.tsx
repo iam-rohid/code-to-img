@@ -5,9 +5,25 @@ import { useRouter } from "next/navigation";
 
 import { signOut } from "@/auth/actions";
 import { SessionValidationResult } from "@/auth/utils";
+import { trpc } from "@/trpc/client";
 
-export type AuthContextValue = {
-  session: SessionValidationResult | null;
+type Loading = {
+  status: "loading";
+  session: undefined;
+};
+type Authorized = {
+  status: "authorized";
+  session: SessionValidationResult;
+};
+type Unauthorized = {
+  status: "unauthorized";
+  session: null;
+  error?: string | null;
+};
+
+type SessionState = Authorized | Loading | Unauthorized;
+
+export type AuthContextValue = SessionState & {
   signOut: () => Promise<void>;
 };
 
@@ -17,9 +33,13 @@ export default function AuthProvider({
   session,
   children,
 }: {
-  session: SessionValidationResult | null;
+  session?: SessionValidationResult | null;
   children: ReactNode;
 }) {
+  const sessionQuery = trpc.auth.getSession.useQuery(undefined, {
+    initialData: session,
+  });
+
   const router = useRouter();
   const handleSignOut = useCallback(async () => {
     await signOut();
@@ -28,7 +48,20 @@ export default function AuthProvider({
   }, [router]);
 
   return (
-    <Context.Provider value={{ session, signOut: handleSignOut }}>
+    <Context.Provider
+      value={{
+        ...(sessionQuery.isLoading
+          ? { status: "loading", session: undefined }
+          : sessionQuery.isError || !sessionQuery.data
+            ? {
+                status: "unauthorized",
+                session: null,
+                error: sessionQuery.error?.message,
+              }
+            : { status: "authorized", session: sessionQuery.data }),
+        signOut: handleSignOut,
+      }}
+    >
       {children}
     </Context.Provider>
   );

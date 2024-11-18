@@ -1,5 +1,5 @@
-import SnippetsList from "./snippets-list";
+import PageClient from "./page-client";
 
 export default function Page() {
-  return <SnippetsList />;
+  return <PageClient />;
 }

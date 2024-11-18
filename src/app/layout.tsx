@@ -2,7 +2,6 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 
-import { getCurrentSession } from "@/auth/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AuthProvider from "@/providers/auth-provider";
@@ -17,8 +16,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getCurrentSession();
-
   return (
     <html lang="en">
       <body
@@ -27,7 +24,7 @@ export default async function RootLayout({
       >
         <TooltipProvider>
           <TRPCProvider>
-            <AuthProvider session={session}>{children}</AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
           </TRPCProvider>
           <Toaster />
         </TooltipProvider>

@@ -30,19 +30,19 @@ export default function SettingsSidebar() {
         exact: true,
       },
     ],
-    []
+    [],
   );
 
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarHeader>
-          <div className="flex items-center justify-between px-2 gap-2">
+          <div className="flex items-center justify-between gap-2 px-2">
             <Link
-              href="/dashboard"
-              className="font-semibold flex items-center text-sm group/back text-muted-foreground hover:text-foreground transition-colors overflow-hidden"
+              href="/"
+              className="group/back flex items-center overflow-hidden text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
-              <ChevronLeftIcon className="w-5 h-5 mr-2 group-hover/back:-translate-x-1 transition-transform duration-200 flex-shrink-0" />
+              <ChevronLeftIcon className="mr-2 h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover/back:-translate-x-1" />
               <p className="truncate">Account</p>
             </Link>
 

@@ -62,11 +62,12 @@ import {
   useSnippetStore,
 } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
+import { Skeleton } from "../ui/skeleton";
 
 import { InspectionPanelMemo } from "./inspection-panel";
 
 export default function EditorUI() {
-  const { session } = useAuth();
+  const { status } = useAuth();
   const layersOpen = useEditorStore((state) => state.layersOpen);
   const setLayersOpen = useEditorStore((state) => state.setLayersOpen);
   const zoom = useEditorStore((state) => state.zoom);
@@ -104,18 +105,20 @@ export default function EditorUI() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="start">
-                {session ? (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
-                      <LayoutGridIcon />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                ) : (
+                {status === "loading" ? (
+                  <Skeleton className="h-10 w-20" />
+                ) : status === "unauthorized" ? (
                   <DropdownMenuItem asChild>
                     <Link href="/login">
                       <LogInIcon />
                       Log In
+                    </Link>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link href="/">
+                      <LayoutGridIcon />
+                      Dashboard
                     </Link>
                   </DropdownMenuItem>
                 )}
