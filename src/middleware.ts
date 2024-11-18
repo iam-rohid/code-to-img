@@ -1,10 +1,48 @@
+import { asc, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { validateSessionToken } from "./auth/utils";
+import { db } from "./db";
+import { workspaceMemberTable, workspaceTable } from "./db/schema";
+import { CURRENT_WORKSPACE_SLUG_COOKIE, SESSION_COOKIE } from "./lib/constants";
+
 const publicPages = ["/", "/login.*", "/legal.*"];
 
+const getWorkspaceRedirectPath = async (
+  req: NextRequest,
+  sessionToken: string,
+) => {
+  const workspaceSlug =
+    req.cookies.get(CURRENT_WORKSPACE_SLUG_COOKIE)?.value ?? null;
+  if (workspaceSlug) {
+    return `/${workspaceSlug}`;
+  }
+
+  const session = await validateSessionToken(sessionToken);
+  if (!session) {
+    return null;
+  }
+
+  const [workspace] = await db
+    .select({ slug: workspaceTable.slug })
+    .from(workspaceMemberTable)
+    .innerJoin(
+      workspaceTable,
+      eq(workspaceTable.id, workspaceMemberTable.workspaceId),
+    )
+    .where(eq(workspaceMemberTable.userId, session.user.id))
+    .orderBy(asc(workspaceMemberTable.createdAt));
+
+  if (workspace) {
+    return `/${workspace.slug}`;
+  }
+
+  return "/onboarding/workspace";
+};
+
 export async function middleware(req: NextRequest): Promise<NextResponse> {
-  const sessionToken = req.cookies.get("session")?.value ?? null;
+  const sessionToken = req.cookies.get(SESSION_COOKIE)?.value ?? null;
 
   const publicPathnameRegex = RegExp(
     `^(${publicPages
@@ -18,13 +56,20 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
   if (!sessionToken && !isPublicPage) {
     const url = new URL("/login", req.url);
     url.searchParams.set("callbackUrl", req.nextUrl.pathname);
-    return NextResponse.redirect(url, 302);
+    return NextResponse.redirect(url);
+  }
+
+  if (sessionToken && req.nextUrl.pathname === "/") {
+    const redirectPath = await getWorkspaceRedirectPath(req, sessionToken);
+    if (redirectPath) {
+      return NextResponse.redirect(new URL(redirectPath, req.url));
+    }
   }
 
   if (req.method === "GET") {
     const response = NextResponse.next();
     if (sessionToken) {
-      response.cookies.set("session", sessionToken, {
+      response.cookies.set(SESSION_COOKIE, sessionToken, {
         path: "/",
         maxAge: 60 * 60 * 24 * 30,
         sameSite: "lax",

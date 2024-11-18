@@ -1,12 +1,11 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  deleteSessionTokenCookie,
-  getCurrentSession,
-  invalidateSession,
-} from "./utils";
+import { CURRENT_WORKSPACE_SLUG_COOKIE, SESSION_COOKIE } from "@/lib/constants";
+
+import { getCurrentSession, invalidateSession } from "./utils";
 
 export async function signOut() {
   const session = await getCurrentSession();
@@ -15,6 +14,8 @@ export async function signOut() {
   }
 
   await invalidateSession(session.session.token);
-  await deleteSessionTokenCookie();
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(CURRENT_WORKSPACE_SLUG_COOKIE);
   return redirect("/login");
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, ReactNode, useContext, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { notFound, useParams } from "next/navigation";
 
-import DashboardLoader from "@/components/layout/dashboard-loader";
 import { Workspace, WorkspaceMember } from "@/db/schema";
 import { trpc } from "@/trpc/client";
 
@@ -24,19 +24,31 @@ export default function WorkspaceProvider({
     { slug: workspaceSlug },
     { retry: false },
   );
-  const { mutate: updateUserMutate } = trpc.users.updateUser.useMutation();
+  const { mutate: updateUserMutate } =
+    trpc.workspaces.setCurrentWorkspace.useMutation();
 
   useEffect(() => {
+    if (!workspaceQuery.isSuccess) {
+      return;
+    }
     const timeout = setTimeout(() => {
-      updateUserMutate({ defaultWorkspace: workspaceSlug });
+      updateUserMutate({ workspaceSlug: workspaceQuery.data.workspace.slug });
     }, 100);
     return () => {
       clearTimeout(timeout);
     };
-  }, [updateUserMutate, workspaceSlug]);
+  }, [
+    updateUserMutate,
+    workspaceQuery.data?.workspace.slug,
+    workspaceQuery.isSuccess,
+  ]);
 
   if (workspaceQuery.isPending) {
-    return <DashboardLoader />;
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
   }
 
   if (workspaceQuery.isError) {

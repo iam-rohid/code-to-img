@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CheckIcon, ChevronsUpDown, PlusIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   Command,
@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
 import CreateWorkspaceForm from "./forms/create-workspace-form";
@@ -26,13 +25,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Skeleton } from "./ui/skeleton";
 
 export default function WorkspaceSwitcher() {
+  const { workspaceSlug } = useParams<{ workspaceSlug?: string }>();
+
   const [open, setOpen] = useState(false);
   const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
   const router = useRouter();
 
-  const { workspace } = useWorkspace();
-
-  const workspaces = trpc.workspaces.getWorkspaces.useQuery();
+  const workspacesQuery = trpc.workspaces.getWorkspaces.useQuery();
+  const currentWorkspace = useMemo(
+    () =>
+      workspacesQuery.data?.find(
+        (workspace) => workspace.workspace.slug === workspaceSlug,
+      ),
+    [workspaceSlug, workspacesQuery.data],
+  );
 
   const handleChangeWorkspace = useCallback(
     async (slug: string) => {
@@ -40,6 +46,14 @@ export default function WorkspaceSwitcher() {
     },
     [router],
   );
+
+  if (workspacesQuery.isPending) {
+    return <Skeleton className="h-10 w-full" />;
+  }
+
+  if (workspacesQuery.isError) {
+    return <p>{workspacesQuery.error.message}</p>;
+  }
 
   return (
     <>
@@ -51,7 +65,7 @@ export default function WorkspaceSwitcher() {
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {workspace.name}
+            {currentWorkspace?.workspace.name ?? "Select workspace"}
             <ChevronsUpDown className="-mr-1 ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -61,36 +75,26 @@ export default function WorkspaceSwitcher() {
             <CommandList>
               <CommandEmpty>No workspace found.</CommandEmpty>
               <CommandGroup>
-                {workspaces.isPending ? (
-                  <>
-                    <Skeleton className="h-8" />
-                    <Skeleton className="h-8" />
-                    <Skeleton className="h-8" />
-                  </>
-                ) : workspaces.isError ? (
-                  <p>{workspaces.error.message}</p>
-                ) : (
-                  workspaces.data.map((org) => (
-                    <CommandItem
-                      key={org.workspace.slug}
-                      value={org.workspace.slug}
-                      onSelect={async (currentValue) => {
-                        handleChangeWorkspace(currentValue);
-                        setOpen(false);
-                      }}
-                    >
-                      <CheckIcon
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          workspace.slug === org.workspace.slug
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
-                      />
-                      {org.workspace.name}
-                    </CommandItem>
-                  ))
-                )}
+                {workspacesQuery.data.map(({ workspace }) => (
+                  <CommandItem
+                    key={workspace.slug}
+                    value={workspace.slug}
+                    onSelect={async (currentValue) => {
+                      handleChangeWorkspace(currentValue);
+                      setOpen(false);
+                    }}
+                  >
+                    <CheckIcon
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        workspace.slug === workspaceSlug
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    {workspace.name}
+                  </CommandItem>
+                ))}
               </CommandGroup>
               <CommandSeparator />
               <CommandGroup>

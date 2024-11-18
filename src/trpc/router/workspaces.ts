@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { db } from "@/db";
@@ -7,6 +8,7 @@ import {
   workspaceMemberTable as workspaceMemberTable,
   workspaceTable as workspaceTable,
 } from "@/db/schema";
+import { CURRENT_WORKSPACE_SLUG_COOKIE } from "@/lib/constants";
 import { createWorkspaceDto, updateWorkspaceDto } from "@/validators";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
@@ -156,5 +158,17 @@ export const workspacesRouter = router({
       }
 
       return updatedWorkspace;
+    }),
+  setCurrentWorkspace: protectedProcedure
+    .input(z.object({ workspaceSlug: z.string() }))
+    .mutation(async ({ input }) => {
+      const cookieStore = await cookies();
+      cookieStore.set(CURRENT_WORKSPACE_SLUG_COOKIE, input.workspaceSlug, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: "lax",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      });
     }),
 });

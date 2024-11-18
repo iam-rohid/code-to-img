@@ -15,6 +15,7 @@ import {
   User,
   userTable,
 } from "@/db/schema";
+import { SESSION_COOKIE } from "@/lib/constants";
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
@@ -169,7 +170,7 @@ export type SessionValidationResult = { session: Session; user: User };
 export const getCurrentSession = cache(
   async (): Promise<SessionValidationResult | null> => {
     const cookieStore = await cookies();
-    const token = cookieStore.get("session")?.value;
+    const token = cookieStore.get(SESSION_COOKIE)?.value;
     if (!token) {
       return null;
     }
@@ -182,22 +183,11 @@ export async function setSessionTokenCookie(
   expiresAt: Date,
 ): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set("session", token, {
+  cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
-    path: "/",
-  });
-}
-
-export async function deleteSessionTokenCookie(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set("session", "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 0,
     path: "/",
   });
 }
