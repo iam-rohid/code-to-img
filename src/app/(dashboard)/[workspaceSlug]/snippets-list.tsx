@@ -11,14 +11,13 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { SnippetCard } from "@/components/snippet-card";
+import { SnippetList, SnippetListSkeleton } from "@/components/snippet-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
-export default function SnippetsList() {
+export default function MySnippets() {
   const { workspace } = useWorkspace();
   const snippetsQuery = trpc.snippets.getSnippets.useQuery({
     workspaceId: workspace.id,
@@ -48,10 +47,6 @@ export default function SnippetsList() {
 
   return (
     <div className="mx-auto my-16 w-full max-w-screen-xl space-y-8 px-4">
-      <div>
-        <h2 className="text-xl font-semibold">My Snippets</h2>
-      </div>
-
       <div className="flex gap-4">
         <div className="flex gap-2">
           <Button variant="outline">
@@ -75,25 +70,15 @@ export default function SnippetsList() {
         </div>
       </div>
 
-      <div>
-        {snippetsQuery.isPending ? (
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-[3/2.5] rounded-lg" />
-            ))}
-          </div>
-        ) : snippetsQuery.isError ? (
-          <p>{snippetsQuery.error.message}</p>
-        ) : snippetsQuery.data.length < 1 ? (
-          <p>No snippets found</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
-            {snippetsQuery.data.map((snippet) => (
-              <SnippetCard snippet={snippet} key={snippet.id} />
-            ))}
-          </div>
-        )}
-      </div>
+      {snippetsQuery.isPending ? (
+        <SnippetListSkeleton />
+      ) : snippetsQuery.isError ? (
+        <p>{snippetsQuery.error.message}</p>
+      ) : snippetsQuery.data.length < 1 ? (
+        <p>No snippets found</p>
+      ) : (
+        <SnippetList snippets={snippetsQuery.data} />
+      )}
     </div>
   );
 }

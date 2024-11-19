@@ -18,9 +18,9 @@ export default function AppBar({
   links?: { title: string; url: string }[];
 }) {
   return (
-    <div className="flex px-4 items-center h-14">
+    <div className="sticky top-0 z-30 flex h-14 items-center bg-background px-4">
       <SidebarTrigger />
-      <p className="h-8 w-px mx-4 bg-border" />
+      <p className="mx-4 h-8 w-px bg-border" />
       <Breadcrumb>
         <BreadcrumbList>
           {links?.map((link) => (

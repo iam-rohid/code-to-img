@@ -92,16 +92,18 @@ export function SnippetCard({ snippet }: { snippet: Snippet }) {
   }, [snippet.id]);
 
   return (
-    <div className="group relative rounded-lg border transition-shadow hover:shadow-lg">
+    <div className="group relative rounded-xl border transition-shadow hover:shadow-lg">
       <Link
         href={editorHref}
-        className="absolute inset-0 z-10 rounded-lg ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="absolute inset-0 z-10 rounded-xl ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       />
 
-      <SnippetViewer
-        data={snippet.data}
-        className="aspect-[3/2] overflow-hidden rounded-t-lg bg-secondary"
-      />
+      <div className="p-2 pb-0">
+        <SnippetViewer
+          data={snippet.data}
+          className="aspect-[3/2] overflow-hidden rounded-lg bg-secondary"
+        />
+      </div>
 
       <div className="flex items-center gap-2 py-2 pl-4 pr-2">
         <div className="flex-1 overflow-hidden">

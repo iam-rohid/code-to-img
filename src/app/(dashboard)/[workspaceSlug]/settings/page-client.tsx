@@ -11,7 +11,10 @@ export default function PageClient() {
   return (
     <>
       <AppBar
-        links={[{ title: "Settings", url: `/${workspace.slug}/settings` }]}
+        links={[
+          { title: workspace.name, url: `/${workspace.slug}` },
+          { title: "Settings", url: `/${workspace.slug}/settings` },
+        ]}
         title="General"
       />
       <div className="container mx-auto my-16 max-w-screen-md space-y-8 px-4 md:px-8">
