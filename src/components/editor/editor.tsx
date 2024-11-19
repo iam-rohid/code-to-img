@@ -72,7 +72,7 @@ const Snippet = () => {
   }, [snippetStore, updateSnippetData]);
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-secondary">
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-editor-background text-editor-foreground">
       <div
         className="absolute bottom-0 left-0 right-0 top-0 overflow-hidden"
         onWheel={handleScroll}

@@ -62,6 +62,7 @@ import {
   useSnippetStore,
 } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
+import { ThemeSwitcher } from "../theme-toggle";
 import { Skeleton } from "../ui/skeleton";
 
 import { InspectionPanelMemo } from "./inspection-panel";
@@ -97,14 +98,18 @@ export default function EditorUI() {
     <div className="pointer-events-none absolute inset-0 z-20 flex flex-col gap-4 p-4">
       <div className="flex items-center gap-2">
         <div className="flex-1 justify-start">
-          <div className="pointer-events-auto flex w-fit items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+          <div className="pointer-events-auto flex w-fit items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="ghost">
                   <MenuIcon />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="bottom" align="start">
+              <DropdownMenuContent
+                side="bottom"
+                align="start"
+                className="bg-editor-card text-editor-card-foreground"
+              >
                 {status === "loading" ? (
                   <Skeleton className="h-10 w-20" />
                 ) : status === "unauthorized" ? (
@@ -131,6 +136,11 @@ export default function EditorUI() {
                   <TrashIcon />
                   Reset the canvas
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="flex items-center justify-between gap-2 px-2">
+                  <p className="text-sm font-medium">Theme</p>
+                  <ThemeSwitcher />
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -139,7 +149,7 @@ export default function EditorUI() {
         <Toolbar />
 
         <div className="flex flex-1 justify-end">
-          <div className="pointer-events-auto flex w-fit items-center justify-end gap-2 rounded-lg border bg-background p-1 shadow-sm">
+          <div className="pointer-events-auto flex w-fit items-center justify-end gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -174,7 +184,7 @@ export default function EditorUI() {
 
       <div className="flex items-center gap-2">
         <div className="flex flex-1 items-center gap-2">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="icon" variant="ghost" onClick={handleZoomOut}>
@@ -204,7 +214,7 @@ export default function EditorUI() {
             </Tooltip>
           </div>
 
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
             <Button size="icon" variant="ghost">
               <UndoIcon />
             </Button>
@@ -214,7 +224,7 @@ export default function EditorUI() {
           </div>
         </div>
         {(viewPortOffset.x !== 0 || viewPortOffset.y !== 0) && (
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
             <Button
               onClick={() => setViewPortOffset({ x: 0, y: 0 })}
               variant="ghost"
@@ -229,7 +239,7 @@ export default function EditorUI() {
           ) : isDurty ? (
             <p className="text-sm text-muted-foreground">Unsaved changes</p>
           ) : null}
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
             <Button size="icon" variant="ghost">
               <InfoIcon />
             </Button>
@@ -246,7 +256,7 @@ function Toolbar() {
   const canvasHeight = useSnippetStore((state) => state.transform.height);
 
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-background p-1 shadow-sm">
+    <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
       <div>
         <Button
           size="icon"
@@ -314,7 +324,7 @@ function LayersPanel() {
   const updateElement = useSnippetStore((state) => state.updateElement);
 
   return (
-    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-background shadow-sm">
+    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-editor-card text-editor-card-foreground shadow-sm">
       <div className="p-2">
         <p className="text-sm font-medium text-muted-foreground">Layers</p>
       </div>

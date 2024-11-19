@@ -14,6 +14,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        editor: {
+          background: "hsl(var(--editor-background))",
+          foreground: "hsl(var(--editor-foreground))",
+          card: {
+            DEFAULT: "hsl(var(--editor-card-background))",
+            foreground: "hsl(var(--editor-card-foreground))",
+          },
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",

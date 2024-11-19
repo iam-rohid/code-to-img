@@ -13,7 +13,7 @@ export function TextElementOptions({ element }: { element: iTextElement }) {
   return (
     <>
       <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Value</p>
+        <p className="mb-2 text-xs text-muted-foreground">Text</p>
         <Input
           value={element.text}
           onChange={(e) => {

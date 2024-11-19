@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { useAuth } from "@/providers/auth-provider";
 
+import { ThemeSwitcher } from "./theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
@@ -63,6 +64,14 @@ export default function UserButton() {
               Account
             </Link>
           </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+          <div className="flex items-center justify-between gap-2 px-2">
+            <p className="text-sm font-medium">Theme</p>
+            <ThemeSwitcher />
+          </div>
+          <DropdownMenuSeparator />
+
           <DropdownMenuItem onClick={signOut}>
             <LogOutIcon />
             Log Out
