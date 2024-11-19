@@ -16,7 +16,6 @@ export const userTable = pgTable("user", {
   name: text("name"),
   image: text("image"),
   passwordHash: text("password_hash"),
-  defaultWorkspace: text("default_workspace"),
 });
 
 export type User = typeof userTable.$inferSelect;

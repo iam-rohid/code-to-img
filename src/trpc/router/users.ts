@@ -10,13 +10,14 @@ export const usersRouter = router({
   updateUser: protectedProcedure
     .input(
       z.object({
-        defaultWorkspace: z.string().optional(),
+        name: z.string().min(1).max(100),
+        image: z.string().url().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const [updatedUser] = await ctx.db
         .update(userTable)
-        .set({ defaultWorkspace: input.defaultWorkspace })
+        .set({ name: input.name, image: input.image })
         .where(eq(userTable.id, ctx.session.user.id))
         .returning();
 

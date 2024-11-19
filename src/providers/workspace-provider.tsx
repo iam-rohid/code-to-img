@@ -24,21 +24,21 @@ export default function WorkspaceProvider({
     { slug: workspaceSlug },
     { retry: false },
   );
-  const { mutate: updateUserMutate } =
-    trpc.workspaces.setCurrentWorkspace.useMutation();
+  const { mutate: setCurrentWorkspaceSlug } =
+    trpc.workspaces.setCurrentWorkspaceSlug.useMutation();
 
   useEffect(() => {
     if (!workspaceQuery.isSuccess) {
       return;
     }
     const timeout = setTimeout(() => {
-      updateUserMutate({ workspaceSlug: workspaceQuery.data.workspace.slug });
+      setCurrentWorkspaceSlug(workspaceQuery.data.workspace.slug);
     }, 100);
     return () => {
       clearTimeout(timeout);
     };
   }, [
-    updateUserMutate,
+    setCurrentWorkspaceSlug,
     workspaceQuery.data?.workspace.slug,
     workspaceQuery.isSuccess,
   ]);

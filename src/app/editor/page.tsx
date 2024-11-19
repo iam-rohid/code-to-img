@@ -1,4 +1,5 @@
 import { desc, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/auth/utils";
@@ -10,6 +11,7 @@ import {
   workspaceMemberTable,
   workspaceTable,
 } from "@/db/schema";
+import { CURRENT_WORKSPACE_SLUG_COOKIE } from "@/lib/constants";
 import {
   CloudEditorProvider,
   LocalEditorProvider,
@@ -39,11 +41,13 @@ export default async function Page({
   if (!snippetId) {
     let workspaceId: string | null = null;
 
-    if (session.user.defaultWorkspace) {
+    const cookieStore = await cookies();
+    const workspaceSlug = cookieStore.get(CURRENT_WORKSPACE_SLUG_COOKIE)?.value;
+    if (workspaceSlug) {
       const [workspace] = await db
         .select({ id: workspaceTable.id })
         .from(workspaceTable)
-        .where(eq(workspaceTable.slug, session.user.defaultWorkspace));
+        .where(eq(workspaceTable.slug, workspaceSlug));
       workspaceId = workspace.id;
     }
 

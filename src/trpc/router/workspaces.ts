@@ -159,11 +159,11 @@ export const workspacesRouter = router({
 
       return updatedWorkspace;
     }),
-  setCurrentWorkspace: protectedProcedure
-    .input(z.object({ workspaceSlug: z.string() }))
+  setCurrentWorkspaceSlug: protectedProcedure
+    .input(z.string())
     .mutation(async ({ input }) => {
       const cookieStore = await cookies();
-      cookieStore.set(CURRENT_WORKSPACE_SLUG_COOKIE, input.workspaceSlug, {
+      cookieStore.set(CURRENT_WORKSPACE_SLUG_COOKIE, input, {
         path: "/",
         maxAge: 60 * 60 * 24 * 30,
         sameSite: "lax",
