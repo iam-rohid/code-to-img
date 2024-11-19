@@ -87,7 +87,9 @@ export function WorkspaceNameCard() {
             />
           </CardContent>
           <CardFooter>
-            <Button disabled={!form.formState.isDirty}>
+            <Button
+              disabled={!form.formState.isDirty || updateWorkspaceMut.isPending}
+            >
               {updateWorkspaceMut.isPending && (
                 <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
               )}
@@ -157,7 +159,9 @@ export function WorkspaceSlugCard() {
             />
           </CardContent>
           <CardFooter>
-            <Button disabled={!form.formState.isDirty}>
+            <Button
+              disabled={!form.formState.isDirty || updateWorkspaceMut.isPending}
+            >
               {updateWorkspaceMut.isPending && (
                 <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
               )}

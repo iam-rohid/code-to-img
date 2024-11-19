@@ -1,7 +1,8 @@
 "use client";
 
-import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { LogOutIcon, PlusIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/providers/auth-provider";
 
@@ -19,6 +20,7 @@ import {
 import { Skeleton } from "./ui/skeleton";
 
 export default function UserButton() {
+  const pathname = usePathname();
   const { status, session, signOut } = useAuth();
 
   if (status === "loading") {
@@ -58,10 +60,23 @@ export default function UserButton() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {pathname !== "/onboarding/workspace" && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/onboarding/workspace">
+                  <PlusIcon />
+                  New workspace
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+            </>
+          )}
+
           <DropdownMenuItem asChild>
             <Link href="/account/settings">
-              <SettingsIcon />
-              Account
+              <UserIcon />
+              My Account
             </Link>
           </DropdownMenuItem>
 
@@ -74,7 +89,7 @@ export default function UserButton() {
 
           <DropdownMenuItem onClick={signOut}>
             <LogOutIcon />
-            Log Out
+            Log out
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

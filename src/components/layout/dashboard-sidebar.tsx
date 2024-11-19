@@ -8,6 +8,7 @@ import {
   SettingsIcon,
   TrashIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
@@ -23,7 +24,6 @@ import {
 } from "@/components/ui/sidebar";
 import UserButton from "@/components/user-button";
 import WorkspaceSwitcher from "@/components/workspace-switcher";
-import { APP_NAME } from "@/lib/constants";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
@@ -75,8 +75,17 @@ function WorkspaceContent({ workspaceSlug }: { workspaceSlug: string }) {
       <SidebarHeader>
         <div className="flex items-center px-2">
           <div className="flex-1">
-            <Link href="/" className="font-semibold">
-              {APP_NAME}
+            <Link
+              href={`/${workspaceSlug}`}
+              className="flex h-10 w-10 items-center justify-center"
+            >
+              <Image
+                src="/code-to-img.svg"
+                alt="codetoimg logo"
+                width={48}
+                height={48}
+                className="h-8 w-8"
+              />
             </Link>
           </div>
           <UserButton />

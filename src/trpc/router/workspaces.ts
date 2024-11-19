@@ -171,4 +171,31 @@ export const workspacesRouter = router({
         secure: process.env.NODE_ENV === "production",
       });
     }),
+  deleteWorkspace: protectedProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { workspace, member } = await getWorkspaceById(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+      if (member.role !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only workspace owner can delete workspace.",
+        });
+      }
+
+      const [deletedWorkspace] = await ctx.db
+        .delete(workspaceTable)
+        .where(eq(workspaceTable.id, workspace.id))
+        .returning();
+
+      if (!deletedWorkspace) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      const cookieStore = await cookies();
+      cookieStore.delete(CURRENT_WORKSPACE_SLUG_COOKIE);
+
+      return deletedWorkspace;
+    }),
 });

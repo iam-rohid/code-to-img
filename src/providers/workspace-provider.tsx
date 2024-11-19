@@ -2,8 +2,10 @@
 
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { notFound, useParams } from "next/navigation";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { Workspace, WorkspaceMember } from "@/db/schema";
 import { trpc } from "@/trpc/client";
 
@@ -52,10 +54,21 @@ export default function WorkspaceProvider({
   }
 
   if (workspaceQuery.isError) {
-    if (workspaceQuery.error.data?.code === "NOT_FOUND") {
-      notFound();
-    }
-    return <p>{workspaceQuery.error.message}</p>;
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <div className="mx-auto my-auto flex max-w-screen-md flex-col items-center gap-4">
+          <p className="text-7xl font-bold">404</p>
+          <p className="text-muted-foreground">
+            Workspace doesn&apos;t exist or you don&apos;t have permission to
+            access it.
+          </p>
+
+          <Button asChild>
+            <Link href="/">Go back home</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

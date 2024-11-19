@@ -19,16 +19,13 @@ import {
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 
-import CreateWorkspaceForm from "./forms/create-workspace-form";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Skeleton } from "./ui/skeleton";
 
 export default function WorkspaceSwitcher() {
   const { workspaceSlug } = useParams<{ workspaceSlug?: string }>();
 
   const [open, setOpen] = useState(false);
-  const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
   const router = useRouter();
 
   const workspacesQuery = trpc.workspaces.getWorkspaces.useQuery();
@@ -103,26 +100,17 @@ export default function WorkspaceSwitcher() {
                   className="whitespace-nowrap"
                   onSelect={() => {
                     setOpen(false);
-                    setCreateWorkspaceOpen(true);
+                    router.push(`/onboarding/workspace`);
                   }}
                 >
                   <PlusIcon className="h-4 w-4" />
-                  Create new workspace
+                  Create workspace
                 </CommandItem>
               </CommandGroup>
             </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
-
-      <Dialog open={createWorkspaceOpen} onOpenChange={setCreateWorkspaceOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create a new Workspace</DialogTitle>
-          </DialogHeader>
-          <CreateWorkspaceForm />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
