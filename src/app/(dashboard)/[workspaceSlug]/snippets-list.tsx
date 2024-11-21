@@ -1,16 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
-import {
-  ChevronDownIcon,
-  FilterIcon,
-  Loader2,
-  Plus,
-  SearchIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { ChevronDownIcon, FilterIcon, SearchIcon } from "lucide-react";
 
+import { useCreateSnippetModal } from "@/components/modals/create-snippet-modal";
 import { SnippetList, SnippetListSkeleton } from "@/components/snippet-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,31 +11,12 @@ import { trpc } from "@/trpc/client";
 
 export default function MySnippets() {
   const { workspace } = useWorkspace();
+  const [CreateSnippetModal, , setCreateSnippetModalOpen] =
+    useCreateSnippetModal();
   const snippetsQuery = trpc.snippets.getSnippets.useQuery({
     workspaceId: workspace.id,
     trashed: false,
   });
-
-  const router = useRouter();
-
-  const utils = trpc.useUtils();
-  const createSnippetMut = trpc.snippets.createSnippet.useMutation();
-
-  const handleCreateSnippet = useCallback(() => {
-    createSnippetMut.mutate(
-      { workspaceId: workspace.id, dto: { title: "Untitled" } },
-      {
-        onSuccess: (snippet) => {
-          toast("Snippet created");
-          router.push(`/editor?snippetId=${encodeURIComponent(snippet.id)}`);
-          utils.snippets.getSnippets.invalidate({ workspaceId: workspace.id });
-        },
-        onError: (error) => {
-          toast("Failed to create snippet", { description: error.message });
-        },
-      },
-    );
-  }, [createSnippetMut, router, utils.snippets.getSnippets, workspace.id]);
 
   return (
     <div className="mx-auto my-16 w-full max-w-screen-xl space-y-8 px-4">
@@ -60,11 +33,7 @@ export default function MySnippets() {
             <Input className="w-full pl-10 pr-10" placeholder="Search..." />
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </form>
-          <Button
-            onClick={handleCreateSnippet}
-            disabled={createSnippetMut.isPending}
-          >
-            {createSnippetMut.isPending ? <Loader2 /> : <Plus />}
+          <Button onClick={() => setCreateSnippetModalOpen(true)}>
             Create Snippet
           </Button>
         </div>
@@ -75,10 +44,29 @@ export default function MySnippets() {
       ) : snippetsQuery.isError ? (
         <p>{snippetsQuery.error.message}</p>
       ) : snippetsQuery.data.length < 1 ? (
-        <p>No snippets found</p>
+        <div className="rounded-lg border px-6 py-16">
+          <div className="container mx-auto flex max-w-screen-sm flex-col items-center">
+            <h3 className="text-center text-lg font-semibold">
+              Oops, No Snippets Found!
+            </h3>
+            <p className="mt-2 text-center text-muted-foreground">
+              Don’t worry, it’s easy to fix! Create your first snippet now and
+              turn your code into a beautiful, shareable visual for the web or
+              your blog.
+            </p>
+            <Button
+              className="mt-6"
+              onClick={() => setCreateSnippetModalOpen(true)}
+            >
+              Create Snippet
+            </Button>
+          </div>
+        </div>
       ) : (
         <SnippetList snippets={snippetsQuery.data} />
       )}
+
+      <CreateSnippetModal />
     </div>
   );
 }

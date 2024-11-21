@@ -46,7 +46,10 @@ export default function RenameSnippetForm({
     onSuccess: (updatedSnippet) => {
       onRenamed?.(updatedSnippet);
       toast.success("Snippet renamed");
-      utils.snippets.getSnippet.invalidate({ snippetId: snippet.id });
+      utils.snippets.getSnippet.setData(
+        { snippetId: snippet.id },
+        updatedSnippet,
+      );
     },
     onError: (error) => {
       toast.error("Failed to rename snippet", { description: error.message });
@@ -73,7 +76,7 @@ export default function RenameSnippetForm({
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input {...field} />
               </FormControl>
 
               <FormMessage />

@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
 
-import { getDefaultSnippetData } from "@/lib/utils/editor";
 import { iElement } from "@/lib/validator/element";
 import { iSnippetData } from "@/lib/validator/snippet";
 import { iTransform } from "@/lib/validator/transform";
@@ -32,10 +31,9 @@ export type SnippetState = iSnippetData & SnipetActions;
 
 export type SnippetStore = ReturnType<typeof createSnippetStore>;
 
-export const createSnippetStore = (initProps?: Partial<iSnippetData>) => {
+export const createSnippetStore = (snippetData: iSnippetData) => {
   return create<SnippetState>()((set, get) => ({
-    ...getDefaultSnippetData(),
-    ...initProps,
+    ...snippetData,
     updateSnippet: (data) => {
       set({ ...data });
     },

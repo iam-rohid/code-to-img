@@ -1,18 +1,18 @@
-import { useCallback, useMemo } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {
   ArchiveRestoreIcon,
-  ClipboardIcon,
   CopyIcon,
   EditIcon,
+  MoreHorizontalIcon,
   MoreVertical,
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 
 import { Snippet } from "@/db/schema";
+import { useSnippetActions } from "@/hooks/use-snippet-actions";
+import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
 import { useRenameSnippetModal } from "./modals/rename-snippet-modal";
@@ -25,78 +25,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import {
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "./ui/sidebar";
 
 dayjs.extend(relativeTime);
 
-export function SnippetCard({ snippet }: { snippet: Snippet }) {
-  const [RenameModal, , setRenameModalOpen] = useRenameSnippetModal();
-  const editorHref = useMemo(
-    () => `/editor?snippetId=${encodeURIComponent(snippet.id)}`,
-    [snippet.id],
+export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
+  const { workspace } = useWorkspace();
+  const { data: snippet } = trpc.snippets.getSnippet.useQuery(
+    { snippetId: initSnippet.id },
+    {
+      initialData: initSnippet,
+      placeholderData: (data) => {
+        return data ?? initSnippet;
+      },
+    },
   );
-
-  const utils = trpc.useUtils();
-
-  const duplicateSnippetMut = trpc.snippets.duplicateSnippet.useMutation({
-    onSuccess: () => {
-      utils.snippets.getSnippets.invalidate();
-      toast.success("Snippet duplicated");
-    },
-    onError: (error) => {
-      toast.error("Failed to duplicate snippet", {
-        description: error.message,
-      });
-    },
-  });
-
-  const moveToTrashMut = trpc.snippets.moveToTrash.useMutation({
-    onSuccess: () => {
-      utils.snippets.getSnippets.invalidate();
-      toast.success("Snippet moved to trash");
-    },
-    onError: (error) => {
-      toast.error("Failed to move snippet to trash", {
-        description: error.message,
-      });
-    },
-  });
-
-  const restoreFromTrashMut = trpc.snippets.restoreFromTrash.useMutation({
-    onSuccess: () => {
-      utils.snippets.getSnippets.invalidate();
-      toast.success("Snippet restored from trash");
-    },
-    onError: (error) => {
-      toast.error("Failed to restore snippet from trash", {
-        description: error.message,
-      });
-    },
-  });
-
-  const deleteSnippetMut = trpc.snippets.deleteSnippet.useMutation({
-    onSuccess: () => {
-      utils.snippets.getSnippets.invalidate();
-      toast.success("Snippet permanently deleted");
-    },
-    onError: (error) => {
-      toast.error("Failed to delete snippet", {
-        description: error.message,
-      });
-    },
-  });
-
-  const handlCopyLink = useCallback(() => {
-    const url = new URL(`/view/${snippet.id}`, window.location.href);
-    window.navigator.clipboard.writeText(url.toString());
-    toast.success("Link copied to clipboard");
-  }, [snippet.id]);
 
   return (
     <div className="group relative rounded-xl border transition-shadow hover:shadow-lg">
-      <Link
-        href={editorHref}
-        className="absolute inset-0 z-10 rounded-xl ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      />
+      {snippet.trashedAt ? (
+        <div className="absolute inset-0 z-10 rounded-xl"></div>
+      ) : (
+        <Link
+          href={`/${workspace.slug}/editor/${snippet.id}`}
+          className="absolute inset-0 z-10 rounded-xl ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        />
+      )}
 
       <div className="p-2 pb-0">
         <SnippetViewer
@@ -107,7 +65,9 @@ export function SnippetCard({ snippet }: { snippet: Snippet }) {
 
       <div className="flex items-center gap-2 py-2 pl-4 pr-2">
         <div className="flex-1 overflow-hidden">
-          <p className="truncate font-semibold">{snippet.title}</p>
+          <p className="truncate font-semibold">
+            {snippet.title || "Untitled"}
+          </p>
           <p className="truncate text-sm text-muted-foreground">
             {dayjs(snippet.createdAt).fromNow()}
           </p>
@@ -123,77 +83,126 @@ export function SnippetCard({ snippet }: { snippet: Snippet }) {
               <MoreVertical />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {snippet.trashedAt ? (
-              <>
-                <DropdownMenuItem
-                  onClick={() =>
-                    restoreFromTrashMut.mutate({ snippetId: snippet.id })
-                  }
-                >
-                  <ArchiveRestoreIcon />
-                  Restore
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    deleteSnippetMut.mutate({ snippetId: snippet.id })
-                  }
-                >
-                  <TrashIcon />
-                  Permanently Delete
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <>
-                {/* <DropdownMenuItem onClick={() => router.push(editorHref)}>
-                  <ExternalLinkIcon />
-                  Open
-                </DropdownMenuItem>
-                <DropdownMenuSeparator /> */}
-                <DropdownMenuItem onClick={handlCopyLink}>
-                  <ClipboardIcon />
-                  Copy Link
-                </DropdownMenuItem>
-                {/* <DropdownMenuItem>
-                  <ShareIcon />
-                  Share
-                </DropdownMenuItem> */}
-                <DropdownMenuItem
-                  onClick={() =>
-                    duplicateSnippetMut.mutate({ snippetId: snippet.id })
-                  }
-                >
-                  <CopyIcon />
-                  Duplicate
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setRenameModalOpen(true)}>
-                  <EditIcon />
-                  Rename
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    moveToTrashMut.mutate({ snippetId: snippet.id })
-                  }
-                >
-                  <TrashIcon />
-                  Move to Trash
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
+          <SnippetActionDropdownContent snippet={snippet} />
         </DropdownMenu>
-
-        <RenameModal
-          snippet={snippet}
-          onRenamed={() => {
-            utils.snippets.getSnippets.invalidate({
-              trashed: false,
-              workspaceId: snippet.workspaceId,
-            });
-          }}
-        />
       </div>
     </div>
+  );
+}
+
+export function SnippetSidebarItem({
+  snippet: initSnippet,
+  isActive,
+}: {
+  snippet: Snippet;
+  isActive?: boolean;
+}) {
+  const { workspace } = useWorkspace();
+  const { data: snippet } = trpc.snippets.getSnippet.useQuery(
+    { snippetId: initSnippet.id },
+    {
+      initialData: initSnippet,
+      placeholderData: (data) => {
+        return data ?? initSnippet;
+      },
+    },
+  );
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild className="h-fit p-0" isActive={isActive}>
+        <div>
+          <Link
+            href={`/${workspace.slug}/editor/${snippet.id}`}
+            className="absolute inset-0 z-10 rounded-lg ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+
+          <div className="p-2 pr-0">
+            <SnippetViewer
+              data={snippet.data}
+              className="h-16 w-16 overflow-hidden rounded-sm bg-sidebar"
+            />
+          </div>
+
+          <div className="flex flex-1 flex-col justify-center overflow-hidden p-2">
+            <p className="truncate text-sm font-medium">{snippet.title}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {dayjs(snippet.createdAt).fromNow()}
+            </p>
+          </div>
+        </div>
+      </SidebarMenuButton>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuAction
+            showOnHover
+            className="right-2 top-2 z-20 text-muted-foreground hover:text-foreground"
+          >
+            <MoreHorizontalIcon />
+          </SidebarMenuAction>
+        </DropdownMenuTrigger>
+        <SnippetActionDropdownContent snippet={snippet} />
+      </DropdownMenu>
+    </SidebarMenuItem>
+  );
+}
+
+function SnippetActionDropdownContent({ snippet }: { snippet: Snippet }) {
+  const [RenameModal, , setRenameModalOpen] = useRenameSnippetModal();
+
+  const {
+    deleteSnippetMut,
+    moveToTrashMut,
+    restoreFromTrashMut,
+    duplicateSnippetMut,
+  } = useSnippetActions(snippet);
+
+  return (
+    <>
+      <DropdownMenuContent>
+        {snippet.trashedAt ? (
+          <>
+            <DropdownMenuItem
+              onClick={() =>
+                restoreFromTrashMut.mutate({ snippetId: snippet.id })
+              }
+            >
+              <ArchiveRestoreIcon />
+              Restore
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => deleteSnippetMut.mutate({ snippetId: snippet.id })}
+            >
+              <TrashIcon />
+              Permanently Delete
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem
+              onClick={() =>
+                duplicateSnippetMut.mutate({ snippetId: snippet.id })
+              }
+            >
+              <CopyIcon />
+              Duplicate
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setRenameModalOpen(true)}>
+              <EditIcon />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => moveToTrashMut.mutate({ snippetId: snippet.id })}
+            >
+              <TrashIcon />
+              Move to Trash
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+      <RenameModal snippet={snippet} />
+    </>
   );
 }

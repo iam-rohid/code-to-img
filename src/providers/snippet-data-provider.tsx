@@ -7,38 +7,68 @@ import {
   useEffect,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 import { Snippet } from "@/db/schema";
-import { getDefaultSnippetData } from "@/lib/utils/editor";
+import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
 import { trpc } from "@/trpc/client";
 
-export interface EditorContext {
+export interface SnippetDataContext {
   isSaving: boolean;
   isDurty: boolean;
   snippetData: iSnippetData;
   updateSnippetData: (snippet: iSnippetData) => void;
 }
 
-const Context = createContext<EditorContext | null>(null);
+const Context = createContext<SnippetDataContext | null>(null);
 
-export interface CloudEditorProviderProps {
+export interface CloudSnippetDataProviderProps {
   children: ReactNode;
   snippet: Snippet;
 }
 
-export function CloudEditorProvider({
+export function CloudSnippetDataProvider({
   children,
   snippet,
-}: CloudEditorProviderProps) {
+}: CloudSnippetDataProviderProps) {
   const [newData, setNewData] = useState<iSnippetData | null>(null);
-  const { mutate, isPending } = trpc.snippets.updateSnippet.useMutation();
+  const utils = trpc.useUtils();
+  const { mutate, isPending } = trpc.snippets.updateSnippet.useMutation({
+    onMutate: (vars) => {
+      utils.snippets.getSnippet.setData(
+        { snippetId: vars.snippetId },
+        (snippet) =>
+          snippet
+            ? {
+                ...snippet,
+                data: vars.dto.data ?? snippet.data,
+                title: vars.dto.title ?? snippet.title,
+              }
+            : undefined,
+      );
+    },
+    onSuccess: (data) => {
+      utils.snippets.getSnippet.setData({ snippetId: snippet.id }, data);
+    },
+    onError: (error) => {
+      toast.error("Failed to save", { description: error.message });
+    },
+  });
 
   useEffect(() => {
-    if (!isPending && newData) {
+    if (isPending || !newData) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
       mutate({ snippetId: snippet.id, dto: { data: newData } });
       setNewData(null);
-    }
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [isPending, mutate, newData, snippet.id]);
 
   return (
@@ -55,11 +85,13 @@ export function CloudEditorProvider({
   );
 }
 
-export interface LocalEditorProviderProps {
+export interface LocalSnippetDataProviderProps {
   children: ReactNode;
 }
 
-export function LocalEditorProvider({ children }: LocalEditorProviderProps) {
+export function LocalSnippetDataProvider({
+  children,
+}: LocalSnippetDataProviderProps) {
   const [snippetData, setSnippetData] = useState<iSnippetData | null>(null);
   const [newData, setNewData] = useState<iSnippetData | null>(null);
 
@@ -83,7 +115,7 @@ export function LocalEditorProvider({ children }: LocalEditorProviderProps) {
     }
 
     if (!initialized) {
-      setSnippetData(getDefaultSnippetData());
+      setSnippetData(DEFAULT_SNIPPET_TEMPLATE.data);
     }
   }, []);
 
@@ -105,7 +137,7 @@ export function LocalEditorProvider({ children }: LocalEditorProviderProps) {
   );
 }
 
-export function useEditor() {
+export function useSnippetData() {
   const context = useContext(Context);
   if (!context) {
     throw new Error("useEditor must use inside EditorProvider");

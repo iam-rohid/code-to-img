@@ -6,7 +6,7 @@ import { Skeleton } from "./ui/skeleton";
 export function SnippetList({ snippets }: { snippets: Snippet[] }) {
   return (
     <div className="@container">
-      <div className="@[36rem]:grid-cols-2 @[56rem]:grid-cols-3 grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 @[36rem]:grid-cols-2 @[56rem]:grid-cols-3">
         {snippets.map((snippet) => (
           <SnippetCard snippet={snippet} key={snippet.id} />
         ))}
@@ -15,10 +15,10 @@ export function SnippetList({ snippets }: { snippets: Snippet[] }) {
   );
 }
 
-export function SnippetListSkeleton({ count = 10 }: { count?: number }) {
+export function SnippetListSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="@container">
-      <div className="@[36rem]:grid-cols-2 @[56rem]:grid-cols-3 grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 @[36rem]:grid-cols-2 @[56rem]:grid-cols-3">
         {Array.from({ length: count }).map((_, i) => (
           <Skeleton key={i} className="aspect-[3/2.5] rounded-lg" />
         ))}

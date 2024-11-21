@@ -17,17 +17,11 @@ export const SnippetStoreProvider = ({
   snippet,
 }: {
   children: ReactNode;
-  snippet?: Partial<iSnippetData>;
+  snippet: iSnippetData;
 }) => {
   const storeRef = useRef<SnippetStore>();
 
   if (!storeRef.current) {
-    if (!snippet) {
-      const snippetString = localStorage.getItem("snippet-data");
-      if (snippetString) {
-        snippet = JSON.parse(snippetString);
-      }
-    }
     storeRef.current = createSnippetStore(snippet);
   }
 

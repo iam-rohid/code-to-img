@@ -13,9 +13,9 @@ import {
 } from "@/db/schema";
 import { CURRENT_WORKSPACE_SLUG_COOKIE } from "@/lib/constants";
 import {
-  CloudEditorProvider,
-  LocalEditorProvider,
-} from "@/providers/editor-provider";
+  CloudSnippetDataProvider,
+  LocalSnippetDataProvider,
+} from "@/providers/snippet-data-provider";
 import { trpc } from "@/trpc/server";
 
 export default async function Page({
@@ -32,9 +32,9 @@ export default async function Page({
     }
 
     return (
-      <LocalEditorProvider>
+      <LocalSnippetDataProvider>
         <Editor />
-      </LocalEditorProvider>
+      </LocalSnippetDataProvider>
     );
   }
 
@@ -102,8 +102,8 @@ export default async function Page({
     .where(eq(snippetTable.id, snippet.id));
 
   return (
-    <CloudEditorProvider snippet={snippet}>
+    <CloudSnippetDataProvider snippet={snippet}>
       <Editor />
-    </CloudEditorProvider>
+    </CloudSnippetDataProvider>
   );
 }

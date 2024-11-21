@@ -3,15 +3,20 @@ import { Reorder } from "framer-motion";
 import {
   AppWindowMacIcon,
   ArrowRightIcon,
+  CircleAlertIcon,
+  CircleCheckBigIcon,
   CircleIcon,
+  Code2Icon,
   CopyIcon,
+  EditIcon,
   EyeClosedIcon,
   EyeIcon,
   HexagonIcon,
   ImageIcon,
+  ImagePlusIcon,
   InfoIcon,
   LayersIcon,
-  LayoutGridIcon,
+  Loader2,
   LockIcon,
   LogInIcon,
   MenuIcon,
@@ -20,12 +25,16 @@ import {
   RedoIcon,
   ShapesIcon,
   Share,
+  Share2Icon,
+  SidebarCloseIcon,
+  SidebarOpenIcon,
   SquareIcon,
   TrashIcon,
   TypeIcon,
   UndoIcon,
   UnlockIcon,
 } from "lucide-react";
+import { nanoid } from "nanoid";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -48,22 +57,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import UserButton from "@/components/user-button";
+import { getCodeEditorElement, getTextElement } from "@/lib/constants/elements";
 import { cn } from "@/lib/utils";
-import {
-  getCodeEditorElement,
-  getDefaultSnippetData,
-  getTextElement,
-} from "@/lib/utils/editor";
 import { useAuth } from "@/providers/auth-provider";
-import { useEditor } from "@/providers/editor-provider";
-import {
-  SnippetStoreContext,
-  useSnippetStore,
-} from "@/providers/snippet-store-provider";
+import { useSnippetData } from "@/providers/snippet-data-provider";
+import { useSnippet } from "@/providers/snippet-provider";
+import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
+import { useRenameSnippetModal } from "../modals/rename-snippet-modal";
 import { ThemeSwitcher } from "../theme-toggle";
-import { Skeleton } from "../ui/skeleton";
+import { SidebarContext } from "../ui/sidebar";
 
 import { InspectionPanelMemo } from "./inspection-panel";
 
@@ -75,8 +78,10 @@ export default function EditorUI() {
   const setZoom = useEditorStore((state) => state.setZoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
-  const snippetStore = useContext(SnippetStoreContext);
-  const { isDurty, isSaving } = useEditor();
+  const { isDurty, isSaving } = useSnippetData();
+  const sidebarContext = useContext(SidebarContext);
+  const snippet = useSnippet();
+  const [RenameModal, , setShowRenameModal] = useRenameSnippetModal();
 
   const zoomPercentage = useMemo(() => Math.round(zoom * 100), [zoom]);
 
@@ -97,65 +102,97 @@ export default function EditorUI() {
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex flex-col gap-4 p-4">
       <div className="flex items-center gap-2">
-        <div className="flex-1 justify-start">
-          <div className="pointer-events-auto flex w-fit items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
+        <div className="flex flex-1 items-center justify-start gap-2 overflow-hidden">
+          <div className="pointer-events-auto flex items-center gap-2">
+            {sidebarContext && (
+              <Button
+                onClick={() => sidebarContext.toggleSidebar()}
+                variant="secondary"
+                size="icon"
+                className="flex-shrink-0"
+              >
+                {sidebarContext.open ? (
+                  <SidebarCloseIcon />
+                ) : (
+                  <SidebarOpenIcon />
+                )}
+              </Button>
+            )}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="flex-shrink-0"
+                >
                   <MenuIcon />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="bottom"
                 align="start"
-                className="bg-editor-card text-editor-card-foreground"
+                className="bg-card text-card-foreground"
               >
-                {status === "loading" ? (
-                  <Skeleton className="h-10 w-20" />
-                ) : status === "unauthorized" ? (
-                  <DropdownMenuItem asChild>
-                    <Link href="/login">
-                      <LogInIcon />
-                      Log In
-                    </Link>
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem asChild>
-                    <Link href="/">
-                      <LayoutGridIcon />
-                      Dashboard
-                    </Link>
+                {snippet && (
+                  <DropdownMenuItem onClick={() => setShowRenameModal(true)}>
+                    <EditIcon />
+                    Rename Snippet
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    snippetStore?.setState(getDefaultSnippetData());
-                  }}
-                >
-                  <TrashIcon />
-                  Reset the canvas
+
+                <DropdownMenuItem>
+                  <ImagePlusIcon />
+                  Export as Image
                 </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Share2Icon />
+                  Share
+                </DropdownMenuItem>
+
+                {status === "authorized" && snippet && (
+                  <DropdownMenuItem>
+                    <Code2Icon />
+                    Embeddable Link
+                  </DropdownMenuItem>
+                )}
+
+                {status === "unauthorized" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">
+                        <LogInIcon />
+                        Log In
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+
                 <DropdownMenuSeparator />
+
                 <div className="flex items-center justify-between gap-2 px-2">
                   <p className="text-sm font-medium">Theme</p>
                   <ThemeSwitcher />
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {snippet && <RenameModal snippet={snippet} />}
+            {snippet && <p className="truncate">{snippet.title}</p>}
           </div>
         </div>
 
         <Toolbar />
 
-        <div className="flex flex-1 justify-end">
-          <div className="pointer-events-auto flex w-fit items-center justify-end gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
+        <div className="flex flex-1 items-center justify-end gap-2 overflow-hidden">
+          <div className="pointer-events-auto flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
-                  variant="ghost"
-                  className={cn({
+                  variant="secondary"
+                  className={cn("flex-shrink-0", {
                     "bg-accent text-accent-foreground": layersOpen,
                   })}
                   onClick={() => setLayersOpen(!layersOpen)}
@@ -167,11 +204,11 @@ export default function EditorUI() {
                 {layersOpen ? "Hide layers panel" : "Show layers panel"}
               </TooltipContent>
             </Tooltip>
-            <Button>
+
+            <Button className="flex-shrink-0">
               <Share />
               Share
             </Button>
-            <UserButton />
           </div>
         </div>
       </div>
@@ -184,65 +221,115 @@ export default function EditorUI() {
 
       <div className="flex items-center gap-2">
         <div className="flex flex-1 items-center gap-2">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" onClick={handleZoomOut}>
-                  <MinusIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom Out</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleResetZoom}
-                  className="flex h-10 items-center justify-center text-center text-sm text-muted-foreground"
-                >
-                  {zoomPercentage}%
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Reset Zoom</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" onClick={handleZoomIn}>
-                  <PlusIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom In</TooltipContent>
-            </Tooltip>
-          </div>
+          <div className="pointer-events-auto flex items-center gap-2">
+            <div className="flex items-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-r-none"
+                    onClick={handleZoomOut}
+                  >
+                    <MinusIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Zoom Out</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleResetZoom}
+                    className="flex h-10 items-center justify-center bg-secondary px-2 text-center text-sm text-accent-foreground"
+                  >
+                    {zoomPercentage}%
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Reset Zoom</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-l-none"
+                    onClick={handleZoomIn}
+                  >
+                    <PlusIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Zoom In</TooltipContent>
+              </Tooltip>
+            </div>
 
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
-            <Button size="icon" variant="ghost">
-              <UndoIcon />
-            </Button>
-            <Button size="icon" variant="ghost">
-              <RedoIcon />
-            </Button>
+            <div className="flex items-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-r-none"
+                  >
+                    <UndoIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Undo</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-l-none"
+                  >
+                    <RedoIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Redo</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         </div>
+
         {(viewPortOffset.x !== 0 || viewPortOffset.y !== 0) && (
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
-            <Button
-              onClick={() => setViewPortOffset({ x: 0, y: 0 })}
-              variant="ghost"
-            >
-              Reset Viewport
-            </Button>
-          </div>
+          <Button
+            onClick={() => setViewPortOffset({ x: 0, y: 0 })}
+            variant="secondary"
+            className="pointer-events-auto"
+          >
+            Reset Viewport
+          </Button>
         )}
+
         <div className="flex flex-1 items-center justify-end gap-2">
-          {isSaving ? (
-            <p className="text-sm text-muted-foreground">Saving...</p>
-          ) : isDurty ? (
-            <p className="text-sm text-muted-foreground">Unsaved changes</p>
-          ) : null}
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
-            <Button size="icon" variant="ghost">
-              <InfoIcon />
-            </Button>
+          <div className="pointer-events-auto flex items-center gap-2">
+            {isSaving ? (
+              <div className="flex items-center rounded-full border px-3 py-1">
+                <Loader2 className="-ml-1 mr-1 h-3 w-3 animate-spin" />
+                <p className="text-xs font-medium text-muted-foreground">
+                  Saving...
+                </p>
+              </div>
+            ) : isDurty ? (
+              <div className="flex items-center rounded-full border px-3 py-1">
+                <CircleAlertIcon className="-ml-1 mr-1 h-3 w-3" />
+                <p className="text-xs font-medium text-muted-foreground">
+                  Unsaved changes
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-center rounded-full border px-3 py-1 opacity-0 transition-opacity delay-1000 duration-200">
+                <CircleCheckBigIcon className="-ml-1 mr-1 h-3 w-3" />
+                <p className="text-xs font-medium text-muted-foreground">
+                  Saved
+                </p>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Button size="icon" variant="secondary" className="flex-shrink-0">
+                <InfoIcon />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -256,55 +343,65 @@ function Toolbar() {
   const canvasHeight = useSnippetStore((state) => state.transform.height);
 
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-lg border bg-editor-card p-1 text-editor-card-foreground shadow-sm">
-      <div>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => {
-            addElement(getCodeEditorElement(canvasWidth, canvasHeight));
-          }}
-        >
-          <AppWindowMacIcon />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => {
-            addElement(getTextElement(canvasWidth, canvasHeight));
-          }}
-        >
-          <TypeIcon />
-        </Button>
-        <Button size="icon" variant="ghost">
-          <ImageIcon />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost">
-              <ShapesIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="end">
-            <DropdownMenuItem>
-              <SquareIcon />
-              Rectangle
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CircleIcon />
-              Ellipse
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <HexagonIcon />
-              Polygon
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <ArrowRightIcon />
-              Arrow
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="pointer-events-auto flex items-center gap-1 rounded-lg border bg-card p-0.5 text-card-foreground shadow-md">
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => {
+          addElement(
+            getCodeEditorElement({
+              id: nanoid(),
+              canvasWidth,
+              canvasHeight,
+            }),
+          );
+        }}
+      >
+        <AppWindowMacIcon />
+      </Button>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => {
+          addElement(
+            getTextElement({
+              id: nanoid(),
+              canvasWidth,
+              canvasHeight,
+            }),
+          );
+        }}
+      >
+        <TypeIcon />
+      </Button>
+      <Button size="icon" variant="ghost">
+        <ImageIcon />
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon" variant="ghost">
+            <ShapesIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="bottom" align="end">
+          <DropdownMenuItem>
+            <SquareIcon />
+            Rectangle
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <CircleIcon />
+            Ellipse
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <HexagonIcon />
+            Polygon
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <ArrowRightIcon />
+            Arrow
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -324,7 +421,7 @@ function LayersPanel() {
   const updateElement = useSnippetStore((state) => state.updateElement);
 
   return (
-    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-editor-card text-editor-card-foreground shadow-sm">
+    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="p-2">
         <p className="text-sm font-medium text-muted-foreground">Layers</p>
       </div>

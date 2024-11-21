@@ -51,7 +51,6 @@
     "drizzle-orm": "^0.36.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "framer-motion": "^11.11.11",
-    "lodash": "^4.17.21",
     "lucide-react": "^0.454.0",
     "nanoid": "^5.0.8",
     "next": "15.0.3",
@@ -69,7 +68,6 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.13",
     "@types/node": "^20",
     "@types/prismjs": "^1.26.5",
     "@types/react": "^18",

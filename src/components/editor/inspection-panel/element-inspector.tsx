@@ -36,7 +36,7 @@ function ElementInspector({ elementId }: { elementId: string }) {
   }
 
   return (
-    <div className="bg-editor-card text-editor-card-foreground pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border shadow-sm">
+    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
       <ElementAlignment elementId={elementId} />
       <Separator />
       <ElementTransform elementId={elementId} transform={element.transform} />

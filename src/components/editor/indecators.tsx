@@ -9,11 +9,12 @@ import {
   useState,
 } from "react";
 
-import { useWindowSize } from "@/hooks/use-window-size";
 import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
 import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
+
+import { useEditor } from "./editor";
 
 function getTransform(
   transform: iTransform,
@@ -99,7 +100,7 @@ export function Indecators() {
 export const IndecatorsMemo = memo(Indecators);
 
 function CanvasTransformIndecator() {
-  const windowSize = useWindowSize();
+  const { size: editorSize } = useEditor();
   const canvasWidth = useSnippetStore((state) => state.transform.width);
   const canvasHeight = useSnippetStore((state) => state.transform.height);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
@@ -288,7 +289,7 @@ function CanvasTransformIndecator() {
           height: canvasHeight,
           width: canvasWidth,
         },
-        windowSize,
+        editorSize,
         viewPortOffset,
         zoom,
       )}
@@ -364,7 +365,7 @@ function ElementTransformIndecator({
   transform: iTransform;
 }) {
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
-  const windowSize = useWindowSize();
+  const { size: editorSize } = useEditor();
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
@@ -608,7 +609,7 @@ function ElementTransformIndecator({
           height: canvasHeight,
           width: canvasWidth,
         },
-        windowSize,
+        editorSize,
         viewPortOffset,
         zoom,
       )}
@@ -901,7 +902,7 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
 
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-  const windowSize = useWindowSize();
+  const { size: editorSize } = useEditor();
 
   const canvasWidth = useSnippetStore((state) => state.transform.width);
   const canvasHeight = useSnippetStore((state) => state.transform.height);
@@ -915,7 +916,7 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
       style={getTransform(
         transform,
         { width: canvasWidth, height: canvasHeight },
-        windowSize,
+        editorSize,
         viewPortOffset,
         zoom,
       )}
@@ -931,7 +932,7 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
   );
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-  const windowSize = useWindowSize();
+  const { size: editorSize } = useEditor();
 
   const canvasWidth = useSnippetStore((state) => state.transform.width);
   const canvasHeight = useSnippetStore((state) => state.transform.height);
@@ -944,7 +945,7 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
       style={getTransform(
         transform,
         { width: canvasWidth, height: canvasHeight },
-        windowSize,
+        editorSize,
         viewPortOffset,
         zoom,
       )}
@@ -963,7 +964,7 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
   );
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-  const windowSize = useWindowSize();
+  const { size: editorSize } = useEditor();
 
   const canvasWidth = useSnippetStore((state) => state.transform.width);
   const canvasHeight = useSnippetStore((state) => state.transform.height);
@@ -976,7 +977,7 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
       style={getTransform(
         transform,
         { width: canvasWidth, height: canvasHeight },
-        windowSize,
+        editorSize,
         viewPortOffset,
         zoom,
       )}
@@ -996,7 +997,7 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
 
   const zoom = useEditorStore((state) => state.zoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-  const windowSize = useWindowSize();
+  const { size: editorSize } = useEditor();
 
   const canvasWidth = useSnippetStore((state) => state.transform.width);
   const canvasHeight = useSnippetStore((state) => state.transform.height);
@@ -1009,7 +1010,7 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
       style={getTransform(
         transform,
         { width: canvasWidth, height: canvasHeight },
-        windowSize,
+        editorSize,
         viewPortOffset,
         zoom,
       )}

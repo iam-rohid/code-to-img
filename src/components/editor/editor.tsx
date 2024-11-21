@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useContext, useEffect, WheelEvent } from "react";
-import _ from "lodash";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  WheelEvent,
+} from "react";
 
-import { useEditor } from "@/providers/editor-provider";
+import useElementSize from "@/hooks/use-element-size";
+import { useSnippetData } from "@/providers/snippet-data-provider";
 import {
   SnippetStoreContext,
   SnippetStoreProvider,
@@ -14,16 +20,34 @@ import Canvas from "./canvas";
 import EditorUI from "./editor-ui";
 import { IndecatorsMemo } from "./indecators";
 
+export type EditorContextValue = {
+  size: {
+    width: number;
+    height: number;
+  };
+};
+
+export const EditorContext = createContext<EditorContextValue | null>(null);
+
 export default function Editor() {
-  const { snippetData } = useEditor();
+  const { snippetData } = useSnippetData();
+  const { ref, height, width } = useElementSize();
+
   return (
-    <SnippetStoreProvider snippet={snippetData}>
-      <Snippet />
-    </SnippetStoreProvider>
+    <EditorContext.Provider value={{ size: { width, height } }}>
+      <div
+        className="relative flex flex-1 flex-col overflow-hidden bg-background text-foreground"
+        ref={ref}
+      >
+        <SnippetStoreProvider snippet={snippetData}>
+          <SnippetEditor />
+        </SnippetStoreProvider>
+      </div>
+    </EditorContext.Provider>
   );
 }
 
-const Snippet = () => {
+const SnippetEditor = () => {
   const snippetStore = useContext(SnippetStoreContext);
   if (!snippetStore) {
     throw new Error("SnippetContext.Provider not found in tree.");
@@ -35,7 +59,7 @@ const Snippet = () => {
   const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
   const setZoom = useEditorStore((state) => state.setZoom);
   const zoom = useEditorStore((state) => state.zoom);
-  const { updateSnippetData } = useEditor();
+  const { updateSnippetData } = useSnippetData();
 
   const handleScroll = useCallback(
     (e: WheelEvent<HTMLDivElement>) => {
@@ -52,27 +76,18 @@ const Snippet = () => {
   );
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout | null = null;
     const unsub = snippetStore.subscribe((state, prevState) => {
       if (JSON.stringify(state) !== JSON.stringify(prevState)) {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => {
-          updateSnippetData(JSON.parse(JSON.stringify(state)));
-        }, 500);
+        updateSnippetData(JSON.parse(JSON.stringify(state)));
       }
     });
     return () => {
       unsub();
-      if (timeout) {
-        clearTimeout(timeout);
-      }
     };
   }, [snippetStore, updateSnippetData]);
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-editor-background text-editor-foreground">
+    <>
       <div
         className="absolute bottom-0 left-0 right-0 top-0 overflow-hidden"
         onWheel={handleScroll}
@@ -97,6 +112,14 @@ const Snippet = () => {
         <IndecatorsMemo />
       </div>
       <EditorUI />
-    </div>
+    </>
   );
+};
+
+export const useEditor = () => {
+  const context = useContext(EditorContext);
+  if (!context) {
+    throw new Error("EditorContext.Provider not found in the tree");
+  }
+  return context;
 };

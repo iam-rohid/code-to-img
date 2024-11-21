@@ -62,6 +62,7 @@ export const snippetsRouter = router({
         workspaceId: z.string(),
         dto: z.object({
           title: z.string(),
+          data: snippetSchema.optional(),
         }),
       }),
     )
@@ -75,6 +76,7 @@ export const snippetsRouter = router({
         .values({
           workspaceId: workspace.id,
           title: input.dto.title,
+          data: input.dto.data,
         })
         .returning();
       if (!snippet) {

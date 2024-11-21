@@ -7,7 +7,7 @@ import { useSnippetStore } from "@/providers/snippet-store-provider";
 
 export function CanvasInspector() {
   return (
-    <div className="bg-editor-card text-editor-card-foreground pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border shadow-sm">
+    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="p-2">
         <p className="text-sm font-medium text-muted-foreground">Canvas</p>
       </div>

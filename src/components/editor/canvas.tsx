@@ -32,7 +32,7 @@ export default function Canvas() {
         ))}
       </div>
 
-      <div className="pointer-events-none absolute inset-0 z-20 ring-[9999px] ring-editor-background/80"></div>
+      <div className="pointer-events-none absolute inset-0 z-20 ring-[9999px] ring-background/80"></div>
     </div>
   );
 }
