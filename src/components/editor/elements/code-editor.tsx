@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
+import { useStore } from "zustand";
 
 import { codeEditorThemes } from "@/lib/constants/code-editor-themes";
 import { iCodeEditorElement } from "@/lib/validator/element";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
+import { useEditor } from "../editor";
 
 import Draggable from "./shared/draggable";
 
@@ -13,7 +14,9 @@ export default function CodeEditorElement({
 }: {
   element: iCodeEditorElement;
 }) {
-  const updateElement = useSnippetStore((state) => state.updateElement);
+  const { store, readOnly } = useEditor();
+  const updateElement = useStore(store, (state) => state.updateElement);
+
   const theme = useMemo(
     () => codeEditorThemes.find((theme) => theme.id === element.theme),
     [element.theme],
@@ -95,6 +98,7 @@ export default function CodeEditorElement({
           onChange={(value) => {
             updateElement(element.id, { code: value });
           }}
+          readOnly={readOnly}
           basicSetup={{
             lineNumbers: element.lineNumbers,
             highlightActiveLine: false,

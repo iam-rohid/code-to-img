@@ -1,16 +1,19 @@
 "use client";
 
+import { useStore } from "zustand";
+
 import { getBackgroundStyle } from "@/lib/utils/editor";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
+import { useEditor } from "./editor";
 import { ElementMemo } from "./element";
 
 export default function Canvas() {
-  const width = useSnippetStore((state) => state.transform.width);
-  const height = useSnippetStore((state) => state.transform.height);
-  const background = useSnippetStore((state) => state.background);
-  const elements = useSnippetStore((state) => state.elements);
+  const { store, readOnly } = useEditor();
+  const width = useStore(store, (state) => state.transform.width);
+  const height = useStore(store, (state) => state.transform.height);
+  const background = useStore(store, (state) => state.background);
+  const elements = useStore(store, (state) => state.elements);
   const setSelectedElement = useEditorStore(
     (state) => state.setSelectedElement,
   );
@@ -23,7 +26,11 @@ export default function Canvas() {
       <div
         className="absolute inset-0 z-0"
         style={background.color ? getBackgroundStyle(background.color) : {}}
-        onClick={() => setSelectedElement("canvas")}
+        onClick={() => {
+          if (!readOnly) {
+            setSelectedElement("canvas");
+          }
+        }}
       ></div>
 
       <div className="pointer-events-none absolute inset-0 z-10">

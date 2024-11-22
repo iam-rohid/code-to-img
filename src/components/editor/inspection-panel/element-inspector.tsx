@@ -12,6 +12,7 @@ import {
   RotateCcwIcon,
   TrashIcon,
 } from "lucide-react";
+import { useStore } from "zustand";
 
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Button } from "@/components/ui/button";
@@ -23,12 +24,13 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
+import { useEditor } from "../editor";
 
 import { TextElementOptions } from "./text-element-options";
 
 function ElementInspector({ elementId }: { elementId: string }) {
-  const element = useSnippetStore((state) =>
+  const { store } = useEditor();
+  const element = useStore(store, (state) =>
     state.elements.find((element) => element.id === elementId),
   );
   if (!element) {
@@ -55,7 +57,8 @@ function ElementInspector({ elementId }: { elementId: string }) {
 export const ElementInspectorMemo = memo(ElementInspector);
 
 function ElementAlignment({ elementId }: { elementId: string }) {
-  const alignElement = useSnippetStore((state) => state.alignElement);
+  const { store } = useEditor();
+  const alignElement = useStore(store, (state) => state.alignElement);
   return (
     <div className="p-2">
       <p className="mb-2 text-xs text-muted-foreground">Alignment</p>
@@ -145,7 +148,9 @@ function ElementTransform({
   elementId: string;
   transform: iTransform;
 }) {
-  const updateElementTransform = useSnippetStore(
+  const { store } = useEditor();
+  const updateElementTransform = useStore(
+    store,
     (state) => state.updateElementTransform,
   );
 
@@ -298,8 +303,9 @@ function ElementTransform({
 }
 
 function ElementActions({ elementId }: { elementId: string }) {
-  const removeElement = useSnippetStore((state) => state.removeElement);
-  const duplicateElement = useSnippetStore((state) => state.duplicateElement);
+  const { store } = useEditor();
+  const removeElement = useStore(store, (state) => state.removeElement);
+  const duplicateElement = useStore(store, (state) => state.duplicateElement);
 
   return (
     <div className="p-2">

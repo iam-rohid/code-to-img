@@ -3,8 +3,6 @@ import { Reorder } from "framer-motion";
 import {
   AppWindowMacIcon,
   ArrowRightIcon,
-  CircleAlertIcon,
-  CircleCheckBigIcon,
   CircleIcon,
   Code2Icon,
   CopyIcon,
@@ -16,7 +14,6 @@ import {
   ImagePlusIcon,
   InfoIcon,
   LayersIcon,
-  Loader2,
   LockIcon,
   LogInIcon,
   MenuIcon,
@@ -36,6 +33,7 @@ import {
 } from "lucide-react";
 import { nanoid } from "nanoid";
 import Link from "next/link";
+import { useStore } from "zustand";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -60,17 +58,17 @@ import {
 import { getCodeEditorElement, getTextElement } from "@/lib/constants/elements";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
-import { useSnippetData } from "@/providers/snippet-data-provider";
 import { useSnippet } from "@/providers/snippet-provider";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 import { useRenameSnippetModal } from "../modals/rename-snippet-modal";
 import { ThemeSwitcher } from "../theme-toggle";
 import { SidebarContext } from "../ui/sidebar";
 
+import { useEditor } from "./editor";
 import { InspectionPanelMemo } from "./inspection-panel";
 
 export default function EditorUI() {
+  const { readOnly } = useEditor();
   const { status } = useAuth();
   const layersOpen = useEditorStore((state) => state.layersOpen);
   const setLayersOpen = useEditorStore((state) => state.setLayersOpen);
@@ -78,7 +76,7 @@ export default function EditorUI() {
   const setZoom = useEditorStore((state) => state.setZoom);
   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
   const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
-  const { isDurty, isSaving } = useSnippetData();
+  // const { isDurty, isSaving } = useSnippetData();
   const sidebarContext = useContext(SidebarContext);
   const snippet = useSnippet();
   const [RenameModal, , setShowRenameModal] = useRenameSnippetModal();
@@ -183,33 +181,35 @@ export default function EditorUI() {
           </div>
         </div>
 
-        <Toolbar />
+        {readOnly ? null : <Toolbar />}
 
         <div className="flex flex-1 items-center justify-end gap-2 overflow-hidden">
-          <div className="pointer-events-auto flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className={cn("flex-shrink-0", {
-                    "bg-accent text-accent-foreground": layersOpen,
-                  })}
-                  onClick={() => setLayersOpen(!layersOpen)}
-                >
-                  <LayersIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {layersOpen ? "Hide layers panel" : "Show layers panel"}
-              </TooltipContent>
-            </Tooltip>
+          {readOnly ? null : (
+            <div className="pointer-events-auto flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className={cn("flex-shrink-0", {
+                      "bg-accent text-accent-foreground": layersOpen,
+                    })}
+                    onClick={() => setLayersOpen(!layersOpen)}
+                  >
+                    <LayersIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {layersOpen ? "Hide layers panel" : "Show layers panel"}
+                </TooltipContent>
+              </Tooltip>
 
-            <Button className="flex-shrink-0">
-              <Share />
-              Share
-            </Button>
-          </div>
+              <Button className="flex-shrink-0">
+                <Share />
+                Share
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -262,32 +262,34 @@ export default function EditorUI() {
               </Tooltip>
             </div>
 
-            <div className="flex items-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="rounded-r-none"
-                  >
-                    <UndoIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Undo</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="rounded-l-none"
-                  >
-                    <RedoIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Redo</TooltipContent>
-              </Tooltip>
-            </div>
+            {!readOnly && (
+              <div className="flex items-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="rounded-r-none"
+                    >
+                      <UndoIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Undo</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="rounded-l-none"
+                    >
+                      <RedoIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Redo</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         </div>
 
@@ -303,7 +305,7 @@ export default function EditorUI() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           <div className="pointer-events-auto flex items-center gap-2">
-            {isSaving ? (
+            {/* {isSaving ? (
               <div className="flex items-center rounded-full border px-3 py-1">
                 <Loader2 className="-ml-1 mr-1 h-3 w-3 animate-spin" />
                 <p className="text-xs font-medium text-muted-foreground">
@@ -324,12 +326,18 @@ export default function EditorUI() {
                   Saved
                 </p>
               </div>
+            )} */}
+            {!readOnly && (
+              <div className="flex items-center gap-2">
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="flex-shrink-0"
+                >
+                  <InfoIcon />
+                </Button>
+              </div>
             )}
-            <div className="flex items-center gap-2">
-              <Button size="icon" variant="secondary" className="flex-shrink-0">
-                <InfoIcon />
-              </Button>
-            </div>
           </div>
         </div>
       </div>
@@ -338,9 +346,10 @@ export default function EditorUI() {
 }
 
 function Toolbar() {
-  const addElement = useSnippetStore((state) => state.addElement);
-  const canvasWidth = useSnippetStore((state) => state.transform.width);
-  const canvasHeight = useSnippetStore((state) => state.transform.height);
+  const { store } = useEditor();
+  const addElement = useStore(store, (state) => state.addElement);
+  const canvasWidth = useStore(store, (state) => state.transform.width);
+  const canvasHeight = useStore(store, (state) => state.transform.height);
 
   return (
     <div className="pointer-events-auto flex items-center gap-1 rounded-lg border bg-card p-0.5 text-card-foreground shadow-md">
@@ -407,8 +416,14 @@ function Toolbar() {
 }
 
 function LayersPanel() {
-  const updateSnippet = useSnippetStore((state) => state.updateSnippet);
-  const elements = useSnippetStore((state) => state.elements);
+  const { store } = useEditor();
+
+  const updateSnippet = useStore(store, (state) => state.updateSnippet);
+  const elements = useStore(store, (state) => state.elements);
+  const duplicateElement = useStore(store, (state) => state.duplicateElement);
+  const removeElement = useStore(store, (state) => state.removeElement);
+  const updateElement = useStore(store, (state) => state.updateElement);
+
   const selectedElementId = useEditorStore((state) => state.selectedElementId);
   const setSelectedElement = useEditorStore(
     (state) => state.setSelectedElement,
@@ -416,9 +431,6 @@ function LayersPanel() {
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
-  const duplicateElement = useSnippetStore((state) => state.duplicateElement);
-  const removeElement = useSnippetStore((state) => state.removeElement);
-  const updateElement = useSnippetStore((state) => state.updateElement);
 
   return (
     <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">

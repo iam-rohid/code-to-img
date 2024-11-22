@@ -1,10 +1,13 @@
+import { useStore } from "zustand";
+
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Input } from "@/components/ui/input";
 import { iTextElement } from "@/lib/validator/element";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
+import { useEditor } from "../editor";
 
 export function TextElementOptions({ element }: { element: iTextElement }) {
-  const updateElement = useSnippetStore((state) => state.updateElement);
+  const { store } = useEditor();
+  const updateElement = useStore(store, (state) => state.updateElement);
 
   if (element?.type !== "text") {
     return null;

@@ -5,11 +5,12 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { useStore } from "zustand";
 
 import { cn } from "@/lib/utils";
 import { iElement } from "@/lib/validator/element";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
+import { useEditor } from "../../editor";
 
 export default function Draggable({
   element,
@@ -21,19 +22,24 @@ export default function Draggable({
   className?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
-  const updateElementTransform = useSnippetStore(
+
+  const { store, readOnly } = useEditor();
+
+  const updateElementTransform = useStore(
+    store,
     (state) => state.updateElementTransform,
   );
+
+  const zoom = useEditorStore((state) => state.zoom);
   const updateElementState = useEditorStore(
     (state) => state.updateElementState,
   );
-  const zoom = useEditorStore((state) => state.zoom);
 
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
-      if (element.locked || element.hidden) {
+      if (element.locked || element.hidden || readOnly) {
         return;
       }
 
@@ -42,7 +48,7 @@ export default function Draggable({
       setStartMousePos({ x: e.clientX, y: e.clientY });
       document.documentElement.classList.add("cursor-move", "select-none");
     },
-    [element.hidden, element.id, element.locked, updateElementState],
+    [element.hidden, element.id, element.locked, readOnly, updateElementState],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -80,7 +86,9 @@ export default function Draggable({
   );
 
   useEffect(() => {
-    if (!isDragging) return;
+    if (element.locked || element.hidden || readOnly || !isDragging) {
+      return;
+    }
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -88,12 +96,19 @@ export default function Draggable({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [handleMouseMove, handleMouseUp, isDragging]);
+  }, [
+    element.hidden,
+    element.locked,
+    handleMouseMove,
+    handleMouseUp,
+    isDragging,
+    readOnly,
+  ]);
 
   return (
     <div
       className={cn(className, {
-        "cursor-move": !element.locked && !element.hidden,
+        "cursor-move": !readOnly && !element.locked && !element.hidden,
       })}
       onMouseDown={handleMouseDown}
     >

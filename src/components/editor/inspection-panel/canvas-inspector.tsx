@@ -1,9 +1,10 @@
 import { memo } from "react";
+import { useStore } from "zustand";
 
 import BackgroundPicker from "@/components/background-picker";
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Separator } from "@/components/ui/separator";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
+import { useEditor } from "../editor";
 
 export function CanvasInspector() {
   return (
@@ -22,12 +23,15 @@ export function CanvasInspector() {
 export const CanvasInspectorMemo = memo(CanvasInspector);
 
 export function CanvasTransform() {
-  const canvasWidth = useSnippetStore((state) => state.transform.width);
-  const canvasHeight = useSnippetStore((state) => state.transform.height);
-  const canvasWidthHeightLinked = useSnippetStore(
+  const { store } = useEditor();
+  const canvasWidth = useStore(store, (state) => state.transform.width);
+  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const canvasWidthHeightLinked = useStore(
+    store,
     (state) => state.transform.widthHeightLinked,
   );
-  const setCanvasTransform = useSnippetStore(
+  const setCanvasTransform = useStore(
+    store,
     (state) => state.updateSnippetTransform,
   );
 
@@ -92,8 +96,9 @@ export function CanvasTransform() {
 }
 
 function CanvasBackground() {
-  const background = useSnippetStore((state) => state.background);
-  const updateSnippet = useSnippetStore((state) => state.updateSnippet);
+  const { store } = useEditor();
+  const background = useStore(store, (state) => state.background);
+  const updateSnippet = useStore(store, (state) => state.updateSnippet);
 
   return (
     <div className="p-2">

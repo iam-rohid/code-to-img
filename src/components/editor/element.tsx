@@ -1,15 +1,18 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useStore } from "zustand";
 
 import { iElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
-import { useSnippetStore } from "@/providers/snippet-store-provider";
 import { useEditorStore } from "@/store/editor-store";
 
+import { useEditor } from "./editor";
 import CodeEditorElement from "./elements/code-editor";
 import TextElement from "./elements/text-element";
 
 export default function Element({ element }: { element: iElement }) {
-  const updateElementTransform = useSnippetStore(
+  const { store, readOnly } = useEditor();
+  const updateElementTransform = useStore(
+    store,
     (state) => state.updateElementTransform,
   );
 
@@ -129,9 +132,13 @@ export default function Element({ element }: { element: iElement }) {
           scale(${element.transform.scale})
         `,
       }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
+      {...(readOnly
+        ? {}
+        : {
+            onMouseEnter: handleMouseEnter,
+            onMouseLeave: handleMouseLeave,
+            onMouseDown: handleMouseDown,
+          })}
       className="absolute"
     >
       {element.type === "code-editor" ? (
