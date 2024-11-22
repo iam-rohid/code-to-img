@@ -9,7 +9,6 @@ import { useStore } from "zustand";
 
 import { cn } from "@/lib/utils";
 import { iElement } from "@/lib/validator/element";
-import { useEditorStore } from "@/store/editor-store";
 import { useEditor } from "../../editor";
 
 export default function Draggable({
@@ -23,15 +22,16 @@ export default function Draggable({
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
-  const { store, readOnly } = useEditor();
+  const { store, readOnly, editorStore } = useEditor();
 
   const updateElementTransform = useStore(
     store,
     (state) => state.updateElementTransform,
   );
 
-  const zoom = useEditorStore((state) => state.zoom);
-  const updateElementState = useEditorStore(
+  const zoom = useStore(editorStore, (state) => state.zoom);
+  const updateElementState = useStore(
+    editorStore,
     (state) => state.updateElementState,
   );
 

@@ -59,7 +59,6 @@ import { getCodeEditorElement, getTextElement } from "@/lib/constants/elements";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useSnippet } from "@/providers/snippet-provider";
-import { useEditorStore } from "@/store/editor-store";
 import { useRenameSnippetModal } from "../modals/rename-snippet-modal";
 import { ThemeSwitcher } from "../theme-toggle";
 import { SidebarContext } from "../ui/sidebar";
@@ -68,14 +67,15 @@ import { useEditor } from "./editor";
 import { InspectionPanelMemo } from "./inspection-panel";
 
 export default function EditorUI() {
-  const { readOnly } = useEditor();
+  const { readOnly, editorStore } = useEditor();
   const { status } = useAuth();
-  const layersOpen = useEditorStore((state) => state.layersOpen);
-  const setLayersOpen = useEditorStore((state) => state.setLayersOpen);
-  const zoom = useEditorStore((state) => state.zoom);
-  const setZoom = useEditorStore((state) => state.setZoom);
-  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-  const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
+  const layersOpen = useStore(editorStore, (state) => state.layersOpen);
+  const setLayersOpen = useStore(editorStore, (state) => state.setLayersOpen);
+  const zoom = useStore(editorStore, (state) => state.zoom);
+  const setZoom = useStore(editorStore, (state) => state.setZoom);
+  const scrollX = useStore(editorStore, (state) => state.scrollX);
+  const scrollY = useStore(editorStore, (state) => state.scrollY);
+  const setScroll = useStore(editorStore, (state) => state.setScroll);
   // const { isDurty, isSaving } = useSnippetData();
   const sidebarContext = useContext(SidebarContext);
   const snippet = useSnippet();
@@ -293,9 +293,9 @@ export default function EditorUI() {
           </div>
         </div>
 
-        {(viewPortOffset.x !== 0 || viewPortOffset.y !== 0) && (
+        {(scrollX !== 0 || scrollY !== 0) && (
           <Button
-            onClick={() => setViewPortOffset({ x: 0, y: 0 })}
+            onClick={() => setScroll(0, 0)}
             variant="secondary"
             className="pointer-events-auto"
           >
@@ -416,7 +416,7 @@ function Toolbar() {
 }
 
 function LayersPanel() {
-  const { store } = useEditor();
+  const { store, editorStore } = useEditor();
 
   const updateSnippet = useStore(store, (state) => state.updateSnippet);
   const elements = useStore(store, (state) => state.elements);
@@ -424,11 +424,16 @@ function LayersPanel() {
   const removeElement = useStore(store, (state) => state.removeElement);
   const updateElement = useStore(store, (state) => state.updateElement);
 
-  const selectedElementId = useEditorStore((state) => state.selectedElementId);
-  const setSelectedElement = useEditorStore(
+  const selectedElementId = useStore(
+    editorStore,
+    (state) => state.selectedElementId,
+  );
+  const setSelectedElement = useStore(
+    editorStore,
     (state) => state.setSelectedElement,
   );
-  const updateElementState = useEditorStore(
+  const updateElementState = useStore(
+    editorStore,
     (state) => state.updateElementState,
   );
 

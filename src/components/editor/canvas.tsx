@@ -3,18 +3,18 @@
 import { useStore } from "zustand";
 
 import { getBackgroundStyle } from "@/lib/utils/editor";
-import { useEditorStore } from "@/store/editor-store";
 
 import { useEditor } from "./editor";
 import { ElementMemo } from "./element";
 
 export default function Canvas() {
-  const { store, readOnly } = useEditor();
+  const { store, readOnly, editorStore } = useEditor();
   const width = useStore(store, (state) => state.transform.width);
   const height = useStore(store, (state) => state.transform.height);
   const background = useStore(store, (state) => state.background);
   const elements = useStore(store, (state) => state.elements);
-  const setSelectedElement = useEditorStore(
+  const setSelectedElement = useStore(
+    editorStore,
     (state) => state.setSelectedElement,
   );
 

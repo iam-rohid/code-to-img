@@ -9,11 +9,13 @@ import {
   useRef,
   WheelEvent,
 } from "react";
+import { z } from "zod";
+import { useStore } from "zustand";
 
 import useElementSize from "@/hooks/use-element-size";
 import { cn } from "@/lib/utils";
 import { iSnippetData } from "@/lib/validator/snippet";
-import { useEditorStore } from "@/store/editor-store";
+import { createEditorStore, EditorStore } from "@/store/editor-store";
 import { createSnippetStore, SnippetStore } from "@/store/snippet-store";
 
 import Canvas from "./canvas";
@@ -27,6 +29,7 @@ export type SnippetEditorContextValue = {
   };
   readOnly?: boolean;
   store: SnippetStore;
+  editorStore: EditorStore;
 };
 
 export const SnippetEditorContext =
@@ -38,7 +41,43 @@ export interface SnippetEditorProps {
   readOnly?: boolean;
   className?: string;
   style?: CSSProperties;
+  snippetId?: string;
 }
+
+const scrollPosition = z.object({
+  scrollX: z.number(),
+  scrollY: z.number(),
+  zoom: z.number(),
+});
+
+const scrollPositionStoreSchema = z.record(scrollPosition);
+
+const SCROLL_POSITIONS_KEY = "codetoimg-scroll-position";
+
+const getScrollPosition = (id: string): z.infer<typeof scrollPosition> => {
+  const value = localStorage.getItem(SCROLL_POSITIONS_KEY);
+  if (value) {
+    const scrollPositions = scrollPositionStoreSchema.parse(JSON.parse(value));
+    const scrollPosition = scrollPositions[id];
+    if (scrollPosition) {
+      return scrollPosition;
+    }
+  }
+  return {
+    scrollX: 0,
+    scrollY: 0,
+    zoom: 1,
+  };
+};
+const setScrollPosition = (id: string, pos: z.infer<typeof scrollPosition>) => {
+  let scrollPositions: z.infer<typeof scrollPositionStoreSchema> = {};
+  const value = localStorage.getItem(SCROLL_POSITIONS_KEY);
+  if (value) {
+    scrollPositions = scrollPositionStoreSchema.parse(JSON.parse(value));
+  }
+  scrollPositions[id] = pos;
+  localStorage.setItem(SCROLL_POSITIONS_KEY, JSON.stringify(scrollPositions));
+};
 
 export default function SnippetEditor({
   className,
@@ -46,40 +85,57 @@ export default function SnippetEditor({
   readOnly,
   style,
   defaultValue,
+  snippetId,
 }: SnippetEditorProps) {
-  const { ref, height, width } = useElementSize();
   const storeRef = useRef<SnippetStore>();
-  const setSelectedElement = useEditorStore(
+  if (!storeRef.current) {
+    storeRef.current = createSnippetStore(defaultValue);
+  }
+  const editorStoreRef = useRef<EditorStore>();
+  if (!editorStoreRef.current) {
+    let scrollPosition = {
+      scrollX: 0,
+      scrollY: 0,
+      zoom: 1,
+    };
+    if (snippetId) {
+      scrollPosition = getScrollPosition(snippetId);
+    }
+    editorStoreRef.current = createEditorStore({
+      ...scrollPosition,
+    });
+  }
+
+  const { ref, height, width } = useElementSize();
+  const setSelectedElement = useStore(
+    editorStoreRef.current,
     (state) => state.setSelectedElement,
   );
-  const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-  const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
-  const setZoom = useEditorStore((state) => state.setZoom);
-  const zoom = useEditorStore((state) => state.zoom);
+  const scrollX = useStore(editorStoreRef.current, (state) => state.scrollX);
+  const scrollY = useStore(editorStoreRef.current, (state) => state.scrollY);
+  const setScroll = useStore(
+    editorStoreRef.current,
+    (state) => state.setScroll,
+  );
+  const setZoom = useStore(editorStoreRef.current, (state) => state.setZoom);
+  const zoom = useStore(editorStoreRef.current, (state) => state.zoom);
 
   const handleScroll = useCallback(
     (e: WheelEvent<HTMLDivElement>) => {
       if (e.metaKey) {
         setZoom(Math.min(30, Math.max(0.1, zoom - e.deltaY * 0.01)));
       } else {
-        setViewPortOffset({
-          x: viewPortOffset.x - e.deltaX,
-          y: viewPortOffset.y - e.deltaY,
-        });
+        setScroll(scrollX - e.deltaX, scrollY - e.deltaY);
       }
     },
-    [setViewPortOffset, setZoom, viewPortOffset.x, viewPortOffset.y, zoom],
+    [setZoom, zoom, setScroll, scrollX, scrollY],
   );
 
-  if (!storeRef.current) {
-    storeRef.current = createSnippetStore(defaultValue);
-  }
-
   useEffect(() => {
-    if (!storeRef.current) {
+    if (readOnly) {
       return;
     }
-    if (readOnly) {
+    if (!storeRef.current) {
       return;
     }
 
@@ -93,11 +149,45 @@ export default function SnippetEditor({
     };
   }, [onChnage, readOnly]);
 
+  useEffect(() => {
+    if (readOnly || !snippetId) {
+      return;
+    }
+    if (!editorStoreRef.current) {
+      return;
+    }
+
+    let timeout: NodeJS.Timeout | null = null;
+
+    const unsub = editorStoreRef.current.subscribe((state, prevState) => {
+      if (JSON.stringify(state) !== JSON.stringify(prevState)) {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+        timeout = setTimeout(() => {
+          setScrollPosition(snippetId, {
+            scrollX: state.scrollX,
+            scrollY: state.scrollY,
+            zoom: state.zoom,
+          });
+        }, 200);
+      }
+    });
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      unsub();
+    };
+  }, [onChnage, readOnly, snippetId]);
+
   return (
     <SnippetEditorContext.Provider
       value={{
         size: { width, height },
         store: storeRef.current,
+        editorStore: editorStoreRef.current,
         readOnly,
       }}
     >
@@ -126,7 +216,7 @@ export default function SnippetEditor({
             className="absolute left-1/2 top-1/2"
             style={{
               transform: `
-                translate(${viewPortOffset.x}px, ${viewPortOffset.y}px) 
+                translate(${scrollX}px, ${scrollY}px) 
                 scale(${zoom})
               `,
             }}
@@ -141,75 +231,6 @@ export default function SnippetEditor({
     </SnippetEditorContext.Provider>
   );
 }
-
-// const Editor = () => {
-//   const snippetStore = useContext(SnippetStoreContext);
-//   if (!snippetStore) {
-//     throw new Error("SnippetContext.Provider not found in tree.");
-//   }
-//   const setSelectedElement = useEditorStore(
-//     (state) => state.setSelectedElement,
-//   );
-//   const viewPortOffset = useEditorStore((state) => state.viewPortOffset);
-//   const setViewPortOffset = useEditorStore((state) => state.setViewPortOffset);
-//   const setZoom = useEditorStore((state) => state.setZoom);
-//   const zoom = useEditorStore((state) => state.zoom);
-//   const { updateSnippetData } = useSnippetData();
-
-//   const handleScroll = useCallback(
-//     (e: WheelEvent<HTMLDivElement>) => {
-//       if (e.metaKey) {
-//         setZoom(Math.min(30, Math.max(0.1, zoom - e.deltaY * 0.01)));
-//       } else {
-//         setViewPortOffset({
-//           x: viewPortOffset.x - e.deltaX,
-//           y: viewPortOffset.y - e.deltaY,
-//         });
-//       }
-//     },
-//     [setViewPortOffset, setZoom, viewPortOffset.x, viewPortOffset.y, zoom],
-//   );
-
-//   useEffect(() => {
-//     const unsub = snippetStore.subscribe((state, prevState) => {
-//       if (JSON.stringify(state) !== JSON.stringify(prevState)) {
-//         updateSnippetData(JSON.parse(JSON.stringify(state)));
-//       }
-//     });
-//     return () => {
-//       unsub();
-//     };
-//   }, [snippetStore, updateSnippetData]);
-
-//   return (
-//     <>
-//       <div
-//         className="absolute bottom-0 left-0 right-0 top-0 overflow-hidden"
-//         onWheel={handleScroll}
-//       >
-//         <div
-//           className="absolute inset-0"
-//           onClick={() => setSelectedElement(null)}
-//         ></div>
-
-//         <div
-//           className="absolute left-1/2 top-1/2"
-//           style={{
-//             transform: `
-//           translate(${viewPortOffset.x}px, ${viewPortOffset.y}px)
-//           scale(${zoom})
-//         `,
-//           }}
-//         >
-//           <Canvas />
-//         </div>
-
-//         <IndecatorsMemo />
-//       </div>
-//       <EditorUI />
-//     </>
-//   );
-// };
 
 export const useEditor = () => {
   const context = useContext(SnippetEditorContext);

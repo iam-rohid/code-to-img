@@ -95,7 +95,11 @@ function SnippetLoaded({ snippet }: { snippet: Snippet }) {
     <div className="flex flex-1 flex-col">
       {snippet.trashedAt && <SnippetTrashedBanner snippet={snippet} />}
       <SnippetProvider snippet={snippet}>
-        <SnippetEditor defaultValue={snippet.data} onChnage={setNewData} />
+        <SnippetEditor
+          defaultValue={snippet.data}
+          onChnage={setNewData}
+          snippetId={snippet.id}
+        />
       </SnippetProvider>
     </div>
   );

@@ -3,25 +3,26 @@ import { useStore } from "zustand";
 
 import { iElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
-import { useEditorStore } from "@/store/editor-store";
 
 import { useEditor } from "./editor";
 import CodeEditorElement from "./elements/code-editor";
 import TextElement from "./elements/text-element";
 
 export default function Element({ element }: { element: iElement }) {
-  const { store, readOnly } = useEditor();
+  const { store, readOnly, editorStore } = useEditor();
+  const elementRef = useRef<HTMLDivElement>(null);
+
   const updateElementTransform = useStore(
     store,
     (state) => state.updateElementTransform,
   );
 
-  const elementRef = useRef<HTMLDivElement>(null);
-
-  const updateElementState = useEditorStore(
+  const updateElementState = useStore(
+    editorStore,
     (state) => state.updateElementState,
   );
-  const setSelectedElement = useEditorStore(
+  const setSelectedElement = useStore(
+    editorStore,
     (state) => state.setSelectedElement,
   );
 
