@@ -63,11 +63,11 @@ import { useRenameSnippetModal } from "../modals/rename-snippet-modal";
 import { ThemeSwitcher } from "../theme-toggle";
 import { SidebarContext } from "../ui/sidebar";
 
-import { useEditor } from "./editor";
 import { InspectionPanelMemo } from "./inspection-panel";
+import { useSnippetEditor } from "./snippet-editor";
 
-export default function EditorUI() {
-  const { readOnly, editorStore } = useEditor();
+export default function SnippetEditorUI() {
+  const { readOnly, editorStore } = useSnippetEditor();
   const { status } = useAuth();
   const layersOpen = useStore(editorStore, (state) => state.layersOpen);
   const setLayersOpen = useStore(editorStore, (state) => state.setLayersOpen);
@@ -305,28 +305,6 @@ export default function EditorUI() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           <div className="pointer-events-auto flex items-center gap-2">
-            {/* {isSaving ? (
-              <div className="flex items-center rounded-full border px-3 py-1">
-                <Loader2 className="-ml-1 mr-1 h-3 w-3 animate-spin" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Saving...
-                </p>
-              </div>
-            ) : isDurty ? (
-              <div className="flex items-center rounded-full border px-3 py-1">
-                <CircleAlertIcon className="-ml-1 mr-1 h-3 w-3" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Unsaved changes
-                </p>
-              </div>
-            ) : (
-              <div className="flex items-center rounded-full border px-3 py-1 opacity-0 transition-opacity delay-1000 duration-200">
-                <CircleCheckBigIcon className="-ml-1 mr-1 h-3 w-3" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Saved
-                </p>
-              </div>
-            )} */}
             {!readOnly && (
               <div className="flex items-center gap-2">
                 <Button
@@ -346,10 +324,13 @@ export default function EditorUI() {
 }
 
 function Toolbar() {
-  const { store } = useEditor();
-  const addElement = useStore(store, (state) => state.addElement);
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const { snippetStore } = useSnippetEditor();
+  const addElement = useStore(snippetStore, (state) => state.addElement);
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
 
   return (
     <div className="pointer-events-auto flex items-center gap-1 rounded-lg border bg-card p-0.5 text-card-foreground shadow-md">
@@ -416,13 +397,16 @@ function Toolbar() {
 }
 
 function LayersPanel() {
-  const { store, editorStore } = useEditor();
+  const { snippetStore, editorStore } = useSnippetEditor();
 
-  const updateSnippet = useStore(store, (state) => state.updateSnippet);
-  const elements = useStore(store, (state) => state.elements);
-  const duplicateElement = useStore(store, (state) => state.duplicateElement);
-  const removeElement = useStore(store, (state) => state.removeElement);
-  const updateElement = useStore(store, (state) => state.updateElement);
+  const updateSnippet = useStore(snippetStore, (state) => state.updateSnippet);
+  const elements = useStore(snippetStore, (state) => state.elements);
+  const duplicateElement = useStore(
+    snippetStore,
+    (state) => state.duplicateElement,
+  );
+  const removeElement = useStore(snippetStore, (state) => state.removeElement);
+  const updateElement = useStore(snippetStore, (state) => state.updateElement);
 
   const selectedElementId = useStore(
     editorStore,

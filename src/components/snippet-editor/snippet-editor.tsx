@@ -15,12 +15,15 @@ import { useStore } from "zustand";
 import useElementSize from "@/hooks/use-element-size";
 import { cn } from "@/lib/utils";
 import { iSnippetData } from "@/lib/validator/snippet";
-import { createEditorStore, EditorStore } from "@/store/editor-store";
+import {
+  createSnippetEditorStore,
+  SnippetEditorStore,
+} from "@/store/editor-store";
 import { createSnippetStore, SnippetStore } from "@/store/snippet-store";
 
 import Canvas from "./canvas";
-import EditorUI from "./editor-ui";
 import { IndecatorsMemo } from "./indecators";
+import SnippetEditorUI from "./snippet-editor-ui";
 
 export type SnippetEditorContextValue = {
   size: {
@@ -28,8 +31,8 @@ export type SnippetEditorContextValue = {
     height: number;
   };
   readOnly?: boolean;
-  store: SnippetStore;
-  editorStore: EditorStore;
+  snippetStore: SnippetStore;
+  editorStore: SnippetEditorStore;
 };
 
 export const SnippetEditorContext =
@@ -91,7 +94,7 @@ export default function SnippetEditor({
   if (!storeRef.current) {
     storeRef.current = createSnippetStore(defaultValue);
   }
-  const editorStoreRef = useRef<EditorStore>();
+  const editorStoreRef = useRef<SnippetEditorStore>();
   if (!editorStoreRef.current) {
     let scrollPosition = {
       scrollX: 0,
@@ -101,7 +104,7 @@ export default function SnippetEditor({
     if (snippetId) {
       scrollPosition = getScrollPosition(snippetId);
     }
-    editorStoreRef.current = createEditorStore({
+    editorStoreRef.current = createSnippetEditorStore({
       ...scrollPosition,
     });
   }
@@ -186,7 +189,7 @@ export default function SnippetEditor({
     <SnippetEditorContext.Provider
       value={{
         size: { width, height },
-        store: storeRef.current,
+        snippetStore: storeRef.current,
         editorStore: editorStoreRef.current,
         readOnly,
       }}
@@ -226,13 +229,13 @@ export default function SnippetEditor({
 
           {!readOnly && <IndecatorsMemo />}
         </div>
-        <EditorUI />
+        <SnippetEditorUI />
       </div>
     </SnippetEditorContext.Provider>
   );
 }
 
-export const useEditor = () => {
+export const useSnippetEditor = () => {
   const context = useContext(SnippetEditorContext);
   if (!context) {
     throw new Error("EditorContext.Provider not found in the tree");

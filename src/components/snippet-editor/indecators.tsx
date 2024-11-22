@@ -13,7 +13,7 @@ import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
 
-import { useEditor } from "./editor";
+import { useSnippetEditor } from "./snippet-editor";
 
 function getTransform(
   transform: iTransform,
@@ -50,13 +50,13 @@ function getTransform(
 }
 
 export function Indecators() {
-  const { store, editorStore } = useEditor();
+  const { snippetStore, editorStore } = useSnippetEditor();
   const elementState = useStore(editorStore, (state) => state.elementState);
   const selectedElementId = useStore(
     editorStore,
     (state) => state.selectedElementId,
   );
-  const selectedElement = useStore(store, (state) =>
+  const selectedElement = useStore(snippetStore, (state) =>
     selectedElementId
       ? (state.elements.find((element) => element.id === selectedElementId) ??
         null)
@@ -104,17 +104,20 @@ export function Indecators() {
 export const IndecatorsMemo = memo(Indecators);
 
 function CanvasTransformIndecator() {
-  const { size: editorSize, store, editorStore } = useEditor();
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
   const canvasWidthHeightLinked = useStore(
-    store,
+    snippetStore,
     (state) => state.transform.widthHeightLinked,
   );
   const setCanvasTransform = useStore(
-    store,
+    snippetStore,
     (state) => state.updateSnippetTransform,
   );
 
@@ -374,17 +377,20 @@ function ElementTransformIndecator({
   transform: iTransform;
 }) {
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
-  const { size: editorSize, store, editorStore } = useEditor();
+  const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
   const updateElementState = useStore(
     editorStore,
     (state) => state.updateElementState,
   );
   const updateElementTransform = useStore(
-    store,
+    snippetStore,
     (state) => state.updateElementTransform,
   );
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
   const zoom = useStore(editorStore, (state) => state.zoom);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
@@ -908,10 +914,10 @@ function RotationIndecator({
 }
 
 function HovernigIndecator({ elementId }: { elementId: string }) {
-  const { size: editorSize, store, editorStore } = useEditor();
+  const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
 
   const transform = useStore(
-    store,
+    snippetStore,
     (state) =>
       state.elements.find((element) => element.id === elementId)?.transform,
   );
@@ -920,8 +926,11 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
 
   if (!transform) {
     return null;
@@ -943,9 +952,9 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
 }
 
 function DraggingIndecator({ elementId }: { elementId: string }) {
-  const { size: editorSize, store, editorStore } = useEditor();
+  const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
   const transform = useStore(
-    store,
+    snippetStore,
     (state) =>
       state.elements.find((element) => element.id === elementId)?.transform,
   );
@@ -953,8 +962,11 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
   if (!transform) {
     return null;
   }
@@ -978,9 +990,9 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
   );
 }
 function ResizeIndecator({ elementId }: { elementId: string }) {
-  const { size: editorSize, store, editorStore } = useEditor();
+  const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
   const transform = useStore(
-    store,
+    snippetStore,
     (state) =>
       state.elements.find((element) => element.id === elementId)?.transform,
   );
@@ -988,8 +1000,11 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
   if (!transform) {
     return null;
   }
@@ -1013,9 +1028,9 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
   );
 }
 function RotatingIndecator({ elementId }: { elementId: string }) {
-  const { size: editorSize, store, editorStore } = useEditor();
+  const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
   const transform = useStore(
-    store,
+    snippetStore,
     (state) =>
       state.elements.find((element) => element.id === elementId)?.transform,
   );
@@ -1024,8 +1039,11 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(store, (state) => state.transform.width);
-  const canvasHeight = useStore(store, (state) => state.transform.height);
+  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
+  const canvasHeight = useStore(
+    snippetStore,
+    (state) => state.transform.height,
+  );
   if (!transform) {
     return null;
   }

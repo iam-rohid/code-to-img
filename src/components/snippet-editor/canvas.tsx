@@ -4,15 +4,15 @@ import { useStore } from "zustand";
 
 import { getBackgroundStyle } from "@/lib/utils/editor";
 
-import { useEditor } from "./editor";
 import { ElementMemo } from "./element";
+import { useSnippetEditor } from "./snippet-editor";
 
 export default function Canvas() {
-  const { store, readOnly, editorStore } = useEditor();
-  const width = useStore(store, (state) => state.transform.width);
-  const height = useStore(store, (state) => state.transform.height);
-  const background = useStore(store, (state) => state.background);
-  const elements = useStore(store, (state) => state.elements);
+  const { snippetStore, readOnly, editorStore } = useSnippetEditor();
+  const width = useStore(snippetStore, (state) => state.transform.width);
+  const height = useStore(snippetStore, (state) => state.transform.height);
+  const background = useStore(snippetStore, (state) => state.background);
+  const elements = useStore(snippetStore, (state) => state.elements);
   const setSelectedElement = useStore(
     editorStore,
     (state) => state.setSelectedElement,

@@ -3,11 +3,11 @@ import { useStore } from "zustand";
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Input } from "@/components/ui/input";
 import { iTextElement } from "@/lib/validator/element";
-import { useEditor } from "../editor";
+import { useSnippetEditor } from "../snippet-editor";
 
 export function TextElementOptions({ element }: { element: iTextElement }) {
-  const { store } = useEditor();
-  const updateElement = useStore(store, (state) => state.updateElement);
+  const { snippetStore } = useSnippetEditor();
+  const updateElement = useStore(snippetStore, (state) => state.updateElement);
 
   if (element?.type !== "text") {
     return null;

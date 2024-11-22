@@ -9,7 +9,7 @@ import { useStore } from "zustand";
 
 import { cn } from "@/lib/utils";
 import { iElement } from "@/lib/validator/element";
-import { useEditor } from "../../editor";
+import { useSnippetEditor } from "../../snippet-editor";
 
 export default function Draggable({
   element,
@@ -22,10 +22,10 @@ export default function Draggable({
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
-  const { store, readOnly, editorStore } = useEditor();
+  const { snippetStore, readOnly, editorStore } = useSnippetEditor();
 
   const updateElementTransform = useStore(
-    store,
+    snippetStore,
     (state) => state.updateElementTransform,
   );
 

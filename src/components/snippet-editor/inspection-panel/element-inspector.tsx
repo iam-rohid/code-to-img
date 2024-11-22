@@ -24,13 +24,13 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
-import { useEditor } from "../editor";
+import { useSnippetEditor } from "../snippet-editor";
 
 import { TextElementOptions } from "./text-element-options";
 
 function ElementInspector({ elementId }: { elementId: string }) {
-  const { store } = useEditor();
-  const element = useStore(store, (state) =>
+  const { snippetStore } = useSnippetEditor();
+  const element = useStore(snippetStore, (state) =>
     state.elements.find((element) => element.id === elementId),
   );
   if (!element) {
@@ -57,8 +57,8 @@ function ElementInspector({ elementId }: { elementId: string }) {
 export const ElementInspectorMemo = memo(ElementInspector);
 
 function ElementAlignment({ elementId }: { elementId: string }) {
-  const { store } = useEditor();
-  const alignElement = useStore(store, (state) => state.alignElement);
+  const { snippetStore } = useSnippetEditor();
+  const alignElement = useStore(snippetStore, (state) => state.alignElement);
   return (
     <div className="p-2">
       <p className="mb-2 text-xs text-muted-foreground">Alignment</p>
@@ -148,9 +148,9 @@ function ElementTransform({
   elementId: string;
   transform: iTransform;
 }) {
-  const { store } = useEditor();
+  const { snippetStore } = useSnippetEditor();
   const updateElementTransform = useStore(
-    store,
+    snippetStore,
     (state) => state.updateElementTransform,
   );
 
@@ -303,9 +303,12 @@ function ElementTransform({
 }
 
 function ElementActions({ elementId }: { elementId: string }) {
-  const { store } = useEditor();
-  const removeElement = useStore(store, (state) => state.removeElement);
-  const duplicateElement = useStore(store, (state) => state.duplicateElement);
+  const { snippetStore } = useSnippetEditor();
+  const removeElement = useStore(snippetStore, (state) => state.removeElement);
+  const duplicateElement = useStore(
+    snippetStore,
+    (state) => state.duplicateElement,
+  );
 
   return (
     <div className="p-2">

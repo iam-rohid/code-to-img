@@ -5,7 +5,7 @@ import { useStore } from "zustand";
 
 import { codeEditorThemes } from "@/lib/constants/code-editor-themes";
 import { iCodeEditorElement } from "@/lib/validator/element";
-import { useEditor } from "../editor";
+import { useSnippetEditor } from "../snippet-editor";
 
 import Draggable from "./shared/draggable";
 
@@ -14,8 +14,8 @@ export default function CodeEditorElement({
 }: {
   element: iCodeEditorElement;
 }) {
-  const { store, readOnly } = useEditor();
-  const updateElement = useStore(store, (state) => state.updateElement);
+  const { snippetStore, readOnly } = useSnippetEditor();
+  const updateElement = useStore(snippetStore, (state) => state.updateElement);
 
   const theme = useMemo(
     () => codeEditorThemes.find((theme) => theme.id === element.theme),

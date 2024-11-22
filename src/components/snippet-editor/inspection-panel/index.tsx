@@ -1,13 +1,13 @@
 import { memo } from "react";
 import { useStore } from "zustand";
 
-import { useEditor } from "../editor";
+import { useSnippetEditor } from "../snippet-editor";
 
 import { CanvasInspectorMemo } from "./canvas-inspector";
 import { ElementInspectorMemo } from "./element-inspector";
 
 export default function InspectionPanel() {
-  const { editorStore } = useEditor();
+  const { editorStore } = useSnippetEditor();
   const selectedElementId = useStore(
     editorStore,
     (state) => state.selectedElementId,

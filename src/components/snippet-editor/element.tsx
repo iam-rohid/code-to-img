@@ -4,16 +4,16 @@ import { useStore } from "zustand";
 import { iElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
 
-import { useEditor } from "./editor";
 import CodeEditorElement from "./elements/code-editor";
 import TextElement from "./elements/text-element";
+import { useSnippetEditor } from "./snippet-editor";
 
 export default function Element({ element }: { element: iElement }) {
-  const { store, readOnly, editorStore } = useEditor();
+  const { snippetStore, readOnly, editorStore } = useSnippetEditor();
   const elementRef = useRef<HTMLDivElement>(null);
 
   const updateElementTransform = useStore(
-    store,
+    snippetStore,
     (state) => state.updateElementTransform,
   );
 
