@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import SnippetEditor from "@/components/editor/editor";
+import SnippetEditor from "@/components/snippet-editor/editor";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
 

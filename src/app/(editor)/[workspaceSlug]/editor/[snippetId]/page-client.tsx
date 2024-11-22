@@ -6,7 +6,7 @@ import { ArchiveRestoreIcon, Loader2Icon, TrashIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 
-import SnippetEditor from "@/components/editor/editor";
+import SnippetEditor from "@/components/snippet-editor/editor";
 import { Button } from "@/components/ui/button";
 import { Snippet } from "@/db/schema";
 import { useSnippetActions } from "@/hooks/use-snippet-actions";

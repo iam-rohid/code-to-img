@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
-import SnippetEditor from "@/components/editor/editor";
+import SnippetEditor from "@/components/snippet-editor/editor";
 import { db } from "@/db";
 import { snippetTable } from "@/db/schema";
 
