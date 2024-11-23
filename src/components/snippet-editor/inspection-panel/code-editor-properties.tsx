@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { iCodeEditorElement } from "@/lib/validator/element";
-import { controls } from "../elements/code-editor";
+import { TITLE_BAR_CONTROLS } from "../elements/code-editor/controls";
 import { useSnippetEditor } from "../snippet-editor";
 
 export default function CodeEditorProperties({
@@ -87,7 +87,7 @@ export default function CodeEditorProperties({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {controls.map((item) => (
+            {TITLE_BAR_CONTROLS.map((item) => (
               <SelectItem key={item.id} value={item.id}>
                 <div className="flex h-6 items-center">
                   {item.Control ? (
