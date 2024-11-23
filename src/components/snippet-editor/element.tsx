@@ -133,6 +133,7 @@ export default function Element({ element }: { element: iElement }) {
           onCodeChange={(code) => {
             updateElement(element.id, { code });
           }}
+          readOnly={readOnly}
         />
       ) : element.type === "text" ? (
         <TextElement element={element} />

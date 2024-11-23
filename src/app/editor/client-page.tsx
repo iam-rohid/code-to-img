@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import FullScreenLoader from "@/components/full-screen-loader";
 import SnippetEditor from "@/components/snippet-editor/snippet-editor";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
@@ -12,14 +13,15 @@ export default function ClientPage() {
 
   useEffect(() => {
     if (newData) {
-      localStorage.setItem("snippet-data", JSON.stringify(newData));
+      localStorage.setItem("local-snippet-data", JSON.stringify(newData));
       setNewData(null);
     }
   }, [newData]);
 
   useEffect(() => {
-    const json = localStorage.getItem("snippet-data");
     let initialized = false;
+
+    const json = localStorage.getItem("local-snippet-data");
     if (json) {
       try {
         const data = snippetSchema.parse(JSON.parse(json));
@@ -35,7 +37,7 @@ export default function ClientPage() {
   }, []);
 
   if (!snippetData) {
-    return <p>Loading...</p>;
+    return <FullScreenLoader />;
   }
 
   return <SnippetEditor defaultValue={snippetData} onChnage={setNewData} />;

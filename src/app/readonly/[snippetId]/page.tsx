@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
-import SnippetEditor from "@/components/snippet-editor/snippet-editor";
+import SnippetViewer from "@/components/snippet-editor/snippet-viewer";
 import { db } from "@/db";
 import { snippetTable } from "@/db/schema";
 
@@ -20,5 +20,5 @@ export default async function Page({
     notFound();
   }
 
-  return <SnippetEditor defaultValue={snippet.data} readOnly />;
+  return <SnippetViewer data={snippet.data} className="h-screen" />;
 }

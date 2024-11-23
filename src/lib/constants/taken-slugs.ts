@@ -31,4 +31,5 @@ export const TAKEN_SLUGS = new Set([
   "x",
   "reddit",
   "snapchat",
+  "readonly",
 ]);
