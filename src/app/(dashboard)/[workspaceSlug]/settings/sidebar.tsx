@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { ChevronLeftIcon, LucideIcon, SettingsIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
@@ -17,7 +16,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import UserButton from "@/components/user-button";
-import WorkspaceSwitcher from "@/components/workspace-switcher";
 
 export default function WorkspcaeSettingsSidebar() {
   const pathname = usePathname();

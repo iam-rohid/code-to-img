@@ -1,10 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { HomeIcon, LucideIcon, SettingsIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useMemo } from "react";
 
 import {
   Sidebar,
