@@ -92,7 +92,7 @@ export function MyEyeDroper() {
           const result = await eyeDropper.open();
           if ("sRGBHex" in result) {
             const color = parseColor(result.sRGBHex);
-            colorPicker.setColor(color);
+            colorPicker?.setColor(color);
           } else {
             toast.error("Failed to pick color!");
           }

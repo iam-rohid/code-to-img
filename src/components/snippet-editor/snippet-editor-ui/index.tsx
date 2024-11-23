@@ -2,14 +2,11 @@ import { memo, useCallback, useContext, useMemo } from "react";
 import { Reorder } from "framer-motion";
 import {
   AppWindowMacIcon,
-  ArrowRightIcon,
-  CircleIcon,
   Code2Icon,
   CopyIcon,
   EditIcon,
   EyeClosedIcon,
   EyeIcon,
-  HexagonIcon,
   ImageIcon,
   ImagePlusIcon,
   InfoIcon,
@@ -20,18 +17,16 @@ import {
   MinusIcon,
   PlusIcon,
   RedoIcon,
-  ShapesIcon,
+  RefreshCcw,
   Share,
   Share2Icon,
   SidebarCloseIcon,
   SidebarOpenIcon,
-  SquareIcon,
   TrashIcon,
   TypeIcon,
   UndoIcon,
   UnlockIcon,
 } from "lucide-react";
-import { nanoid } from "nanoid";
 import Link from "next/link";
 import { useStore } from "zustand";
 
@@ -55,19 +50,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getCodeEditorElement, getTextElement } from "@/lib/constants/elements";
+import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useSnippet } from "@/providers/snippet-provider";
-import { useRenameSnippetModal } from "../modals/rename-snippet-modal";
-import { ThemeSwitcher } from "../theme-toggle";
-import { SidebarContext } from "../ui/sidebar";
+import { useRenameSnippetModal } from "../../modals/rename-snippet-modal";
+import { ThemeSwitcher } from "../../theme-toggle";
+import { SidebarContext } from "../../ui/sidebar";
+import { useSnippetEditor } from "../snippet-editor";
 
 import { InspectionPanelMemo } from "./inspection-panel";
-import { useSnippetEditor } from "./snippet-editor";
+import Toolbar from "./toolbar";
 
 export default function SnippetEditorUI() {
-  const { readOnly, editorStore } = useSnippetEditor();
+  const { readOnly, editorStore, snippetStore } = useSnippetEditor();
   const { status } = useAuth();
   const layersOpen = useStore(editorStore, (state) => state.layersOpen);
   const setLayersOpen = useStore(editorStore, (state) => state.setLayersOpen);
@@ -76,7 +72,6 @@ export default function SnippetEditorUI() {
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
   const setScroll = useStore(editorStore, (state) => state.setScroll);
-  // const { isDurty, isSaving } = useSnippetData();
   const sidebarContext = useContext(SidebarContext);
   const snippet = useSnippet();
   const [RenameModal, , setShowRenameModal] = useRenameSnippetModal();
@@ -100,7 +95,7 @@ export default function SnippetEditorUI() {
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex flex-col gap-4 p-4">
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center justify-start gap-2 overflow-hidden">
+        <div className="flex flex-1 items-center justify-start gap-2">
           <div className="pointer-events-auto flex items-center gap-2">
             {sidebarContext && (
               <Button
@@ -132,10 +127,19 @@ export default function SnippetEditorUI() {
                 align="start"
                 className="bg-card text-card-foreground"
               >
-                {snippet && (
+                {snippet ? (
                   <DropdownMenuItem onClick={() => setShowRenameModal(true)}>
                     <EditIcon />
                     Rename Snippet
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      snippetStore.setState(DEFAULT_SNIPPET_TEMPLATE.data)
+                    }
+                  >
+                    <RefreshCcw />
+                    Reset Canvas
                   </DropdownMenuItem>
                 )}
 
@@ -183,7 +187,7 @@ export default function SnippetEditorUI() {
 
         {readOnly ? null : <Toolbar />}
 
-        <div className="flex flex-1 items-center justify-end gap-2 overflow-hidden">
+        <div className="flex flex-1 items-center justify-end gap-2">
           {readOnly ? null : (
             <div className="pointer-events-auto flex items-center gap-2">
               <Tooltip>
@@ -319,79 +323,6 @@ export default function SnippetEditorUI() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Toolbar() {
-  const { snippetStore } = useSnippetEditor();
-  const addElement = useStore(snippetStore, (state) => state.addElement);
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
-
-  return (
-    <div className="pointer-events-auto flex items-center gap-1 rounded-lg border bg-card p-0.5 text-card-foreground shadow-md">
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={() => {
-          addElement(
-            getCodeEditorElement({
-              id: nanoid(),
-              canvasWidth,
-              canvasHeight,
-            }),
-          );
-        }}
-      >
-        <AppWindowMacIcon />
-      </Button>
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={() => {
-          addElement(
-            getTextElement({
-              id: nanoid(),
-              canvasWidth,
-              canvasHeight,
-            }),
-          );
-        }}
-      >
-        <TypeIcon />
-      </Button>
-      <Button size="icon" variant="ghost">
-        <ImageIcon />
-      </Button>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost">
-            <ShapesIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="bottom" align="end">
-          <DropdownMenuItem>
-            <SquareIcon />
-            Rectangle
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CircleIcon />
-            Ellipse
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <HexagonIcon />
-            Polygon
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ArrowRightIcon />
-            Arrow
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useStore } from "zustand";
 import BackgroundPicker from "@/components/background-picker";
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Separator } from "@/components/ui/separator";
-import { useSnippetEditor } from "../snippet-editor";
+import { useSnippetEditor } from "../../snippet-editor";
 
 export function CanvasInspector() {
   return (

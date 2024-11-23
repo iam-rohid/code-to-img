@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 import { getBackgroundStyle } from "@/lib/utils/editor";
 
-import { ElementMemo } from "./element";
+import Element from "./element";
 import { useSnippetEditor } from "./snippet-editor";
 
 export default function Canvas() {
@@ -13,51 +14,52 @@ export default function Canvas() {
   const width = useStore(snippetStore, (state) => state.transform.width);
   const height = useStore(snippetStore, (state) => state.transform.height);
   const background = useStore(snippetStore, (state) => state.background);
-  const elements = useStore(snippetStore, (state) => state.elements);
+  const elementIds = useStore(
+    snippetStore,
+    useShallow((state) => state.elements.map((el) => el.id).toReversed()),
+  );
   const setSelectedElement = useStore(
     editorStore,
     (state) => state.setSelectedElement,
-  );
-  const canvasRef = useRef<HTMLDivElement | null>(null);
-  const [draggingElementId, setDraggingElementId] = useState<string | null>(
-    null,
   );
   const updateElementTransform = useStore(
     snippetStore,
     (state) => state.updateElementTransform,
   );
-  const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
-
   const zoom = useStore(editorStore, (state) => state.zoom);
+
+  const [draggingElementId, setDraggingElementId] = useState<string | null>(
+    null,
+  );
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+  const startMousePos = useRef({ x: 0, y: 0 });
+  const startElementPos = useRef({ x: 0, y: 0 });
   const updateElementState = useStore(
     editorStore,
     (state) => state.updateElementState,
   );
-
-  const draggingElement = useMemo(
-    () =>
-      draggingElementId
-        ? elements.find((element) => element.id === draggingElementId)
-        : null,
-    [draggingElementId, elements],
-  );
-  const elementIds = useMemo(() => elements.map((el) => el.id), [elements]);
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
       const elementId = (e.currentTarget as HTMLDivElement).getAttribute(
         "data-cti-element-id",
       );
-      console.log(elementId);
       if (!elementId) {
         return;
       }
-      setDraggingElementId(elementId);
-      updateElementState(elementId, { dragging: true });
-      setStartMousePos({ x: e.clientX, y: e.clientY });
+      const el = snippetStore
+        .getState()
+        .elements.find((element) => element.id === elementId);
+      if (!el) {
+        return;
+      }
+      setDraggingElementId(el.id);
+      updateElementState(el.id, { dragging: true });
+      startMousePos.current = { x: e.clientX, y: e.clientY };
+      startElementPos.current = el.transform.position;
       document.documentElement.classList.add("cursor-move", "select-none");
     },
-    [updateElementState],
+    [snippetStore, updateElementState],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -72,35 +74,32 @@ export default function Canvas() {
 
   const handleMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {
-      if (!draggingElement?.id) return;
+      if (!draggingElementId) return;
 
-      let x = draggingElement.transform.position.x;
-      let y = draggingElement.transform.position.y;
+      let x = startElementPos.current.x;
+      let y = startElementPos.current.y;
 
-      const difX = startMousePos.x - e.clientX;
-      const difY = startMousePos.y - e.clientY;
+      const difX = startMousePos.current.x - e.clientX;
+      const difY = startMousePos.current.y - e.clientY;
 
       x -= difX / zoom;
       y -= difY / zoom;
 
-      updateElementTransform(draggingElement.id, {
-        position: { x: Math.round(x), y: Math.round(y) },
+      const newPos = { x: Math.round(x), y: Math.round(y) };
+      updateElementTransform(draggingElementId, {
+        position: newPos,
       });
-      setStartMousePos({ x: e.clientX, y: e.clientY });
+      startElementPos.current = newPos;
+      startMousePos.current = { x: e.clientX, y: e.clientY };
     },
-    [
-      draggingElement?.id,
-      draggingElement?.transform.position.x,
-      draggingElement?.transform.position.y,
-      startMousePos.x,
-      startMousePos.y,
-      updateElementTransform,
-      zoom,
-    ],
+    [draggingElementId, updateElementTransform, zoom],
   );
 
   useEffect(() => {
     if (!canvasRef.current) {
+      return;
+    }
+    if (draggingElementId) {
       return;
     }
     const dragableElementHandles =
@@ -117,16 +116,19 @@ export default function Canvas() {
         el?.removeEventListener("mousedown", handleMouseDown);
       }
     };
-  }, [handleMouseDown, elementIds]);
+  }, [draggingElementId, handleMouseDown, elementIds]);
 
   useEffect(() => {
+    if (!draggingElementId) {
+      return;
+    }
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [handleMouseMove, handleMouseUp, readOnly]);
+  }, [draggingElementId, handleMouseMove, handleMouseUp, readOnly]);
 
   return (
     <div
@@ -145,8 +147,8 @@ export default function Canvas() {
       ></div>
 
       <div className="pointer-events-none absolute inset-0 z-10">
-        {elements.toReversed().map((element) => (
-          <ElementMemo element={element} key={element.id} />
+        {elementIds.map((elementId) => (
+          <Element elementId={elementId} key={elementId} />
         ))}
       </div>
 

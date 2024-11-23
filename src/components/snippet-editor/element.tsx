@@ -1,7 +1,6 @@
-import { memo, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
-import { iElement } from "@/lib/validator/element";
 import { iTransform } from "@/lib/validator/transform";
 
 import CodeEditorElement from "./elements/code-editor";
@@ -9,10 +8,16 @@ import TextElement from "./elements/text-element";
 import { useSnippetEditor } from "./snippet-editor";
 import { getElementWrapperStyle } from "./utils";
 
-export default function Element({ element }: { element: iElement }) {
-  const elementRef = useRef<HTMLDivElement>(null);
-
+export default function Element({ elementId }: { elementId: string }) {
   const { snippetStore, readOnly, editorStore } = useSnippetEditor();
+  const element = useStore(snippetStore, (state) =>
+    state.elements.find((el) => el.id === elementId),
+  );
+  if (!element) {
+    throw new Error("element not found!");
+  }
+
+  const elementRef = useRef<HTMLDivElement>(null);
 
   const updateElementTransform = useStore(
     snippetStore,
@@ -80,8 +85,8 @@ export default function Element({ element }: { element: iElement }) {
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const width = Math.round(entry.contentRect.width);
-        const height = Math.round(entry.contentRect.height);
+        const width = Math.ceil(entry.contentRect.width);
+        const height = Math.ceil(entry.contentRect.height);
 
         const data: Partial<iTransform> = {};
         if (element.transform.autoWidth) {
@@ -141,5 +146,3 @@ export default function Element({ element }: { element: iElement }) {
     </div>
   );
 }
-
-export const ElementMemo = memo(Element);

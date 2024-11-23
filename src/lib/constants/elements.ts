@@ -18,7 +18,7 @@ export const getCodeEditorElement = ({
   canvasHeight,
   canvasWidth,
   width = 400,
-  height = 86,
+  height = 93,
   name = "Code Editor",
   theme = "theme-1",
 }: GetCodeEditorElementProps): iCodeEditorElement => ({
@@ -46,7 +46,7 @@ export const getCodeEditorElement = ({
   theme,
   padding: {
     top: 0,
-    left: 0,
+    left: 12,
     right: 12,
     bottom: 12,
   },

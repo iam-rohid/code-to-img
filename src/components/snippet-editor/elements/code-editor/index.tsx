@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import CodeMirror, {
   EditorView,
@@ -21,19 +21,16 @@ export default function CodeEditorElement({
   readOnly?: boolean;
   onCodeChange?: (code: string) => void;
 }) {
+  const [code, setCode] = useState(element.code);
   const theme = useMemo(
     () => codeEditorThemes.find((theme) => theme.id === element.theme),
     [element.theme],
   );
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const extensions = useMemo(() => {
-    const extensions: Extension[] = [
-      lineNumbers({
-        formatNumber: (n) => {
-          return (n + element.lineNumbersStartFrom - 1).toString();
-        },
-      }),
-    ];
+    const extensions: Extension[] = [];
     const lang = loadLanguage(element.language);
     if (lang) {
       extensions.push(lang);
@@ -41,10 +38,20 @@ export default function CodeEditorElement({
     if (!element.transform.autoWidth) {
       extensions.push(EditorView.lineWrapping);
     }
+    if (element.showLineNumbers) {
+      extensions.push(
+        lineNumbers({
+          formatNumber: (n) => {
+            return (n + element.lineNumbersStartFrom - 1).toString();
+          },
+        }),
+      );
+    }
     return extensions;
   }, [
     element.language,
     element.lineNumbersStartFrom,
+    element.showLineNumbers,
     element.transform.autoWidth,
   ]);
 
@@ -55,6 +62,10 @@ export default function CodeEditorElement({
       )?.Control,
     [element.titleBarControlStyle],
   );
+
+  useEffect(() => {
+    setCode(element.code);
+  }, [element.code]);
 
   return (
     <div
@@ -67,64 +78,71 @@ export default function CodeEditorElement({
         ...theme?.window?.style,
       }}
     >
-      <div
-        style={{
-          background: theme?.window?.titleBarBackground,
-          color: theme?.window?.titleBarForeground,
-          ...theme?.window?.titleBarStyle,
-        }}
-        data-cti-element-id={element.id}
-        className="cti-drag-handle flex-shrink-0 overflow-hidden"
-      >
+      {element.showTitleBar ? (
         <div
-          className={cn("flex h-12 items-center gap-4 px-4", {
-            "flex-row-reverse": element.titleBarControlPosition === "right",
-          })}
+          style={{
+            background: theme?.window?.titleBarBackground,
+            color: theme?.window?.titleBarForeground,
+            ...theme?.window?.titleBarStyle,
+          }}
+          data-cti-element-id={element.id}
+          className="cti-drag-handle flex-shrink-0 overflow-hidden"
         >
-          {Control ? <Control /> : null}
-          <div className="flex-1">
-            <p className="text-white">Hello</p>
+          <div
+            className={cn("flex h-12 items-center gap-4 px-4", {
+              "flex-row-reverse": element.titleBarControlPosition === "right",
+            })}
+          >
+            {Control ? <Control /> : null}
+            <div className="flex-1">
+              {/* <p className="text-white">Hello</p> */}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div
+          data-cti-element-id={element.id}
+          className="cti-drag-handle absolute left-0 right-0 top-0 z-10 h-4"
+        />
+      )}
 
-      <div
-        className="flex flex-1 overflow-hidden"
+      <CodeMirror
+        value={code}
+        theme={theme?.theme}
+        height={element.transform.autoHeight ? undefined : "100%"}
+        width={element.transform.autoWidth ? undefined : `100%`}
+        extensions={extensions}
+        onChange={(value) => {
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+          setCode(value);
+          timeoutRef.current = setTimeout(() => {
+            onCodeChange?.(value);
+          }, 200);
+        }}
+        readOnly={readOnly}
+        basicSetup={{
+          highlightActiveLine: false,
+          highlightActiveLineGutter: false,
+          foldGutter: false,
+          indentOnInput: true,
+          lineNumbers: false,
+          tabSize: element.tabSize,
+        }}
         style={{
-          ...theme?.window?.codeMirrorContainerStyle,
+          maxWidth: "100%",
+          flex: 1,
+          overflow: "hidden",
+          fontSize: element.fontSize,
+          lineHeight: element.lineHeight,
           paddingLeft: element.padding.left,
           paddingRight: element.padding.right,
           paddingTop: element.padding.top,
           paddingBottom: element.padding.bottom,
+          ...theme?.window?.codeMirrorStyle,
         }}
-      >
-        <CodeMirror
-          value={element.code}
-          theme={theme?.theme}
-          height={element.transform.autoHeight ? undefined : "100%"}
-          width={
-            element.transform.autoWidth
-              ? undefined
-              : `${element.transform.width}px`
-          }
-          extensions={extensions}
-          onChange={(value) => {
-            onCodeChange?.(value);
-          }}
-          readOnly={readOnly}
-          basicSetup={{
-            lineNumbers: element.showLineNumbers,
-            highlightActiveLine: false,
-            highlightActiveLineGutter: false,
-            foldGutter: false,
-          }}
-          style={{
-            fontSize: element.fontSize,
-            lineHeight: element.lineHeight,
-            ...theme?.window?.codeMirrorStyle,
-          }}
-        />
-      </div>
+      />
     </div>
   );
 }

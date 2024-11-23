@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
-import { useSnippetEditor } from "../snippet-editor";
+import { useSnippetEditor } from "../../snippet-editor";
 
 import CodeEditorProperties from "./code-editor-properties";
 import { TextElementProperties } from "./text-element-properties";
@@ -191,6 +191,7 @@ function ElementTransformProperties({
           value={transform.width}
           min={20}
           icon={<span>W</span>}
+          disabled={transform.autoWidth}
           onValueChange={(value) => {
             const width = value;
             let height = transform.height;
@@ -231,6 +232,7 @@ function ElementTransformProperties({
             }
             updateElementTransform(elementId, { height, width });
           }}
+          disabled={transform.autoHeight}
         />
 
         <Tooltip>

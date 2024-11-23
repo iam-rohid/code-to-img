@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export function InspectorNumberInput({
   icon,
@@ -16,6 +17,7 @@ export function InspectorNumberInput({
   max,
   min,
   id,
+  disabled,
 }: {
   id?: string;
   value: number;
@@ -23,6 +25,7 @@ export function InspectorNumberInput({
   icon: ReactNode;
   min?: number;
   max?: number;
+  disabled?: boolean;
 }) {
   const [text, setText] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
@@ -128,10 +131,17 @@ export function InspectorNumberInput({
           setIsFocused(false);
         }}
         className="pl-10"
+        disabled={disabled}
       />
       <div
         onMouseDown={handleMouseDown}
-        className="absolute bottom-0 left-0 top-0 flex w-10 cursor-col-resize items-center justify-center text-center text-sm text-muted-foreground"
+        aria-disabled={disabled}
+        className={cn(
+          "absolute bottom-0 left-0 top-0 flex w-10 cursor-col-resize items-center justify-center text-center text-sm text-muted-foreground [&>svg]:h-5 [&>svg]:w-5",
+          {
+            "pointer-events-none": disabled,
+          },
+        )}
       >
         {icon}
       </div>

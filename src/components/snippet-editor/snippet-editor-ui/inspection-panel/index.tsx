@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useStore } from "zustand";
 
-import { useSnippetEditor } from "../snippet-editor";
+import { useSnippetEditor } from "../../snippet-editor";
 
 import { CanvasInspectorMemo } from "./canvas-inspector";
 import { ElementInspectorMemo } from "./element-inspector";
