@@ -7,7 +7,15 @@ import { db } from "./db";
 import { workspaceMemberTable, workspaceTable } from "./db/schema";
 import { CURRENT_WORKSPACE_SLUG_COOKIE, SESSION_COOKIE } from "./lib/constants";
 
-const publicPages = ["/", "/login.*", "/legal.*"];
+const publicPages = [
+  "/",
+  "/login.*",
+  "/legal.*",
+  "/editor",
+  "/readonly",
+  "/blog.*",
+  "/docs.*",
+];
 
 const getWorkspaceRedirectPath = async (
   req: NextRequest,

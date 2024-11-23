@@ -31,16 +31,6 @@ import { useAuth } from "@/providers/auth-provider";
 import { trpc } from "@/trpc/client";
 
 export default function PageClient() {
-  const { status } = useAuth();
-
-  if (status !== "authorized") {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <>
       <AppBar

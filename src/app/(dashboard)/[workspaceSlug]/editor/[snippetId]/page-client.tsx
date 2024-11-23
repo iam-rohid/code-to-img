@@ -39,19 +39,19 @@ function SnippetLoaded({ snippet }: { snippet: Snippet }) {
   const [newData, setNewData] = useState<iSnippetData | null>(null);
   const utils = trpc.useUtils();
   const { mutate, isPending } = trpc.snippets.updateSnippet.useMutation({
-    onMutate: (vars) => {
-      utils.snippets.getSnippet.setData(
-        { snippetId: vars.snippetId },
-        (snippet) =>
-          snippet
-            ? {
-                ...snippet,
-                data: vars.dto.data ?? snippet.data,
-                title: vars.dto.title ?? snippet.title,
-              }
-            : undefined,
-      );
-    },
+    // onMutate: (vars) => {
+    //   utils.snippets.getSnippet.setData(
+    //     { snippetId: vars.snippetId },
+    //     (snippet) =>
+    //       snippet
+    //         ? {
+    //             ...snippet,
+    //             data: vars.dto.data ?? snippet.data,
+    //             title: vars.dto.title ?? snippet.title,
+    //           }
+    //         : undefined,
+    //   );
+    // },
     onSuccess: (data) => {
       utils.snippets.getSnippet.setData({ snippetId: snippet.id }, data);
     },

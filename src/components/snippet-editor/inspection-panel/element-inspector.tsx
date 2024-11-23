@@ -26,7 +26,8 @@ import { cn } from "@/lib/utils";
 import { iTransform } from "@/lib/validator/transform";
 import { useSnippetEditor } from "../snippet-editor";
 
-import { TextElementOptions } from "./text-element-options";
+import CodeEditorProperties from "./code-editor-properties";
+import { TextElementProperties } from "./text-element-properties";
 
 function ElementInspector({ elementId }: { elementId: string }) {
   const { snippetStore } = useSnippetEditor();
@@ -41,13 +42,21 @@ function ElementInspector({ elementId }: { elementId: string }) {
     <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
       <ElementAlignment elementId={elementId} />
       <Separator />
-      <ElementTransform elementId={elementId} transform={element.transform} />
-      {element.type === "text" && (
+      <ElementTransformProperties
+        elementId={elementId}
+        transform={element.transform}
+      />
+      {element.type === "text" ? (
         <>
           <Separator />
-          <TextElementOptions element={element} />
+          <TextElementProperties element={element} />
         </>
-      )}
+      ) : element.type === "code-editor" ? (
+        <>
+          <Separator />
+          <CodeEditorProperties element={element} />
+        </>
+      ) : null}
       <Separator />
       <ElementActions elementId={elementId} />
     </div>
@@ -141,7 +150,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
   );
 }
 
-function ElementTransform({
+function ElementTransformProperties({
   elementId,
   transform,
 }: {

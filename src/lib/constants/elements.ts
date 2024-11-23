@@ -42,7 +42,7 @@ export const getCodeEditorElement = ({
   fontSize: 16,
   language: "javascript",
   lineHeight: 24,
-  lineNumbers: true,
+  showLineNumbers: true,
   theme,
   padding: {
     top: 0,
@@ -50,6 +50,13 @@ export const getCodeEditorElement = ({
     right: 12,
     bottom: 12,
   },
+  lineNumbersStartFrom: 1,
+  tabSize: 4,
+  showTitleBar: true,
+  titleBarControlStyle: "macos-default",
+  titleBarControlPosition: "left",
+  hidden: false,
+  locked: false,
 });
 
 export interface GetTextElementProps extends GetElementArgs {

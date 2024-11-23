@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
 
-import { iElement } from "@/lib/validator/element";
-import { iSnippetData } from "@/lib/validator/snippet";
+import { elementSchema, iElement } from "@/lib/validator/element";
+import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
 import { iTransform } from "@/lib/validator/transform";
 
 export type Alignment =
@@ -33,13 +33,14 @@ export type SnippetStore = ReturnType<typeof createSnippetStore>;
 
 export const createSnippetStore = (snippetData: iSnippetData) => {
   return create<SnippetState>()((set, get) => ({
-    ...snippetData,
+    ...snippetSchema.parse(snippetData),
     updateSnippet: (data) => {
       set({ ...data });
     },
     addElement: (element) => {
+      const el = elementSchema.parse(element);
       set((state) => ({
-        elements: [element, ...state.elements],
+        elements: [el, ...state.elements],
       }));
     },
     updateElement: (elementId, data) => {

@@ -1,10 +1,10 @@
 "use client";
 
 import { createContext, ReactNode, useContext, useEffect } from "react";
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+import FullScreenLoader from "@/components/full-screen-loader";
 import { Button } from "@/components/ui/button";
 import { Workspace, WorkspaceMember } from "@/db/schema";
 import { trpc } from "@/trpc/client";
@@ -46,11 +46,7 @@ export default function WorkspaceProvider({
   ]);
 
   if (workspaceQuery.isPending) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="animate-spin" />
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
   if (workspaceQuery.isError) {

@@ -5,13 +5,9 @@ import { Input } from "@/components/ui/input";
 import { iTextElement } from "@/lib/validator/element";
 import { useSnippetEditor } from "../snippet-editor";
 
-export function TextElementOptions({ element }: { element: iTextElement }) {
+export function TextElementProperties({ element }: { element: iTextElement }) {
   const { snippetStore } = useSnippetEditor();
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
-
-  if (element?.type !== "text") {
-    return null;
-  }
 
   return (
     <>
@@ -30,6 +26,7 @@ export function TextElementOptions({ element }: { element: iTextElement }) {
         <p className="mb-2 text-xs text-muted-foreground">Font Size</p>
         <InspectorNumberInput
           icon={<>FS</>}
+          min={12}
           value={element.fontSize ?? 16}
           onValueChange={(fontSize) => {
             updateElement(element.id, {

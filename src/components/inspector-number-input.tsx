@@ -15,9 +15,11 @@ export function InspectorNumberInput({
   value,
   max,
   min,
+  id,
 }: {
+  id?: string;
   value: number;
-  onValueChange: (value: number) => void;
+  onValueChange?: (value: number) => void;
   icon: ReactNode;
   min?: number;
   max?: number;
@@ -45,7 +47,7 @@ export function InspectorNumberInput({
     let newValue = parseFloat(text);
     if (!isNaN(newValue)) {
       newValue = clampValue(newValue);
-      onValueChange(newValue);
+      onValueChange?.(newValue);
       setText(String(newValue));
     } else {
       setText(String(value));
@@ -72,7 +74,7 @@ export function InspectorNumberInput({
       const currentX = e.clientX;
       let newValue = Math.floor(value + (currentX - startX));
       newValue = clampValue(newValue);
-      onValueChange(newValue);
+      onValueChange?.(newValue);
       setText(String(newValue));
       setStartX(currentX);
     },
@@ -109,6 +111,7 @@ export function InspectorNumberInput({
   return (
     <fieldset className="relative">
       <Input
+        id={id}
         ref={ref}
         value={text}
         onChange={(e) => {

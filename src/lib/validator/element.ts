@@ -19,10 +19,15 @@ export const codeEditorElementSchema = z
     code: z.string(),
     fontSize: z.number().min(0),
     lineHeight: z.number().min(0),
-    lineNumbers: z.boolean(),
+    showLineNumbers: z.boolean().default(true),
+    lineNumbersStartFrom: z.number().min(1).default(1),
+    tabSize: z.number().min(2).default(4),
     theme: z.string(),
     language: languageSchema,
     padding: paddingSchema,
+    showTitleBar: z.boolean().default(true),
+    titleBarControlPosition: z.enum(["left", "right"]).default("left"),
+    titleBarControlStyle: z.string().default("macos-default"),
   })
   .merge(elementBase);
 
