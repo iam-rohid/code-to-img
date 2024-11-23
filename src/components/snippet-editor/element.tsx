@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
 import { iElement } from "@/lib/validator/element";
@@ -7,16 +7,18 @@ import { iTransform } from "@/lib/validator/transform";
 import CodeEditorElement from "./elements/code-editor";
 import TextElement from "./elements/text-element";
 import { useSnippetEditor } from "./snippet-editor";
+import { getElementWrapperStyle } from "./utils";
 
 export default function Element({ element }: { element: iElement }) {
-  const { snippetStore, readOnly, editorStore } = useSnippetEditor();
   const elementRef = useRef<HTMLDivElement>(null);
+
+  const { snippetStore, readOnly, editorStore } = useSnippetEditor();
 
   const updateElementTransform = useStore(
     snippetStore,
     (state) => state.updateElementTransform,
   );
-
+  const updateElement = useStore(snippetStore, (state) => state.updateElement);
   const updateElementState = useStore(
     editorStore,
     (state) => state.updateElementState,
@@ -26,47 +28,50 @@ export default function Element({ element }: { element: iElement }) {
     (state) => state.setSelectedElement,
   );
 
-  const offset = useMemo(() => {
-    if (!element.transform) {
-      return {
-        x: 0,
-        y: 0,
-      };
-    }
-    return {
-      x:
-        (element.transform.width * element.transform.scale -
-          element.transform.width) /
-        2,
-      y:
-        (element.transform.height * element.transform.scale -
-          element.transform.height) /
-        2,
-    };
-  }, [element.transform]);
-
   const handleMouseEnter = useCallback(() => {
-    if (element.hidden || element.locked) {
+    if (element.hidden || element.locked || readOnly) {
       return;
     }
     updateElementState(element.id, { hovering: true });
-  }, [element.hidden, element.locked, element.id, updateElementState]);
+  }, [
+    element.hidden,
+    element.locked,
+    element.id,
+    readOnly,
+    updateElementState,
+  ]);
 
   const handleMouseLeave = useCallback(() => {
-    if (element.hidden || element.locked) {
+    if (element.hidden || element.locked || readOnly) {
       return;
     }
     updateElementState(element.id, { hovering: false });
-  }, [element.hidden, element.locked, element.id, updateElementState]);
+  }, [
+    element.hidden,
+    element.locked,
+    element.id,
+    readOnly,
+    updateElementState,
+  ]);
 
   const handleMouseDown = useCallback(() => {
-    if (element.hidden || element.locked) {
+    if (element.hidden || element.locked || readOnly) {
       return;
     }
     setSelectedElement(element.id);
-  }, [element.hidden, element.locked, element.id, setSelectedElement]);
+  }, [
+    element.hidden,
+    element.locked,
+    element.id,
+    readOnly,
+    setSelectedElement,
+  ]);
 
   useEffect(() => {
+    if (element.hidden || element.locked || readOnly) {
+      return;
+    }
+
     const el = elementRef.current;
     if (!el) {
       return;
@@ -101,38 +106,19 @@ export default function Element({ element }: { element: iElement }) {
       resizeObserver.unobserve(el);
     };
   }, [
+    element.hidden,
     element.id,
+    element.locked,
     element.transform.autoHeight,
     element.transform.autoWidth,
+    readOnly,
     updateElementTransform,
   ]);
-
-  if (!element) {
-    return null;
-  }
 
   return (
     <div
       ref={elementRef}
-      style={{
-        display: element.hidden ? "none" : undefined,
-        pointerEvents: element.locked ? "none" : "auto",
-        left: element.transform.position.x,
-        top: element.transform.position.y,
-        width: element.transform.autoWidth
-          ? "fit-content"
-          : element.transform.width,
-        height: element.transform.autoHeight
-          ? "fit-content"
-          : element.transform.height,
-        minWidth: 20,
-        minHeight: 20,
-        transform: `
-          translate(${offset.x}px, ${offset.y}px) 
-          rotate(${element.transform.rotation}deg) 
-          scale(${element.transform.scale})
-        `,
-      }}
+      style={getElementWrapperStyle(element)}
       {...(readOnly
         ? {}
         : {
@@ -140,10 +126,14 @@ export default function Element({ element }: { element: iElement }) {
             onMouseLeave: handleMouseLeave,
             onMouseDown: handleMouseDown,
           })}
-      className="absolute"
     >
       {element.type === "code-editor" ? (
-        <CodeEditorElement element={element} />
+        <CodeEditorElement
+          element={element}
+          onCodeChange={(code) => {
+            updateElement(element.id, { code });
+          }}
+        />
       ) : element.type === "text" ? (
         <TextElement element={element} />
       ) : null}

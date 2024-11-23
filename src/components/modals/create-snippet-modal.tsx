@@ -13,7 +13,7 @@ import { SYSTEM_SNIPPET_TEMPLATES } from "@/lib/constants/templates";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
-import SnippetViewer from "../snippet-viewer";
+import SnippetViewer from "../snippet-editor/snippet-viewer";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import {

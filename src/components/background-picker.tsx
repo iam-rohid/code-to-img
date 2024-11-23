@@ -155,7 +155,7 @@ function GradientPicker({
                   style={{ backgroundColor: color }}
                   className="flex h-6 w-6 rounded-md border shadow-sm"
                   onMouseDown={(e) => {
-                    if (e.button === 1) {
+                    if (e.button === 1 && colors.length > 2) {
                       setColors(colors.filter((_, j) => i !== j));
                     }
                   }}

@@ -303,11 +303,15 @@ function ElementTransform({
 }
 
 function ElementActions({ elementId }: { elementId: string }) {
-  const { snippetStore } = useSnippetEditor();
+  const { snippetStore, editorStore } = useSnippetEditor();
   const removeElement = useStore(snippetStore, (state) => state.removeElement);
   const duplicateElement = useStore(
     snippetStore,
     (state) => state.duplicateElement,
+  );
+  const setSelectedElement = useStore(
+    editorStore,
+    (state) => state.setSelectedElement,
   );
 
   return (
@@ -319,7 +323,12 @@ function ElementActions({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => duplicateElement(elementId)}
+              onClick={() => {
+                const duplicatedElement = duplicateElement(elementId);
+                if (duplicatedElement) {
+                  setSelectedElement(duplicatedElement.id);
+                }
+              }}
             >
               <CopyIcon />
               <span className="sr-only">Duplicate</span>

@@ -23,7 +23,7 @@ export type SnipetActions = {
     transform: Partial<iTransform>,
   ) => void;
   removeElement: (elemenntId: string) => void;
-  duplicateElement: (elemenntId: string) => void;
+  duplicateElement: (elemenntId: string) => iElement | null;
   alignElement: (elementId: string, alignment: Alignment) => void;
 };
 
@@ -75,7 +75,7 @@ export const createSnippetStore = (snippetData: iSnippetData) => {
       const snippets = get().elements;
       const elementToDuplicate = snippets.find((el) => el.id === elementId);
       if (!elementToDuplicate) {
-        return;
+        return null;
       }
 
       const element = structuredClone(elementToDuplicate);
@@ -86,6 +86,7 @@ export const createSnippetStore = (snippetData: iSnippetData) => {
       set({
         elements: [element, ...snippets],
       });
+      return element;
     },
     alignElement: (elementId, alignment) => {
       const state = get();

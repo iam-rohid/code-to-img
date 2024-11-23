@@ -16,7 +16,7 @@ import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
 import { useRenameSnippetModal } from "./modals/rename-snippet-modal";
-import SnippetViewer from "./snippet-viewer";
+import SnippetViewer from "./snippet-editor/snippet-viewer";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,

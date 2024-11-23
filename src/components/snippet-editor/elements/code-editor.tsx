@@ -1,22 +1,19 @@
 import { useMemo } from "react";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import CodeMirror, { EditorView, Extension } from "@uiw/react-codemirror";
-import { useStore } from "zustand";
 
 import { codeEditorThemes } from "@/lib/constants/code-editor-themes";
 import { iCodeEditorElement } from "@/lib/validator/element";
-import { useSnippetEditor } from "../snippet-editor";
-
-import Draggable from "./shared/draggable";
 
 export default function CodeEditorElement({
   element,
+  readOnly,
+  onCodeChange,
 }: {
   element: iCodeEditorElement;
+  readOnly?: boolean;
+  onCodeChange?: (code: string) => void;
 }) {
-  const { snippetStore, readOnly } = useSnippetEditor();
-  const updateElement = useStore(snippetStore, (state) => state.updateElement);
-
   const theme = useMemo(
     () => codeEditorThemes.find((theme) => theme.id === element.theme),
     [element.theme],
@@ -52,7 +49,11 @@ export default function CodeEditorElement({
         }}
         className="flex-shrink-0 overflow-hidden"
       >
-        <Draggable element={element}>
+        <div
+          id={element.id}
+          data-cti-element-id={element.id}
+          className="cti-drag-handle"
+        >
           <div className="flex h-full items-center gap-2 py-[15px] pl-[14px]">
             <div
               className="h-[12px] w-[12px] flex-shrink-0 rounded-full bg-[#FEBC2E]"
@@ -73,7 +74,7 @@ export default function CodeEditorElement({
               }}
             ></div>
           </div>
-        </Draggable>
+        </div>
       </div>
       <div
         className="flex flex-1 overflow-hidden"
@@ -96,7 +97,7 @@ export default function CodeEditorElement({
           }
           extensions={extensions}
           onChange={(value) => {
-            updateElement(element.id, { code: value });
+            onCodeChange?.(value);
           }}
           readOnly={readOnly}
           basicSetup={{
