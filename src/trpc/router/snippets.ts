@@ -20,7 +20,11 @@ export const getSnippet = async (snippetId: string, userId: string) => {
   }
 
   await getWorkspaceById(snippet.workspaceId, userId);
-  return snippet;
+  const data = await await snippetSchema.parseAsync(snippet.data);
+  return {
+    ...snippet,
+    data,
+  };
 };
 
 export const snippetsRouter = router({
@@ -54,7 +58,18 @@ export const snippetsRouter = router({
           ),
         )
         .orderBy(desc(snippetTable.createdAt));
-      return snippets;
+      const result = await Promise.allSettled(
+        snippets.map(async (snippet) => {
+          const data = await await snippetSchema.parseAsync(snippet.data);
+          return {
+            ...snippet,
+            data,
+          };
+        }),
+      );
+      return result
+        .filter((res) => res.status === "fulfilled")
+        .map((item) => item.value);
     }),
   createSnippet: protectedProcedure
     .input(
