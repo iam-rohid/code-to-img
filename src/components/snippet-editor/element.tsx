@@ -32,6 +32,10 @@ export default function Element({ elementId }: { elementId: string }) {
     editorStore,
     (state) => state.setSelectedElement,
   );
+  const handleTabSelect = useStore(
+    editorStore,
+    (state) => state.handleTabSelect,
+  );
 
   const handleMouseEnter = useCallback(() => {
     if (element.hidden || element.locked || readOnly) {
@@ -135,10 +139,11 @@ export default function Element({ elementId }: { elementId: string }) {
       {element.type === "code-editor" ? (
         <CodeEditorElement
           element={element}
-          onCodeChange={(code) => {
-            updateElement(element.id, { code });
+          onChange={(updatedElement) => {
+            updateElement(element.id, updatedElement);
           }}
           readOnly={readOnly}
+          onTabSelect={(tabId) => handleTabSelect(element.id, tabId)}
         />
       ) : element.type === "text" ? (
         <TextElement element={element} />

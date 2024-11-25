@@ -1,9 +1,11 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { langNames } from "@uiw/codemirror-extensions-langs";
 import { ALargeSmallIcon, ListOrderedIcon, SpaceIcon } from "lucide-react";
 import { useStore } from "zustand";
 
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -13,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { iCodeEditorElement } from "@/lib/validator/element";
+import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/element";
 import { TITLE_BAR_CONTROLS } from "../../elements/code-editor/controls";
 import { useSnippetEditor } from "../../snippet-editor";
 
@@ -24,11 +26,30 @@ export default function CodeEditorProperties({
 }: {
   element: iCodeEditorElement;
 }) {
-  const { snippetStore } = useSnippetEditor();
+  const { snippetStore, editorStore } = useSnippetEditor();
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
+  const selectedTabIds = useStore(editorStore, (state) => state.selectedTabIds);
+  const selectedTab = useMemo(() => {
+    const tabId = selectedTabIds[element.id];
+    if (!tabId) {
+      return null;
+    }
+    return element.tabs.find((tab) => tab.id === tabId) ?? null;
+  }, [element.id, element.tabs, selectedTabIds]);
+
+  const handleUpdateTab = useCallback(
+    (tabId: string, updatedTab: Partial<CodeEditorTab>) => {
+      updateElement(element.id, {
+        tabs: element.tabs.map((tab) =>
+          tab.id === tabId ? { ...tab, ...updatedTab } : tab,
+        ),
+      });
+    },
+    [element.id, element.tabs, updateElement],
+  );
 
   return (
-    <>
+    <div>
       <div className="p-2">
         <p className="text-xs text-muted-foreground">Code Editor Properties</p>
       </div>
@@ -42,29 +63,6 @@ export default function CodeEditorProperties({
             updateElement(element.id, { padding: value })
           }
         />
-      </div>
-
-      <div className="flex h-12 items-center justify-between gap-2 px-2">
-        <Label htmlFor="control-style">Language</Label>
-        <Select
-          value={element.language}
-          onValueChange={(value) =>
-            updateElement(element.id, {
-              language: value as iCodeEditorElement["language"],
-            })
-          }
-        >
-          <SelectTrigger className="w-fit gap-2">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {langNames.map((langName) => (
-              <SelectItem key={langName} value={langName}>
-                <div className="flex h-6 items-center">{langName}</div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <NumberField
@@ -160,6 +158,52 @@ export default function CodeEditorProperties({
           </div>
         </>
       )}
-    </>
+
+      {selectedTab && (
+        <>
+          <div className="p-2">
+            <p className="text-xs text-muted-foreground">Selected Tab</p>
+          </div>
+          <Separator />
+          <div className="flex h-12 items-center justify-between gap-2 px-2">
+            <Label htmlFor="control-style">Tab Name</Label>
+            <Input
+              key={selectedTab.id}
+              defaultValue={selectedTab.name}
+              placeholder="Untitled"
+              className="w-32"
+              onChange={(e) => {
+                handleUpdateTab(selectedTab.id, {
+                  name: e.currentTarget.value,
+                });
+              }}
+            />
+          </div>
+          <div className="flex h-12 items-center justify-between gap-2 px-2">
+            <Label htmlFor="control-style">Language</Label>
+            <Select
+              key={selectedTab.id}
+              defaultValue={selectedTab.language}
+              onValueChange={(value) => {
+                handleUpdateTab(selectedTab.id, {
+                  language: value as CodeEditorTab["language"],
+                });
+              }}
+            >
+              <SelectTrigger className="w-32 gap-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {langNames.map((langName) => (
+                  <SelectItem key={langName} value={langName}>
+                    <div className="flex h-6 items-center">{langName}</div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

@@ -13,21 +13,31 @@ const elementBase = z.object({
   locked: z.boolean().optional(),
 });
 
+export const codeEditorTabSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  language: languageSchema,
+});
+
+export type CodeEditorTab = z.infer<typeof codeEditorTabSchema>;
+
 export const codeEditorElementSchema = z
   .object({
     type: z.literal("code-editor"),
-    code: z.string(),
+    // code: z.string(),
     fontSize: z.number().min(0),
     lineHeight: z.number().min(0),
     showLineNumbers: z.boolean().default(true),
     lineNumbersStartFrom: z.number().min(1).default(1),
     tabSize: z.number().min(2).default(4),
     theme: z.string(),
-    language: languageSchema,
     padding: paddingSchema,
     showTitleBar: z.boolean().default(true),
     titleBarControlPosition: z.enum(["left", "right"]).default("left"),
     titleBarControlStyle: z.string().default("macos-default"),
+    showTabs: z.boolean().default(true),
+    tabs: z.array(codeEditorTabSchema).min(1),
   })
   .merge(elementBase);
 

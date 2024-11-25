@@ -2,7 +2,7 @@ import { CSSProperties } from "react";
 import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
 import { Extension } from "@uiw/react-codemirror";
 
-export const codeEditorThemes: {
+export interface iCodeEditorTheme {
   id: string;
   name: string;
   theme: Extension;
@@ -20,7 +20,9 @@ export const codeEditorThemes: {
     codeMirrorContainerStyle?: CSSProperties;
     codeMirrorStyle?: CSSProperties;
   };
-}[] = [
+}
+
+export const codeEditorThemes: iCodeEditorTheme[] = [
   {
     id: "theme-1",
     name: "Theme 1",

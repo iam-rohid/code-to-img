@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid";
+
 import { iCodeEditorElement, iTextElement } from "../validator/element";
 
 export interface GetElementArgs {
@@ -38,9 +40,8 @@ export const getCodeEditorElement = ({
     scale: 1,
   },
   type: "code-editor",
-  code: 'console.log("Hello, World")',
+
   fontSize: 16,
-  language: "javascript",
   lineHeight: 24,
   showLineNumbers: true,
   theme,
@@ -57,6 +58,15 @@ export const getCodeEditorElement = ({
   titleBarControlPosition: "left",
   hidden: false,
   locked: false,
+  showTabs: true,
+  tabs: [
+    {
+      id: nanoid(),
+      name: "Tab 01",
+      code: 'console.log("Hello, World")',
+      language: "javascript",
+    },
+  ],
 });
 
 export interface GetTextElementProps extends GetElementArgs {

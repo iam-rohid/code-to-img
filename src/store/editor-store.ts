@@ -18,6 +18,7 @@ export interface SnippetEditorState {
   scrollX: number;
   scrollY: number;
   layersOpen: boolean;
+  selectedTabIds: Record<string, string>;
 }
 
 export interface SnippetEditorActions {
@@ -27,6 +28,7 @@ export interface SnippetEditorActions {
   setScrollX: (scrollY: number) => void;
   setLayersOpen: (open: boolean) => void;
   setSelectedElement: (elemenntId: string | null) => void;
+  handleTabSelect: (elementId: string, tabId: string) => void;
   updateElementState: (elemenntId: string, data: Partial<ElementState>) => void;
   commitHistory: (state: SnippetState) => void;
   undo: () => void;
@@ -45,6 +47,7 @@ export const createSnippetEditorStore = (
     elementState: {},
     selectedElementId: null,
     layersOpen: false,
+    selectedTabIds: {},
     ...initState,
     setLayersOpen: (layersOpen) => set({ layersOpen }),
     setZoom: (zoom) => set({ zoom }),
@@ -82,6 +85,10 @@ export const createSnippetEditorStore = (
         ),
       }));
     },
+    handleTabSelect: (elementId, tabId) =>
+      set((state) => ({
+        selectedTabIds: { ...state.selectedTabIds, [elementId]: tabId },
+      })),
   }));
 };
 

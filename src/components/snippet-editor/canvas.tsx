@@ -41,6 +41,9 @@ export default function Canvas() {
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
+      if (e.button !== 0) {
+        return;
+      }
       const elementId = (e.currentTarget as HTMLDivElement).getAttribute(
         "data-cti-element-id",
       );
