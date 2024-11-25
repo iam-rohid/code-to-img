@@ -3,12 +3,29 @@ import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { snippetTable } from "@/db/schema";
+import { Snippet, snippetTable } from "@/db/schema";
+import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { snippetSchema } from "@/lib/validator/snippet";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
 
 import { getWorkspaceById } from "./workspaces";
+
+const parseSnippet = (snippet: Snippet): Snippet => {
+  try {
+    const data = snippetSchema.parse(snippet.data);
+    return {
+      ...snippet,
+      data,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return {
+      ...snippet,
+      data: DEFAULT_SNIPPET_TEMPLATE.data,
+    };
+  }
+};
 
 export const getSnippet = async (snippetId: string, userId: string) => {
   const [snippet] = await db
@@ -20,11 +37,7 @@ export const getSnippet = async (snippetId: string, userId: string) => {
   }
 
   await getWorkspaceById(snippet.workspaceId, userId);
-  const data = await await snippetSchema.parseAsync(snippet.data);
-  return {
-    ...snippet,
-    data,
-  };
+  return parseSnippet(snippet);
 };
 
 export const snippetsRouter = router({
@@ -58,18 +71,7 @@ export const snippetsRouter = router({
           ),
         )
         .orderBy(desc(snippetTable.createdAt));
-      const result = await Promise.allSettled(
-        snippets.map(async (snippet) => {
-          const data = await await snippetSchema.parseAsync(snippet.data);
-          return {
-            ...snippet,
-            data,
-          };
-        }),
-      );
-      return result
-        .filter((res) => res.status === "fulfilled")
-        .map((item) => item.value);
+      return snippets.map(parseSnippet);
     }),
   createSnippet: protectedProcedure
     .input(
