@@ -270,7 +270,7 @@ function ElementTransformProperties({ element }: { element: iElement }) {
         <InspectorNumberInput
           value={element.scale * 100}
           min={10}
-          max={200}
+          max={500}
           icon={<span>S</span>}
           onValueChange={(value) => {
             updateElementTransform(element.id, {

@@ -124,7 +124,12 @@ export default function CodeEditorElement({
         backgroundImage: theme.settings.backgroundImage,
         backgroundColor: theme.settings.background,
         color: theme.settings.foreground,
-        boxShadow: `0 0 0 0.5px rgba(0,0,0,${theme.isDark ? 0.8 : 0.4}), 0px 24px 32px -6px rgba(0,0,0,0.6)`,
+        boxShadow: [
+          ...(element.border
+            ? [`0 0 0 0.5px rgba(0,0,0,${theme.isDark ? 0.8 : 0.4})`]
+            : []),
+          "0px 24px 32px -6px rgba(0,0,0,0.6)",
+        ].join(", "),
         borderRadius: `10px`,
       }}
     >
@@ -175,13 +180,15 @@ export default function CodeEditorElement({
         </div>
       ))}
 
-      <div
-        className="pointer-events-none absolute inset-0 z-20"
-        style={{
-          boxShadow: `inset 0 0 0 1px ${borderColor}`,
-          borderRadius: `10px`,
-        }}
-      />
+      {element.border && (
+        <div
+          className="pointer-events-none absolute inset-0 z-20"
+          style={{
+            boxShadow: `inset 0 0 0 1px ${borderColor}`,
+            borderRadius: `10px`,
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -307,7 +314,7 @@ function TitleBar({
             ? secondaryBackground.toString()
             : background.toString(),
         boxShadow:
-          element.tabs.length > 1
+          element.border && element.tabs.length > 1
             ? `inset 0 -1px 0 0 ${borderColor}`
             : undefined,
       }}
@@ -340,7 +347,7 @@ function TitleBar({
                         ? theme.settings.background
                         : "transparent",
                       boxShadow:
-                        selected && element.tabs.length > 1
+                        element.border && selected && element.tabs.length > 1
                           ? `inset 1px 0 0 ${borderColor}, inset -1px 0 0 ${borderColor}`
                           : undefined,
                     }}

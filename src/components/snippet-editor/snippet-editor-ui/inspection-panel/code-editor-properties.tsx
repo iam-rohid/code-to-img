@@ -129,6 +129,12 @@ export default function CodeEditorProperties({
       )}
 
       <SwitchField
+        label="Border"
+        checked={element.border}
+        onCheckedChange={(border) => updateElement(element.id, { border })}
+      />
+
+      <SwitchField
         label="Show Title Bar"
         checked={element.showTitleBar}
         onCheckedChange={(titleBar) =>

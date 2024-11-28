@@ -34,6 +34,7 @@ export const codeEditorElementSchema = z
     titleBarControlStyle: z.string().optional().default("macos-default"),
     showTabs: z.boolean().optional().default(true),
     tabs: z.array(codeEditorTabSchema).min(1),
+    border: z.boolean().optional().default(true),
   })
   .merge(elementBase);
 

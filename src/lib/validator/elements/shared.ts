@@ -10,7 +10,7 @@ export const elementBase = z.object({
   autoHeight: z.boolean().optional().default(false),
   widthHeightLinked: z.boolean().optional().default(false),
   rotation: z.number().optional().default(0),
-  scale: z.number().min(0.1).max(3).optional().default(1),
+  scale: z.number().min(0.1).max(5).optional().default(1),
   x: z.number().optional().default(0),
   y: z.number().optional().default(0),
   hidden: z.boolean().optional().default(false),

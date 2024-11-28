@@ -66,6 +66,7 @@ export const getCodeEditorElement = ({
       language: "javascript",
     },
   ],
+  border: true,
 });
 
 export interface GetTextElementProps extends GetElementArgs {
