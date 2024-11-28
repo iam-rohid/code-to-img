@@ -1,6 +1,7 @@
-import { CodeEditorTheme } from "@/lib/constants/code-editor-themes";
-import Color from "color";
 import { useMemo } from "react";
+import Color from "color";
+
+import { CodeEditorTheme } from "@/lib/constants/code-editor-themes";
 
 function MacOSControl() {
   return (
