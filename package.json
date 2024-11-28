@@ -14,6 +14,8 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/language": "^6.10.3",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
     "@hookform/resolvers": "^3.9.1",
     "@lezer/highlight": "^1.2.1",
     "@neondatabase/serverless": "^0.10.3",
@@ -41,13 +43,14 @@
     "@trpc/react-query": "11.0.0-rc.608",
     "@trpc/server": "11.0.0-rc.608",
     "@uiw/codemirror-extensions-langs": "^4.23.6",
-    "@uiw/codemirror-theme-tokyo-night": "^4.23.6",
     "@uiw/codemirror-themes": "^4.23.6",
+    "@uiw/codemirror-themes-all": "^4.23.6",
     "@uiw/react-codemirror": "^4.23.6",
     "arctic": "^2.2.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
+    "color": "^4.2.3",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.1",
@@ -70,6 +73,7 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@types/color": "^4.2.0",
     "@types/node": "^20",
     "@types/prismjs": "^1.26.5",
     "@types/react": "^18",

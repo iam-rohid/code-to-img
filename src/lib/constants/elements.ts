@@ -2,6 +2,8 @@ import { nanoid } from "nanoid";
 
 import { iCodeEditorElement, iTextElement } from "../validator/elements";
 
+import { DEFAULT_THEME } from "./code-editor-themes";
+
 export interface GetElementArgs {
   id: string;
   name?: string;
@@ -21,7 +23,7 @@ export const getCodeEditorElement = ({
   width = 400,
   height = 93,
   name = "Code Editor",
-  theme = "theme-1",
+  theme = DEFAULT_THEME,
   x = 0,
   y = 0,
 }: GetCodeEditorElementProps): iCodeEditorElement => ({

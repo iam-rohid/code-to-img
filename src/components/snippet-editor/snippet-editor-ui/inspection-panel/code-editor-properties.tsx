@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { CODE_EDITOR_THEMES } from "@/lib/constants/code-editor-themes";
 import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
 import { TITLE_BAR_CONTROLS } from "../../elements/code-editor/controls";
 import { useSnippetEditor } from "../../snippet-editor";
@@ -63,6 +64,29 @@ export default function CodeEditorProperties({
             updateElement(element.id, { padding: value })
           }
         />
+      </div>
+
+      <div className="flex h-12 items-center justify-between gap-2 px-2">
+        <Label htmlFor="theme">Theme</Label>
+        <Select
+          value={element.theme}
+          onValueChange={(value) =>
+            updateElement(element.id, {
+              theme: value,
+            })
+          }
+        >
+          <SelectTrigger id="theme" className="w-fit gap-2">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CODE_EDITOR_THEMES.map((item) => (
+              <SelectItem key={item.id} value={item.id}>
+                {item.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <NumberField

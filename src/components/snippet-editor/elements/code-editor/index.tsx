@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as TabsPremitives from "@radix-ui/react-tabs";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
@@ -6,13 +8,11 @@ import CodeMirror, {
   Extension,
   lineNumbers,
 } from "@uiw/react-codemirror";
+import Color from "color";
 import { PlusIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 
-import {
-  codeEditorThemes,
-  iCodeEditorTheme,
-} from "@/lib/constants/code-editor-themes";
+import { CODE_EDITOR_THEMES } from "@/lib/constants/code-editor-themes";
 import { cn } from "@/lib/utils";
 import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
 
@@ -33,8 +33,29 @@ export default function CodeEditorElement({
 }) {
   const [selectedTabId, setSelectedTabId] = useState(() => element.tabs[0].id);
   const theme = useMemo(
-    () => codeEditorThemes.find((theme) => theme.id === element.theme),
+    () =>
+      CODE_EDITOR_THEMES.find((theme) => theme.id === element.theme) ??
+      CODE_EDITOR_THEMES[0]!,
     [element.theme],
+  );
+  const background = useMemo(
+    () => Color(theme.settings.background),
+    [theme.settings.background],
+  );
+  const secondaryBackground = useMemo(
+    () =>
+      background.isDark() ? background.darken(0.3) : background.darken(0.05),
+    [background],
+  );
+  const secondaryBackground2 = useMemo(
+    () =>
+      background.isDark() ? background.lighten(0.4) : background.darken(0.1),
+    [background],
+  );
+  const borderColor = useMemo(
+    () =>
+      background.isDark() ? background.lighten(1) : background.darken(0.1),
+    [background],
   );
 
   const extensions = useMemo(() => {
@@ -72,9 +93,9 @@ export default function CodeEditorElement({
     }
     const newTab: CodeEditorTab = {
       id: nanoid(),
-      code: "",
+      code: "// Enter your code here",
       language: "javascript",
-      name: "",
+      name: "index.js",
     };
     onChange?.({
       ...element,
@@ -110,64 +131,103 @@ export default function CodeEditorElement({
       value={selectedTabId}
       onValueChange={setSelectedTabId}
       id={element.id}
-      className="flex h-full w-full flex-col overflow-hidden"
+      className="code-editor flex h-full w-full flex-col overflow-hidden rounded-lg"
       style={{
-        background: theme?.window?.background,
-        backgroundImage: theme?.window?.backgroundImage,
-        color: theme?.window?.foreground,
-        ...theme?.window?.style,
+        backgroundImage: theme.settings.backgroundImage,
+        backgroundColor: theme.settings.background,
+        color: theme.settings.foreground,
+        boxShadow: `0 0 0 1px ${borderColor}`,
       }}
     >
       {element.showTitleBar ? (
         <div
-          style={{
-            background: theme?.window?.titleBarBackground,
-            color: theme?.window?.titleBarForeground,
-            ...theme?.window?.titleBarStyle,
-          }}
           data-cti-element-id={element.id}
           className="cti-drag-handle flex-shrink-0 overflow-hidden"
+          style={{
+            backgroundColor:
+              element.tabs.length > 1
+                ? secondaryBackground.toString()
+                : background.toString(),
+            boxShadow:
+              element.tabs.length > 1
+                ? `inset 0 -1px 0 0 ${borderColor}`
+                : undefined,
+          }}
         >
           <div
-            className={cn("flex h-12 items-center gap-4 px-4", {
+            className={cn("flex h-10 items-center", {
               "flex-row-reverse": element.titleBarControlPosition === "right",
             })}
           >
-            {Control ? <Control /> : null}
-            <div className="flex-1">
-              <TabsPremitives.List className="flex flex-nowrap items-center gap-1">
-                {element.tabs.map((tab) => (
-                  <div key={tab.id} className="relative">
-                    <TabsPremitives.Trigger
-                      value={tab.id}
-                      className={cn(
-                        "h-8 max-w-48 rounded-md px-3 text-left text-sm font-medium aria-selected:bg-accent aria-selected:text-accent-foreground",
-                        {
-                          "pr-8": !readOnly,
-                        },
-                      )}
+            {Control ? (
+              <div className="flex-shrink-0 px-4">
+                <Control />
+              </div>
+            ) : null}
+            <div className="flex h-full flex-1 overflow-hidden">
+              <TabsPremitives.List className="flex flex-1 flex-nowrap items-center overflow-hidden">
+                {element.tabs.map((tab) => {
+                  const selected = selectedTabId === tab.id;
+                  return (
+                    <div
+                      key={tab.id}
+                      className="group/tab relative flex h-full flex-1 overflow-hidden"
                     >
-                      <p className="truncate">{tab.name || "Untitled"}</p>
-                    </TabsPremitives.Trigger>
-                    {!readOnly && element.tabs.length > 0 && (
-                      <button
-                        className="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full hover:bg-secondary"
-                        onClick={() => handleRemoveTab(tab.id)}
+                      <TabsPremitives.Trigger
+                        value={tab.id}
+                        className={cn(
+                          "h-full flex-1 overflow-hidden truncate px-3 text-center text-sm font-medium hover:bg-red-50",
+                        )}
+                        style={{
+                          backgroundColor: selected
+                            ? theme.settings.background
+                            : "transparent",
+                          boxShadow:
+                            selected && element.tabs.length > 1
+                              ? `inset 1px 0 0 ${borderColor}, inset -1px 0 0 ${borderColor}`
+                              : undefined,
+                        }}
+                        css={{
+                          ":hover": {
+                            backgroundColor: selected
+                              ? undefined
+                              : secondaryBackground2.toString(),
+                          },
+                        }}
                       >
-                        <XIcon className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {!readOnly && element.tabs.length < MAX_TABS && (
-                  <button
-                    className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-secondary"
-                    onClick={handleAddNewTab}
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                  </button>
-                )}
+                        {tab.name || "Untitled"}
+                      </TabsPremitives.Trigger>
+                      {!readOnly && element.tabs.length > 1 && (
+                        <button
+                          className="pointer-events-none absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-secondary group-hover/tab:pointer-events-auto group-hover/tab:opacity-100"
+                          onClick={() => handleRemoveTab(tab.id)}
+                          css={{
+                            ":hover": {
+                              backgroundColor: secondaryBackground2.toString(),
+                            },
+                          }}
+                        >
+                          <XIcon className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </TabsPremitives.List>
+
+              {!readOnly && element.tabs.length < MAX_TABS && (
+                <button
+                  className="flex h-full w-6 flex-shrink-0 items-center justify-center"
+                  onClick={handleAddNewTab}
+                  css={{
+                    ":hover": {
+                      backgroundColor: secondaryBackground2.toString(),
+                    },
+                  }}
+                >
+                  <PlusIcon className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -188,7 +248,7 @@ export default function CodeEditorElement({
             key={tab.id}
             tab={tab}
             extensions={extensions}
-            theme={theme}
+            theme={theme.theme}
             element={element}
             onCodeChange={(code) =>
               onChange?.({
@@ -216,7 +276,7 @@ function TabContent({
 }: {
   tab: CodeEditorTab;
   extensions?: Extension[];
-  theme?: iCodeEditorTheme;
+  theme: Extension;
   onCodeChange?: (value: string) => void;
   readOnly?: boolean;
   element: iCodeEditorElement;
@@ -241,7 +301,7 @@ function TabContent({
     <CodeMirror
       key={tab.id}
       value={code}
-      theme={theme?.theme}
+      theme={theme}
       height={element.autoHeight ? undefined : "100%"}
       width={element.autoWidth ? undefined : `100%`}
       extensions={extensions}
@@ -273,7 +333,12 @@ function TabContent({
         paddingRight: element.padding.right,
         paddingTop: element.padding.top,
         paddingBottom: element.padding.bottom,
-        ...theme?.window?.codeMirrorStyle,
+        outline: "none",
+      }}
+      css={{
+        ".cm-focused": {
+          outline: "none",
+        },
       }}
     />
   );

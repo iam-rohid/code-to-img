@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { codeEditorThemes } from "@/lib/constants/code-editor-themes";
+import { DEFAULT_THEME } from "@/lib/constants/code-editor-themes";
 import { languageSchema } from "../language";
 
 import { elementBase, paddingSchema } from "./shared";
@@ -22,7 +22,7 @@ export const codeEditorElementSchema = z
     showLineNumbers: z.boolean().optional().default(true),
     lineNumbersStartFrom: z.number().min(1).optional().default(1),
     tabSize: z.number().min(2).optional().default(4),
-    theme: z.string().optional().default(codeEditorThemes[0].id),
+    theme: z.string().optional().default(DEFAULT_THEME),
     padding: paddingSchema
       .optional()
       .default({ bottom: 12, left: 12, right: 12, top: 0 }),

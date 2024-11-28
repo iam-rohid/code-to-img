@@ -1,52 +1,62 @@
-import { CSSProperties } from "react";
-import { tokyoNightInit } from "@uiw/codemirror-theme-tokyo-night";
+import { type CreateThemeOptions } from "@uiw/codemirror-themes";
+import {
+  defaultSettingsDracula,
+  defaultSettingsTokyoNight,
+  defaultSettingsTokyoNightDay,
+  defaultSettingsVscodeDark,
+  defaultSettingsVscodeLight,
+  draculaInit,
+  tokyoNightDayInit,
+  tokyoNightInit,
+  vscodeDarkInit,
+  vscodeLightInit,
+} from "@uiw/codemirror-themes-all";
 import { Extension } from "@uiw/react-codemirror";
 
-export interface iCodeEditorTheme {
+const defaultInitOptions: Partial<CreateThemeOptions> = {
+  settings: {
+    background: "transparent",
+    gutterBackground: "transparent",
+    gutterBorder: "transparent",
+  },
+};
+
+export const CODE_EDITOR_THEMES: {
   id: string;
   name: string;
   theme: Extension;
-  window?: {
-    background?: string;
-    backgroundImage?: string;
-    foreground?: string;
-    titleBarBackground?: string;
-    titleBarForeground?: string;
-    titleBarTraficLightColor1?: string;
-    titleBarTraficLightColor2?: string;
-    titleBarTraficLightColor3?: string;
-    style?: CSSProperties;
-    titleBarStyle?: CSSProperties;
-    codeMirrorContainerStyle?: CSSProperties;
-    codeMirrorStyle?: CSSProperties;
-  };
-}
-
-export const codeEditorThemes: iCodeEditorTheme[] = [
+  settings: CreateThemeOptions["settings"];
+}[] = [
   {
-    id: "theme-1",
-    name: "Theme 1",
-    theme: tokyoNightInit({
-      settings: {
-        background: "transparent",
-        gutterBackground: "transparent",
-      },
-    }),
-    window: {
-      background: "#1A1B26",
-      foreground: "#BBC5EE",
-      titleBarBackground: "#1A1B26",
-      style: {
-        border: "1px solid rgba(255,255,255,0.3)",
-        boxShadow: "0 0 0 0.5px rgba(0,0,0,0.8)",
-        borderRadius: 10,
-      },
-      titleBarStyle: {
-        backgroundColor: "transparent",
-      },
-      codeMirrorContainerStyle: {
-        backgroundColor: "transparent",
-      },
-    },
+    id: "tokyo-night",
+    name: "Tokyo Night",
+    theme: tokyoNightInit(defaultInitOptions),
+    settings: defaultSettingsTokyoNight,
+  },
+  {
+    id: "tokyo-night-day",
+    name: "Tokyo Night Day",
+    theme: tokyoNightDayInit(defaultInitOptions),
+    settings: defaultSettingsTokyoNightDay,
+  },
+  {
+    id: "dracula",
+    name: "Dracula",
+    theme: draculaInit(defaultInitOptions),
+    settings: defaultSettingsDracula,
+  },
+  {
+    id: "vscode-light",
+    name: "VS Code Light",
+    theme: vscodeLightInit(defaultInitOptions),
+    settings: defaultSettingsVscodeLight,
+  },
+  {
+    id: "vscode-dark",
+    name: "VS Code Dark",
+    theme: vscodeDarkInit(defaultInitOptions),
+    settings: defaultSettingsVscodeDark,
   },
 ];
+
+export const DEFAULT_THEME = "dracula";
