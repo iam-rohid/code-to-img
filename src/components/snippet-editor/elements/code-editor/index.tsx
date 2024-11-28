@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import * as TabsPremitives from "@radix-ui/react-tabs";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import CodeMirror, {
   EditorView,
@@ -12,13 +11,16 @@ import Color from "color";
 import { PlusIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 
-import { CODE_EDITOR_THEMES } from "@/lib/constants/code-editor-themes";
+import {
+  CODE_EDITOR_THEMES,
+  CodeEditorTheme,
+} from "@/lib/constants/code-editor-themes";
 import { cn } from "@/lib/utils";
 import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
 
 import { TITLE_BAR_CONTROLS } from "./controls";
 
-const MAX_TABS = 3;
+const MAX_TABS = 4;
 
 export default function CodeEditorElement({
   element,
@@ -43,19 +45,16 @@ export default function CodeEditorElement({
     [theme.settings.background],
   );
   const secondaryBackground = useMemo(
-    () =>
-      background.isDark() ? background.darken(0.3) : background.darken(0.05),
-    [background],
+    () => (theme.isDark ? background.darken(0.3) : background.darken(0.05)),
+    [background, theme.isDark],
   );
   const secondaryBackground2 = useMemo(
-    () =>
-      background.isDark() ? background.lighten(0.4) : background.darken(0.1),
-    [background],
+    () => (theme.isDark ? background.lighten(0.4) : background.darken(0.1)),
+    [background, theme.isDark],
   );
   const borderColor = useMemo(
-    () =>
-      background.isDark() ? background.lighten(1) : background.darken(0.1),
-    [background],
+    () => (theme.isDark ? background.lighten(1) : background.darken(0.2)),
+    [background, theme.isDark],
   );
 
   const extensions = useMemo(() => {
@@ -78,14 +77,6 @@ export default function CodeEditorElement({
     element.lineNumbersStartFrom,
     element.showLineNumbers,
   ]);
-
-  const Control = useMemo(
-    () =>
-      TITLE_BAR_CONTROLS.find(
-        (control) => control.id === element.titleBarControlStyle,
-      )?.Control,
-    [element.titleBarControlStyle],
-  );
 
   const handleAddNewTab = useCallback(() => {
     if (element.tabs.length >= MAX_TABS) {
@@ -127,110 +118,30 @@ export default function CodeEditorElement({
   }, [onTabSelect, selectedTabId]);
 
   return (
-    <TabsPremitives.Root
-      value={selectedTabId}
-      onValueChange={setSelectedTabId}
-      id={element.id}
-      className="code-editor flex h-full w-full flex-col overflow-hidden rounded-xl"
+    <div
+      className="code-editor relative flex h-full w-full flex-col overflow-hidden"
       style={{
         backgroundImage: theme.settings.backgroundImage,
         backgroundColor: theme.settings.background,
         color: theme.settings.foreground,
-        boxShadow: `0 0 0 1px ${borderColor}, 0 0 0 1.5px rgba(0,0,0,0.4), 0px 6px 16px rgba(0,0,0,0.5)`,
+        boxShadow: `0 0 0 0.5px rgba(0,0,0,${theme.isDark ? 0.8 : 0.4}), 0px 24px 32px -6px rgba(0,0,0,0.6)`,
+        borderRadius: `10px`,
       }}
     >
       {element.showTitleBar ? (
-        <div
-          data-cti-element-id={element.id}
-          className="cti-drag-handle flex-shrink-0 overflow-hidden"
-          style={{
-            backgroundColor:
-              element.tabs.length > 1
-                ? secondaryBackground.toString()
-                : background.toString(),
-            boxShadow:
-              element.tabs.length > 1
-                ? `inset 0 -1px 0 0 ${borderColor}`
-                : undefined,
-          }}
-        >
-          <div
-            className={cn("flex h-10 items-center", {
-              "flex-row-reverse": element.titleBarControlPosition === "right",
-            })}
-          >
-            {Control ? (
-              <div className="flex-shrink-0 px-4">
-                <Control />
-              </div>
-            ) : null}
-            <div className="flex h-full flex-1 overflow-hidden">
-              <TabsPremitives.List className="flex flex-1 flex-nowrap items-center overflow-hidden">
-                {element.tabs.map((tab) => {
-                  const selected = selectedTabId === tab.id;
-                  return (
-                    <div
-                      key={tab.id}
-                      className="group/tab relative flex h-full flex-1 overflow-hidden"
-                    >
-                      <TabsPremitives.Trigger
-                        value={tab.id}
-                        className={cn(
-                          "h-full flex-1 overflow-hidden truncate px-3 text-center text-sm font-medium hover:bg-red-50",
-                        )}
-                        style={{
-                          backgroundColor: selected
-                            ? theme.settings.background
-                            : "transparent",
-                          boxShadow:
-                            selected && element.tabs.length > 1
-                              ? `inset 1px 0 0 ${borderColor}, inset -1px 0 0 ${borderColor}`
-                              : undefined,
-                        }}
-                        css={{
-                          ":hover": {
-                            backgroundColor: selected
-                              ? undefined
-                              : secondaryBackground2.toString(),
-                          },
-                        }}
-                      >
-                        {tab.name || "Untitled"}
-                      </TabsPremitives.Trigger>
-                      {!readOnly && element.tabs.length > 1 && (
-                        <button
-                          className="pointer-events-none absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-secondary group-hover/tab:pointer-events-auto group-hover/tab:opacity-100"
-                          onClick={() => handleRemoveTab(tab.id)}
-                          css={{
-                            ":hover": {
-                              backgroundColor: secondaryBackground2.toString(),
-                            },
-                          }}
-                        >
-                          <XIcon className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </TabsPremitives.List>
-
-              {!readOnly && element.tabs.length < MAX_TABS && (
-                <button
-                  className="flex h-full w-6 flex-shrink-0 items-center justify-center"
-                  onClick={handleAddNewTab}
-                  css={{
-                    ":hover": {
-                      backgroundColor: secondaryBackground2.toString(),
-                    },
-                  }}
-                >
-                  <PlusIcon className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        <TitleBar
+          background={background}
+          borderColor={borderColor}
+          element={element}
+          secondaryBackground={secondaryBackground}
+          onAddTabClick={handleAddNewTab}
+          onRemoveTabClick={handleRemoveTab}
+          secondaryBackground2={secondaryBackground2}
+          theme={theme}
+          readOnly={readOnly}
+          selectedTabId={selectedTabId}
+          onSelectedTabChange={setSelectedTabId}
+        />
       ) : (
         <div
           data-cti-element-id={element.id}
@@ -239,10 +150,11 @@ export default function CodeEditorElement({
       )}
 
       {element.tabs.map((tab) => (
-        <TabsPremitives.Content
+        <div
           key={tab.id}
-          value={tab.id}
-          className="overflow-hidden"
+          className={cn("overflow-hidden", {
+            hidden: selectedTabId !== tab.id,
+          })}
         >
           <TabContent
             key={tab.id}
@@ -260,9 +172,17 @@ export default function CodeEditorElement({
             }
             readOnly={readOnly}
           />
-        </TabsPremitives.Content>
+        </div>
       ))}
-    </TabsPremitives.Root>
+
+      <div
+        className="pointer-events-none absolute inset-0 z-20"
+        style={{
+          boxShadow: `inset 0 0 0 1px ${borderColor}`,
+          borderRadius: `10px`,
+        }}
+      />
+    </div>
   );
 }
 
@@ -341,5 +261,133 @@ function TabContent({
         },
       }}
     />
+  );
+}
+
+function TitleBar({
+  element,
+  background,
+  secondaryBackground,
+  borderColor,
+  theme,
+  secondaryBackground2,
+  readOnly,
+  onAddTabClick,
+  onRemoveTabClick,
+  selectedTabId,
+  onSelectedTabChange,
+}: {
+  element: iCodeEditorElement;
+  background: Color;
+  secondaryBackground: Color;
+  borderColor: Color;
+  secondaryBackground2: Color;
+  theme: CodeEditorTheme;
+  readOnly?: boolean;
+  onRemoveTabClick: (tabId: string) => void;
+  onAddTabClick: () => void;
+  selectedTabId: string;
+  onSelectedTabChange: (tabId: string) => void;
+}) {
+  const Control = useMemo(
+    () =>
+      TITLE_BAR_CONTROLS.find(
+        (control) => control.id === element.titleBarControlStyle,
+      )?.Control,
+    [element.titleBarControlStyle],
+  );
+
+  return (
+    <div
+      data-cti-element-id={element.id}
+      className="cti-drag-handle flex-shrink-0 overflow-hidden"
+      style={{
+        backgroundColor:
+          element.tabs.length > 1
+            ? secondaryBackground.toString()
+            : background.toString(),
+        boxShadow:
+          element.tabs.length > 1
+            ? `inset 0 -1px 0 0 ${borderColor}`
+            : undefined,
+      }}
+    >
+      <div
+        className={cn("flex h-10 items-center", {
+          "flex-row-reverse": element.titleBarControlPosition === "right",
+        })}
+      >
+        {Control ? (
+          <div className="flex-shrink-0 px-4">
+            <Control theme={theme} />
+          </div>
+        ) : null}
+        <div className="flex h-full flex-1 overflow-hidden">
+          <div className="flex flex-1 flex-nowrap items-center overflow-hidden">
+            {element.tabs.map((tab) => {
+              const selected = selectedTabId === tab.id;
+              return (
+                <div
+                  key={tab.id}
+                  className="group/tab relative flex h-full flex-1 overflow-hidden"
+                >
+                  <div
+                    className={cn(
+                      "flex h-full flex-1 cursor-pointer items-center overflow-hidden truncate px-3 text-center text-sm font-medium hover:bg-red-50",
+                    )}
+                    style={{
+                      backgroundColor: selected
+                        ? theme.settings.background
+                        : "transparent",
+                      boxShadow:
+                        selected && element.tabs.length > 1
+                          ? `inset 1px 0 0 ${borderColor}, inset -1px 0 0 ${borderColor}`
+                          : undefined,
+                    }}
+                    css={{
+                      ":hover": {
+                        backgroundColor: selected
+                          ? undefined
+                          : secondaryBackground2.toString(),
+                      },
+                    }}
+                    onClick={() => onSelectedTabChange(tab.id)}
+                  >
+                    {tab.name || "Untitled"}
+                  </div>
+                  {!readOnly && element.tabs.length > 1 && (
+                    <div
+                      className="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-secondary group-hover/tab:opacity-100"
+                      onClick={() => onRemoveTabClick(tab.id)}
+                      css={{
+                        ":hover": {
+                          backgroundColor: secondaryBackground2.toString(),
+                        },
+                      }}
+                    >
+                      <XIcon className="h-3 w-3" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {!readOnly && element.tabs.length < MAX_TABS && (
+            <button
+              className="flex h-full w-7 flex-shrink-0 items-center justify-center"
+              onClick={onAddTabClick}
+              css={{
+                ":hover": {
+                  backgroundColor: secondaryBackground2.toString(),
+                },
+              }}
+            >
+              <PlusIcon className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
