@@ -131,12 +131,12 @@ export default function CodeEditorElement({
       value={selectedTabId}
       onValueChange={setSelectedTabId}
       id={element.id}
-      className="code-editor flex h-full w-full flex-col overflow-hidden rounded-lg"
+      className="code-editor flex h-full w-full flex-col overflow-hidden rounded-xl"
       style={{
         backgroundImage: theme.settings.backgroundImage,
         backgroundColor: theme.settings.background,
         color: theme.settings.foreground,
-        boxShadow: `0 0 0 1px ${borderColor}`,
+        boxShadow: `0 0 0 1px ${borderColor}, 0 0 0 1.5px rgba(0,0,0,0.4), 0px 6px 16px rgba(0,0,0,0.5)`,
       }}
     >
       {element.showTitleBar ? (
