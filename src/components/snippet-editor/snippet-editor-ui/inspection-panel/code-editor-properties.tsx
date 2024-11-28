@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/element";
+import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
 import { TITLE_BAR_CONTROLS } from "../../elements/code-editor/controls";
 import { useSnippetEditor } from "../../snippet-editor";
 

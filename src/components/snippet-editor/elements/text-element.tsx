@@ -1,5 +1,5 @@
 import { getBackgroundStyle, getPaddingStyle } from "@/lib/utils/editor";
-import { iTextElement } from "@/lib/validator/element";
+import { iTextElement } from "@/lib/validator/elements";
 
 export default function TextElement({ element }: { element: iTextElement }) {
   return (

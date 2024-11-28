@@ -1,50 +1,47 @@
 import { nanoid } from "nanoid";
 
-import { iCodeEditorElement, iTextElement } from "../validator/element";
+import { iCodeEditorElement, iTextElement } from "../validator/elements";
 
 export interface GetElementArgs {
   id: string;
-  canvasWidth: number;
-  canvasHeight: number;
   name?: string;
   width?: number;
   height?: number;
+  x?: number;
+  y?: number;
 }
 
 export interface GetCodeEditorElementProps extends GetElementArgs {
   theme?: string;
 }
 
+export const CURRENT_CODE_EDITOR_ELEMENT_VERSION = "0.1.0";
 export const getCodeEditorElement = ({
   id,
-  canvasHeight,
-  canvasWidth,
   width = 400,
   height = 93,
   name = "Code Editor",
   theme = "theme-1",
+  x = 0,
+  y = 0,
 }: GetCodeEditorElementProps): iCodeEditorElement => ({
+  version: CURRENT_CODE_EDITOR_ELEMENT_VERSION,
+  type: "code-editor",
   id,
   name,
-  transform: {
-    height,
-    width,
-    autoWidth: false,
-    autoHeight: true,
-    widthHeightLinked: false,
-    position: {
-      x: canvasWidth / 2 - width / 2,
-      y: canvasHeight / 2 - height / 2,
-    },
-    rotation: 0,
-    scale: 1,
-  },
-  type: "code-editor",
-
+  height,
+  width,
+  x,
+  y,
+  theme,
+  autoWidth: false,
+  autoHeight: true,
+  widthHeightLinked: false,
+  rotation: 0,
+  scale: 1,
   fontSize: 16,
   lineHeight: 24,
   showLineNumbers: true,
-  theme,
   padding: {
     top: 0,
     left: 12,
@@ -72,38 +69,36 @@ export const getCodeEditorElement = ({
 export interface GetTextElementProps extends GetElementArgs {
   text?: string;
 }
+const CURRENT_TEXT_ELEMENT_VERSION = "0.1.0";
 
 export const getTextElement = ({
   id,
-  canvasHeight,
-  canvasWidth,
   width = 72,
   height = 44,
   name = "Text",
   text = "Text",
+  x = 0,
+  y = 0,
 }: GetTextElementProps): iTextElement => ({
-  id,
+  version: CURRENT_TEXT_ELEMENT_VERSION,
   type: "text",
+  id,
   name,
   text,
+  x,
+  y,
+  height,
+  width,
   foregrounnd: "#000",
   background: { color: { type: "solid", color: "#FFFFFF" } },
   fontWeight: "900",
   lineHeight: 1,
   fontSize: 24,
-  transform: {
-    height,
-    width,
-    autoHeight: true,
-    autoWidth: true,
-    widthHeightLinked: false,
-    position: {
-      x: canvasWidth / 2 - width / 2,
-      y: canvasHeight / 2 - height / 2,
-    },
-    rotation: 0,
-    scale: 1,
-  },
+  autoHeight: true,
+  autoWidth: true,
+  widthHeightLinked: false,
+  rotation: 0,
+  scale: 1,
   fontFamily: "Inter",
   padding: {
     bottom: 8,
@@ -114,4 +109,6 @@ export const getTextElement = ({
   horizontalAlignment: "center",
   verticalAlignment: "center",
   letterSpacing: 1,
+  hidden: false,
+  locked: false,
 });

@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { iPadding } from "@/lib/validator/padding";
+import { iPadding } from "@/lib/validator/elements/shared";
 
 export function SwitchField({
   checked,

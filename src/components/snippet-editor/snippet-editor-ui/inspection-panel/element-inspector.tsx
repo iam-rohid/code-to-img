@@ -23,7 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { iTransform } from "@/lib/validator/transform";
+import { iElement } from "@/lib/validator/elements";
 import { useSnippetEditor } from "../../snippet-editor";
 
 import CodeEditorProperties from "./code-editor-properties";
@@ -40,12 +40,9 @@ function ElementInspector({ elementId }: { elementId: string }) {
 
   return (
     <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
-      <ElementAlignment elementId={elementId} />
+      <ElementAlignment element={element} />
       <Separator />
-      <ElementTransformProperties
-        elementId={elementId}
-        transform={element.transform}
-      />
+      <ElementTransformProperties element={element} />
       {element.type === "text" ? (
         <>
           <Separator />
@@ -58,14 +55,14 @@ function ElementInspector({ elementId }: { elementId: string }) {
         </>
       ) : null}
       <Separator />
-      <ElementActions elementId={elementId} />
+      <ElementActions element={element} />
     </div>
   );
 }
 
 export const ElementInspectorMemo = memo(ElementInspector);
 
-function ElementAlignment({ elementId }: { elementId: string }) {
+function ElementAlignment({ element }: { element: iElement }) {
   const { snippetStore } = useSnippetEditor();
   const alignElement = useStore(snippetStore, (state) => state.alignElement);
   return (
@@ -77,7 +74,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => alignElement(elementId, "start-horizontal")}
+              onClick={() => alignElement(element.id, "start-horizontal")}
             >
               <AlignHorizontalJustifyStartIcon />
             </Button>
@@ -89,7 +86,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => alignElement(elementId, "center-horizontal")}
+              onClick={() => alignElement(element.id, "center-horizontal")}
             >
               <AlignHorizontalJustifyCenterIcon />
             </Button>
@@ -101,7 +98,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => alignElement(elementId, "end-horizontal")}
+              onClick={() => alignElement(element.id, "end-horizontal")}
             >
               <AlignHorizontalJustifyEndIcon />
             </Button>
@@ -114,7 +111,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => alignElement(elementId, "start-vertical")}
+              onClick={() => alignElement(element.id, "start-vertical")}
             >
               <AlignVerticalJustifyStartIcon />
             </Button>
@@ -126,7 +123,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => alignElement(elementId, "center-vertical")}
+              onClick={() => alignElement(element.id, "center-vertical")}
             >
               <AlignVerticalJustifyCenterIcon />
             </Button>
@@ -138,7 +135,7 @@ function ElementAlignment({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => alignElement(elementId, "end-vertical")}
+              onClick={() => alignElement(element.id, "end-vertical")}
             >
               <AlignVerticalJustifyEndIcon />
             </Button>
@@ -150,17 +147,11 @@ function ElementAlignment({ elementId }: { elementId: string }) {
   );
 }
 
-function ElementTransformProperties({
-  elementId,
-  transform,
-}: {
-  elementId: string;
-  transform: iTransform;
-}) {
+function ElementTransformProperties({ element }: { element: iElement }) {
   const { snippetStore } = useSnippetEditor();
   const updateElementTransform = useStore(
     snippetStore,
-    (state) => state.updateElementTransform,
+    (state) => state.updateElement,
   );
 
   return (
@@ -168,37 +159,33 @@ function ElementTransformProperties({
       <p className="mb-2 text-xs text-muted-foreground">Transform</p>
       <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
         <InspectorNumberInput
-          value={transform.position.x}
+          value={element.x}
           icon={<span>X</span>}
           onValueChange={(value) => {
-            updateElementTransform(elementId, {
-              position: { ...transform.position, x: value },
-            });
+            updateElementTransform(element.id, { x: value });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={transform.position.y}
+          value={element.y}
           icon={<span>Y</span>}
           onValueChange={(value) => {
-            updateElementTransform(elementId, {
-              position: { ...transform.position, y: value },
-            });
+            updateElementTransform(element.id, { y: value });
           }}
         />
         <div></div>
         <InspectorNumberInput
-          value={transform.width}
+          value={element.width}
           min={20}
           icon={<span>W</span>}
-          disabled={transform.autoWidth}
+          disabled={element.autoWidth}
           onValueChange={(value) => {
             const width = value;
-            let height = transform.height;
-            if (transform.widthHeightLinked) {
-              height = (transform.height * width) / transform.width;
+            let height = element.height;
+            if (element.widthHeightLinked) {
+              height = (element.height * width) / element.width;
             }
-            updateElementTransform(elementId, { width, height });
+            updateElementTransform(element.id, { width, height });
           }}
         />
         <Tooltip>
@@ -207,11 +194,11 @@ function ElementTransformProperties({
               size="icon"
               variant="outline"
               className={cn("h-6 w-6", {
-                "bg-secondary": transform.autoWidth,
+                "bg-secondary": element.autoWidth,
               })}
               onClick={() =>
-                updateElementTransform(elementId, {
-                  autoWidth: !transform.autoWidth,
+                updateElementTransform(element.id, {
+                  autoWidth: !element.autoWidth,
                 })
               }
             >
@@ -221,18 +208,18 @@ function ElementTransformProperties({
           <TooltipContent>Auto width</TooltipContent>
         </Tooltip>
         <InspectorNumberInput
-          value={transform.height}
+          value={element.height}
           min={20}
           icon={<span>H</span>}
           onValueChange={(value) => {
             const height = value;
-            let width = transform.width;
-            if (transform.widthHeightLinked) {
-              width = (transform.width * height) / transform.height;
+            let width = element.width;
+            if (element.widthHeightLinked) {
+              width = (element.width * height) / element.height;
             }
-            updateElementTransform(elementId, { height, width });
+            updateElementTransform(element.id, { height, width });
           }}
-          disabled={transform.autoHeight}
+          disabled={element.autoHeight}
         />
 
         <Tooltip>
@@ -241,11 +228,11 @@ function ElementTransformProperties({
               size="icon"
               variant="outline"
               className={cn("h-6 w-6", {
-                "bg-secondary": transform.autoHeight,
+                "bg-secondary": element.autoHeight,
               })}
               onClick={() =>
-                updateElementTransform(elementId, {
-                  autoHeight: !transform.autoHeight,
+                updateElementTransform(element.id, {
+                  autoHeight: !element.autoHeight,
                 })
               }
             >
@@ -255,10 +242,10 @@ function ElementTransformProperties({
           <TooltipContent>Auto height</TooltipContent>
         </Tooltip>
         <InspectorNumberInput
-          value={transform.rotation}
+          value={element.rotation}
           icon={<span>R</span>}
           onValueChange={(value) => {
-            updateElementTransform(elementId, {
+            updateElementTransform(element.id, {
               rotation: value,
             });
           }}
@@ -270,7 +257,7 @@ function ElementTransformProperties({
               variant="outline"
               className="h-6 w-6"
               onClick={() => {
-                updateElementTransform(elementId, {
+                updateElementTransform(element.id, {
                   rotation: 0,
                 });
               }}
@@ -281,12 +268,12 @@ function ElementTransformProperties({
           <TooltipContent>Reset value</TooltipContent>
         </Tooltip>
         <InspectorNumberInput
-          value={transform.scale * 100}
+          value={element.scale * 100}
           min={10}
           max={200}
           icon={<span>S</span>}
           onValueChange={(value) => {
-            updateElementTransform(elementId, {
+            updateElementTransform(element.id, {
               scale: value / 100,
             });
           }}
@@ -298,7 +285,7 @@ function ElementTransformProperties({
               variant="outline"
               className="h-6 w-6"
               onClick={() => {
-                updateElementTransform(elementId, {
+                updateElementTransform(element.id, {
                   scale: 1,
                 });
               }}
@@ -313,7 +300,7 @@ function ElementTransformProperties({
   );
 }
 
-function ElementActions({ elementId }: { elementId: string }) {
+function ElementActions({ element }: { element: iElement }) {
   const { snippetStore, editorStore } = useSnippetEditor();
   const removeElement = useStore(snippetStore, (state) => state.removeElement);
   const duplicateElement = useStore(
@@ -335,7 +322,7 @@ function ElementActions({ elementId }: { elementId: string }) {
               variant="ghost"
               size="icon"
               onClick={() => {
-                const duplicatedElement = duplicateElement(elementId);
+                const duplicatedElement = duplicateElement(element.id);
                 if (duplicatedElement) {
                   setSelectedElement(duplicatedElement.id);
                 }
@@ -352,7 +339,7 @@ function ElementActions({ elementId }: { elementId: string }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => removeElement(elementId)}
+              onClick={() => removeElement(element.id)}
             >
               <TrashIcon />
               <span className="sr-only">Delete</span>

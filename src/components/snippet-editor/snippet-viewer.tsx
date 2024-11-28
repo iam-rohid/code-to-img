@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import useElementSize from "@/hooks/use-element-size";
 import { cn } from "@/lib/utils";
 import { getBackgroundStyle } from "@/lib/utils/editor";
-import { iElement } from "@/lib/validator/element";
+import { iElement } from "@/lib/validator/elements";
 import { iSnippetData } from "@/lib/validator/snippet";
 
 import CodeEditorElement from "./elements/code-editor";
@@ -22,18 +22,18 @@ export default function SnippetViewer({
   const { ref, height, width } = useElementSize();
 
   const scale = useMemo(() => {
-    if (width / height < data.transform.width / data.transform.height) {
-      return width / data.transform.width;
+    if (width / height < data.width / data.height) {
+      return width / data.width;
     }
-    return height / data.transform.height;
-  }, [data.transform.height, data.transform.width, height, width]);
+    return height / data.height;
+  }, [data.height, data.width, height, width]);
 
   return (
     <div ref={ref} className={cn("relative", className)}>
       <div
         style={{
-          width: data.transform.width,
-          height: data.transform.height,
+          width: data.width,
+          height: data.height,
           transform: `translate(-50%, -50%) scale(${scale})`,
         }}
         className="absolute left-1/2 top-1/2"

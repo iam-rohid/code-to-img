@@ -20,7 +20,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getCodeEditorElement, getTextElement } from "@/lib/constants/elements";
-import { iElement } from "@/lib/validator/element";
+import { getCenterXYForElement } from "@/lib/utils";
+import { iElement } from "@/lib/validator/elements";
 import { useSnippetEditor } from "../snippet-editor";
 
 export default function Toolbar() {
@@ -30,11 +31,8 @@ export default function Toolbar() {
     editorStore,
     (state) => state.setSelectedElement,
   );
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
 
   const handleAddElement = useCallback(
     (element: iElement) => {
@@ -51,7 +49,17 @@ export default function Toolbar() {
         variant="ghost"
         onClick={() => {
           handleAddElement(
-            getCodeEditorElement({ id: nanoid(), canvasWidth, canvasHeight }),
+            getCodeEditorElement({
+              id: nanoid(),
+              width: 400,
+              height: 93,
+              ...getCenterXYForElement({
+                canvasHeight,
+                canvasWidth,
+                width: 400,
+                height: 93,
+              }),
+            }),
           );
         }}
       >
@@ -62,7 +70,17 @@ export default function Toolbar() {
         variant="ghost"
         onClick={() => {
           handleAddElement(
-            getTextElement({ id: nanoid(), canvasWidth, canvasHeight }),
+            getTextElement({
+              id: nanoid(),
+              width: 72,
+              height: 44,
+              ...getCenterXYForElement({
+                canvasHeight,
+                canvasWidth,
+                width: 72,
+                height: 44,
+              }),
+            }),
           );
         }}
       >

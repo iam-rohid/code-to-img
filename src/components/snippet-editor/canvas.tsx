@@ -11,8 +11,8 @@ import { useSnippetEditor } from "./snippet-editor";
 
 export default function Canvas() {
   const { snippetStore, readOnly, editorStore } = useSnippetEditor();
-  const width = useStore(snippetStore, (state) => state.transform.width);
-  const height = useStore(snippetStore, (state) => state.transform.height);
+  const width = useStore(snippetStore, (state) => state.width);
+  const height = useStore(snippetStore, (state) => state.height);
   const background = useStore(snippetStore, (state) => state.background);
   const elementIds = useStore(
     snippetStore,
@@ -22,10 +22,7 @@ export default function Canvas() {
     editorStore,
     (state) => state.setSelectedElement,
   );
-  const updateElementTransform = useStore(
-    snippetStore,
-    (state) => state.updateElementTransform,
-  );
+  const updateElement = useStore(snippetStore, (state) => state.updateElement);
   const zoom = useStore(editorStore, (state) => state.zoom);
 
   const [draggingElementId, setDraggingElementId] = useState<string | null>(
@@ -59,7 +56,7 @@ export default function Canvas() {
       setDraggingElementId(el.id);
       updateElementState(el.id, { dragging: true });
       startMousePos.current = { x: e.clientX, y: e.clientY };
-      startElementPos.current = el.transform.position;
+      startElementPos.current = { x: el.x, y: el.y };
       document.documentElement.classList.add("cursor-move", "select-none");
     },
     [snippetStore, updateElementState],
@@ -89,13 +86,11 @@ export default function Canvas() {
       y -= difY / zoom;
 
       const newPos = { x: Math.round(x), y: Math.round(y) };
-      updateElementTransform(draggingElementId, {
-        position: newPos,
-      });
+      updateElement(draggingElementId, newPos);
       startElementPos.current = newPos;
       startMousePos.current = { x: e.clientX, y: e.clientY };
     },
-    [draggingElementId, updateElementTransform, zoom],
+    [draggingElementId, updateElement, zoom],
   );
 
   useEffect(() => {

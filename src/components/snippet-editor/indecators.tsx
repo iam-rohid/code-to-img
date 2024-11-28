@@ -11,32 +11,35 @@ import {
 import { useStore } from "zustand";
 
 import { cn } from "@/lib/utils";
-import { iTransform } from "@/lib/validator/transform";
+import { iElement } from "@/lib/validator/elements";
 
 import { useSnippetEditor } from "./snippet-editor";
 
 function getTransform(
-  transform: iTransform,
+  element: Pick<
+    iElement,
+    "width" | "height" | "scale" | "x" | "y" | "rotation"
+  >,
   canvasSize: { width: number; height: number },
   windowSize: { width: number; height: number },
   scrollX: number,
   scrollY: number,
   zoom: number,
 ): CSSProperties {
-  const width = transform.width * transform.scale * zoom;
-  const height = transform.height * transform.scale * zoom;
+  const width = element.width * element.scale * zoom;
+  const height = element.height * element.scale * zoom;
 
   const xOffset =
     windowSize.width / 2 +
     scrollX -
     (canvasSize.width * zoom) / 2 +
-    transform.position.x * zoom;
+    element.x * zoom;
 
   const yOffset =
     windowSize.height / 2 +
     scrollY -
     (canvasSize.height * zoom) / 2 +
-    transform.position.y * zoom;
+    element.y * zoom;
 
   return {
     width,
@@ -45,7 +48,7 @@ function getTransform(
     left: xOffset,
     top: yOffset,
 
-    transform: `rotate(${transform.rotation}deg)`,
+    transform: `rotate(${element.rotation}deg)`,
   };
 }
 
@@ -94,7 +97,7 @@ export function Indecators() {
         !selectedElement.locked ? (
         <ElementTransformIndecatorMemo
           elementId={selectedElement.id}
-          transform={selectedElement.transform}
+          element={selectedElement}
         />
       ) : null}
     </>
@@ -105,21 +108,15 @@ export const IndecatorsMemo = memo(Indecators);
 
 function CanvasTransformIndecator() {
   const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
   const canvasWidthHeightLinked = useStore(
     snippetStore,
-    (state) => state.transform.widthHeightLinked,
+    (state) => state.widthHeightLinked,
   );
-  const setCanvasTransform = useStore(
-    snippetStore,
-    (state) => state.updateSnippetTransform,
-  );
+  const updateSnippet = useStore(snippetStore, (state) => state.updateSnippet);
 
   const zoom = useStore(editorStore, (state) => state.zoom);
 
@@ -184,7 +181,7 @@ function CanvasTransformIndecator() {
         newStartPos.y = startMousePos.y;
       }
 
-      setCanvasTransform({
+      updateSnippet({
         width,
         height,
       });
@@ -196,7 +193,7 @@ function CanvasTransformIndecator() {
       canvasHeight,
       startMousePos.x,
       startMousePos.y,
-      setCanvasTransform,
+      updateSnippet,
     ],
   );
 
@@ -271,7 +268,7 @@ function CanvasTransformIndecator() {
         }
       }
 
-      setCanvasTransform({ width, height });
+      updateSnippet({ width, height });
       setStartMousePos(newStartPos);
     },
     [
@@ -281,7 +278,7 @@ function CanvasTransformIndecator() {
       startMousePos.x,
       startMousePos.y,
       canvasWidthHeightLinked,
-      setCanvasTransform,
+      updateSnippet,
     ],
   );
 
@@ -291,10 +288,10 @@ function CanvasTransformIndecator() {
         {
           height: canvasHeight,
           width: canvasWidth,
-          position: { x: 0, y: 0 },
+          x: 0,
+          y: 0,
           rotation: 0,
           scale: 1,
-          widthHeightLinked: false,
         },
         {
           height: canvasHeight,
@@ -370,11 +367,11 @@ function CanvasTransformIndecator() {
 const CanvasTransformIndecatorMemo = memo(CanvasTransformIndecator);
 
 function ElementTransformIndecator({
-  transform,
+  element,
   elementId,
 }: {
   elementId: string;
-  transform: iTransform;
+  element: iElement;
 }) {
   const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
   const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
@@ -382,15 +379,9 @@ function ElementTransformIndecator({
     editorStore,
     (state) => state.updateElementState,
   );
-  const updateElementTransform = useStore(
-    snippetStore,
-    (state) => state.updateElementTransform,
-  );
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
+  const updateElement = useStore(snippetStore, (state) => state.updateElement);
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
   const zoom = useStore(editorStore, (state) => state.zoom);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
@@ -418,16 +409,16 @@ function ElementTransformIndecator({
       pos: { x: number; y: number },
       position: "top-left" | "top-right" | "bottom-left" | "bottom-right",
     ) => {
-      const elementWidth = transform.width * transform.scale;
-      const elementHeight = transform.height * transform.scale;
-      const elementMinWidth = 20 * transform.scale;
-      const elementMinHeight = 20 * transform.scale;
+      const elementWidth = element.width * element.scale;
+      const elementHeight = element.height * element.scale;
+      const elementMinWidth = 20 * element.scale;
+      const elementMinHeight = 20 * element.scale;
 
       let width = elementWidth;
       let height = elementHeight;
 
-      let x = transform.position.x;
-      let y = transform.position.y;
+      let x = element.x;
+      let y = element.y;
 
       const difX = (startMousePos.x - pos.x) / zoom;
       const difY = (startMousePos.y - pos.y) / zoom;
@@ -466,7 +457,7 @@ function ElementTransformIndecator({
           dif = 0;
         }
         width = elementMinWidth;
-        x = transform.position.x + dif;
+        x = element.x + dif;
         newStartPos.x = startMousePos.x;
       }
 
@@ -476,30 +467,31 @@ function ElementTransformIndecator({
           dif = 0;
         }
         height = elementMinHeight;
-        y = transform.position.y + dif;
+        y = element.y + dif;
         newStartPos.y = startMousePos.y;
       }
 
-      updateElementTransform(elementId, {
-        width: Math.round(width / transform.scale),
-        height: Math.round(height / transform.scale),
-        position: { x: Math.round(x), y: Math.round(y) },
+      updateElement(elementId, {
+        width: Math.round(width / element.scale),
+        height: Math.round(height / element.scale),
+        x: Math.round(x),
+        y: Math.round(y),
         autoWidth: false,
         autoHeight: false,
       });
       setStartMousePos(newStartPos);
     },
     [
-      elementId,
+      element.width,
+      element.scale,
+      element.height,
+      element.x,
+      element.y,
       startMousePos.x,
       startMousePos.y,
-      transform.height,
-      transform.position.x,
-      transform.position.y,
-      transform.scale,
-      transform.width,
-      updateElementTransform,
       zoom,
+      updateElement,
+      elementId,
     ],
   );
 
@@ -508,15 +500,15 @@ function ElementTransformIndecator({
       pos: { x: number; y: number },
       position: "left" | "right" | "top" | "bottom",
     ) => {
-      const elementWidth = transform.width * transform.scale;
-      const elementHeight = transform.height * transform.scale;
-      const elementMinWidth = 20 * transform.scale;
-      const elementMinHeight = 20 * transform.scale;
+      const elementWidth = element.width * element.scale;
+      const elementHeight = element.height * element.scale;
+      const elementMinWidth = 20 * element.scale;
+      const elementMinHeight = 20 * element.scale;
 
       let width = elementWidth;
       let height = elementHeight;
-      let x = transform.position.x;
-      let y = transform.position.y;
+      let x = element.x;
+      let y = element.y;
 
       const difX = (startMousePos.x - pos.x) / zoom;
       const difY = (startMousePos.y - pos.y) / zoom;
@@ -546,49 +538,44 @@ function ElementTransformIndecator({
       if (width < elementMinWidth) {
         const dif = elementWidth - elementMinWidth;
         width = elementMinWidth;
-        x = transform.position.x + dif * (position === "left" ? 1 : 0);
+        x = element.x + dif * (position === "left" ? 1 : 0);
         newStartPos.x = startMousePos.x;
       }
       if (height < elementMinHeight) {
         const dif = elementHeight - elementMinHeight;
         height = elementMinHeight;
-        y = transform.position.y + dif * (position === "top" ? 1 : 0);
+        y = element.y + dif * (position === "top" ? 1 : 0);
         newStartPos.y = startMousePos.y;
       }
 
-      const updatedTransform: Partial<iTransform> = {
-        width: Math.round(width / transform.scale),
-        height: Math.round(height / transform.scale),
-        position: { x: Math.round(x), y: Math.round(y) },
+      const updatedTransform: Partial<iElement> = {
+        width: Math.round(width / element.scale),
+        height: Math.round(height / element.scale),
+        x: Math.round(x),
+        y: Math.round(y),
       };
 
-      if (
-        transform.autoWidth &&
-        (position === "left" || position === "right")
-      ) {
+      if (element.autoWidth && (position === "left" || position === "right")) {
         updatedTransform.autoWidth = false;
       }
-      if (
-        transform.autoHeight &&
-        (position === "top" || position === "bottom")
-      ) {
+      if (element.autoHeight && (position === "top" || position === "bottom")) {
         updatedTransform.autoHeight = false;
       }
-      updateElementTransform(elementId, updatedTransform);
+      updateElement(elementId, updatedTransform);
       setStartMousePos(newStartPos);
     },
     [
       elementId,
       startMousePos.x,
       startMousePos.y,
-      transform.autoHeight,
-      transform.autoWidth,
-      transform.height,
-      transform.position.x,
-      transform.position.y,
-      transform.scale,
-      transform.width,
-      updateElementTransform,
+      element.autoHeight,
+      element.autoWidth,
+      element.height,
+      element.x,
+      element.y,
+      element.scale,
+      element.width,
+      updateElement,
       zoom,
     ],
   );
@@ -611,18 +598,18 @@ function ElementTransformIndecator({
 
       // Convert the angle to degrees if needed
       const angleInDegrees = Math.round(angleInRadians * (180 / Math.PI));
-      updateElementTransform(elementId, {
+      updateElement(elementId, {
         rotation: angleInDegrees + 90,
       });
     },
-    [elementId, updateElementTransform],
+    [elementId, updateElement],
   );
 
   return (
     <div
       ref={elementRef}
       style={getTransform(
-        transform,
+        element,
         {
           height: canvasHeight,
           width: canvasWidth,
@@ -916,30 +903,25 @@ function RotationIndecator({
 function HovernigIndecator({ elementId }: { elementId: string }) {
   const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
 
-  const transform = useStore(
-    snippetStore,
-    (state) =>
-      state.elements.find((element) => element.id === elementId)?.transform,
+  const element = useStore(snippetStore, (state) =>
+    state.elements.find((element) => element.id === elementId),
   );
 
   const zoom = useStore(editorStore, (state) => state.zoom);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
 
-  if (!transform) {
+  if (!element) {
     return null;
   }
 
   return (
     <div
       style={getTransform(
-        transform,
+        element,
         { width: canvasWidth, height: canvasHeight },
         editorSize,
         scrollX,
@@ -953,28 +935,23 @@ function HovernigIndecator({ elementId }: { elementId: string }) {
 
 function DraggingIndecator({ elementId }: { elementId: string }) {
   const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
-  const transform = useStore(
-    snippetStore,
-    (state) =>
-      state.elements.find((element) => element.id === elementId)?.transform,
+  const element = useStore(snippetStore, (state) =>
+    state.elements.find((element) => element.id === elementId),
   );
   const zoom = useStore(editorStore, (state) => state.zoom);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
-  if (!transform) {
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
+  if (!element) {
     return null;
   }
 
   return (
     <div
       style={getTransform(
-        transform,
+        element,
         { width: canvasWidth, height: canvasHeight },
         editorSize,
         scrollX,
@@ -984,35 +961,30 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
-        X: {transform.position.x}, Y: {transform.position.y}
+        X: {element.x}, Y: {element.y}
       </div>
     </div>
   );
 }
 function ResizeIndecator({ elementId }: { elementId: string }) {
   const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
-  const transform = useStore(
-    snippetStore,
-    (state) =>
-      state.elements.find((element) => element.id === elementId)?.transform,
+  const element = useStore(snippetStore, (state) =>
+    state.elements.find((element) => element.id === elementId),
   );
   const zoom = useStore(editorStore, (state) => state.zoom);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
-  if (!transform) {
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
+  if (!element) {
     return null;
   }
 
   return (
     <div
       style={getTransform(
-        transform,
+        element,
         { width: canvasWidth, height: canvasHeight },
         editorSize,
         scrollX,
@@ -1022,36 +994,31 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
-        {transform.width} x {transform.height}
+        {element.width} x {element.height}
       </div>
     </div>
   );
 }
 function RotatingIndecator({ elementId }: { elementId: string }) {
   const { size: editorSize, snippetStore, editorStore } = useSnippetEditor();
-  const transform = useStore(
-    snippetStore,
-    (state) =>
-      state.elements.find((element) => element.id === elementId)?.transform,
+  const element = useStore(snippetStore, (state) =>
+    state.elements.find((element) => element.id === elementId),
   );
 
   const zoom = useStore(editorStore, (state) => state.zoom);
   const scrollX = useStore(editorStore, (state) => state.scrollX);
   const scrollY = useStore(editorStore, (state) => state.scrollY);
 
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
-  if (!transform) {
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
+  if (!element) {
     return null;
   }
 
   return (
     <div
       style={getTransform(
-        transform,
+        element,
         { width: canvasWidth, height: canvasHeight },
         editorSize,
         scrollX,
@@ -1061,7 +1028,7 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
-        {transform.rotation}deg
+        {element.rotation}deg
       </div>
     </div>
   );

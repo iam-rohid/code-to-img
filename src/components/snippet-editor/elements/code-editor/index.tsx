@@ -14,7 +14,7 @@ import {
   iCodeEditorTheme,
 } from "@/lib/constants/code-editor-themes";
 import { cn } from "@/lib/utils";
-import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/element";
+import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
 
 import { TITLE_BAR_CONTROLS } from "./controls";
 
@@ -39,7 +39,7 @@ export default function CodeEditorElement({
 
   const extensions = useMemo(() => {
     const extensions: Extension[] = [];
-    if (!element.transform.autoWidth) {
+    if (!element.autoWidth) {
       extensions.push(EditorView.lineWrapping);
     }
     if (element.showLineNumbers) {
@@ -53,9 +53,9 @@ export default function CodeEditorElement({
     }
     return extensions;
   }, [
+    element.autoWidth,
     element.lineNumbersStartFrom,
     element.showLineNumbers,
-    element.transform.autoWidth,
   ]);
 
   const Control = useMemo(
@@ -242,8 +242,8 @@ function TabContent({
       key={tab.id}
       value={code}
       theme={theme?.theme}
-      height={element.transform.autoHeight ? undefined : "100%"}
-      width={element.transform.autoWidth ? undefined : `100%`}
+      height={element.autoHeight ? undefined : "100%"}
+      width={element.autoWidth ? undefined : `100%`}
       extensions={extensions}
       onChange={(value) => {
         if (timeoutRef.current) {

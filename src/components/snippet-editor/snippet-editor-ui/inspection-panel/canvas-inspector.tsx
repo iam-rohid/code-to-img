@@ -24,19 +24,13 @@ export const CanvasInspectorMemo = memo(CanvasInspector);
 
 export function CanvasTransform() {
   const { snippetStore } = useSnippetEditor();
-  const canvasWidth = useStore(snippetStore, (state) => state.transform.width);
-  const canvasHeight = useStore(
-    snippetStore,
-    (state) => state.transform.height,
-  );
+  const canvasWidth = useStore(snippetStore, (state) => state.width);
+  const canvasHeight = useStore(snippetStore, (state) => state.height);
   const canvasWidthHeightLinked = useStore(
     snippetStore,
-    (state) => state.transform.widthHeightLinked,
+    (state) => state.widthHeightLinked,
   );
-  const setCanvasTransform = useStore(
-    snippetStore,
-    (state) => state.updateSnippetTransform,
-  );
+  const updateSnippet = useStore(snippetStore, (state) => state.updateSnippet);
 
   return (
     <div className="p-2">
@@ -52,7 +46,7 @@ export function CanvasTransform() {
             if (canvasWidthHeightLinked) {
               height = (canvasHeight * width) / canvasWidth;
             }
-            setCanvasTransform({
+            updateSnippet({
               width,
               height,
             });
@@ -86,7 +80,7 @@ export function CanvasTransform() {
             if (canvasWidthHeightLinked) {
               width = (canvasWidth * height) / canvasHeight;
             }
-            setCanvasTransform({
+            updateSnippet({
               height,
               width,
             });

@@ -1,9 +1,8 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
 
-import { elementSchema, iElement } from "@/lib/validator/element";
+import { elementSchema, iElement } from "@/lib/validator/elements";
 import { iSnippetData, snippetSchema } from "@/lib/validator/snippet";
-import { iTransform } from "@/lib/validator/transform";
 
 export type Alignment =
   | "start-horizontal"
@@ -15,13 +14,13 @@ export type Alignment =
 
 export type SnipetActions = {
   updateSnippet: (snippet: Partial<iSnippetData>) => void;
-  updateSnippetTransform: (transform: Partial<iTransform>) => void;
+  // updateSnippetTransform: (transform: Partial<Snip>) => void;
   addElement: (element: iElement) => void;
   updateElement: (elementId: string, data: Partial<iElement>) => void;
-  updateElementTransform: (
-    elementId: string,
-    transform: Partial<iTransform>,
-  ) => void;
+  // updateElementTransform: (
+  //   elementId: string,
+  //   transform: Partial<iTransform>,
+  // ) => void;
   removeElement: (elemenntId: string) => void;
   duplicateElement: (elemenntId: string) => iElement | null;
   alignElement: (elementId: string, alignment: Alignment) => void;
@@ -50,23 +49,23 @@ export const createSnippetStore = (snippetData: iSnippetData) => {
         ),
       }));
     },
-    updateSnippetTransform: (transform) => {
-      set((state) => ({
-        transform: {
-          ...state.transform,
-          ...transform,
-        },
-      }));
-    },
-    updateElementTransform: (elementId, transform) => {
-      set((state) => ({
-        elements: state.elements.map((el) =>
-          el.id === elementId
-            ? { ...el, transform: { ...el.transform, ...transform } }
-            : el,
-        ),
-      }));
-    },
+    // updateSnippetTransform: (transform) => {
+    //   set((state) => ({
+    //     transform: {
+    //       ...state.transform,
+    //       ...transform,
+    //     },
+    //   }));
+    // },
+    // updateElementTransform: (elementId, transform) => {
+    //   set((state) => ({
+    //     elements: state.elements.map((el) =>
+    //       el.id === elementId
+    //         ? { ...el, transform: { ...el.transform, ...transform } }
+    //         : el,
+    //     ),
+    //   }));
+    // },
     removeElement: (elementId) => {
       set((state) => ({
         elements: state.elements.filter((el) => el.id !== elementId),
@@ -81,8 +80,8 @@ export const createSnippetStore = (snippetData: iSnippetData) => {
 
       const element = structuredClone(elementToDuplicate);
       element.id = nanoid();
-      element.transform.position.x += 10;
-      element.transform.position.y += 10;
+      element.x += 10;
+      element.y += 10;
 
       set({
         elements: [element, ...snippets],
@@ -91,48 +90,40 @@ export const createSnippetStore = (snippetData: iSnippetData) => {
     },
     alignElement: (elementId, alignment) => {
       const state = get();
-      const transform = state.elements.find(
+      const element = state.elements.find(
         (element) => element.id === elementId,
-      )?.transform;
-      if (!transform) {
+      );
+      if (!element) {
         return;
       }
 
-      let x = transform.position.x;
-      let y = transform.position.y;
+      let x = element.x;
+      let y = element.y;
 
       switch (alignment) {
         case "start-horizontal":
           x = 0;
           break;
         case "center-horizontal":
-          x =
-            state.transform.width / 2 - (transform.width * transform.scale) / 2;
+          x = state.width / 2 - (element.width * element.scale) / 2;
           break;
         case "end-horizontal":
-          x = state.transform.width - transform.width * transform.scale;
+          x = state.width - element.width * element.scale;
           break;
         case "start-vertical":
           y = 0;
           break;
         case "center-vertical":
-          y =
-            state.transform.height / 2 -
-            (transform.height * transform.scale) / 2;
+          y = state.height / 2 - (element.height * element.scale) / 2;
           break;
         case "end-vertical":
-          y = state.transform.height - transform.height * transform.scale;
+          y = state.height - element.height * element.scale;
           break;
       }
 
       set({
         elements: state.elements.map((element) =>
-          element.id === elementId
-            ? {
-                ...element,
-                transform: { ...element.transform, position: { x, y } },
-              }
-            : element,
+          element.id === elementId ? { ...element, x, y } : element,
         ),
       });
     },

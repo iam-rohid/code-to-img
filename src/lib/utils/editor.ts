@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 
 import { iColor } from "../validator/color";
-import { iPadding } from "../validator/padding";
+import { iPadding } from "../validator/elements/shared";
 
 export function getPaddingStyle(padding: iPadding): CSSProperties {
   return {

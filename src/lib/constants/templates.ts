@@ -1,7 +1,8 @@
+import { getCenterXYForElement } from "../utils";
 import { iSnippetData } from "../validator/snippet";
-import { iTransform } from "../validator/transform";
 
 import { getCodeEditorElement } from "./elements";
+import { CURRENT_SNIPPET_VERSION } from "./snippet";
 
 export interface Template {
   id: string;
@@ -9,23 +10,14 @@ export interface Template {
   data: iSnippetData;
 }
 
-const BASE_TRANSFORM: iTransform = {
-  width: 600,
-  height: 400,
-  widthHeightLinked: false,
-  position: {
-    x: 0,
-    y: 0,
-  },
-  rotation: 0,
-  scale: 1,
-};
-
 export const BLANK_SNIPPET_TEMPLATE: Template = {
   id: "blank",
   name: "Blank",
   data: {
-    transform: BASE_TRANSFORM,
+    version: CURRENT_SNIPPET_VERSION,
+    width: 600,
+    height: 400,
+    widthHeightLinked: false,
     background: {
       color: {
         type: "gradient",
@@ -41,7 +33,10 @@ export const DEFAULT_SNIPPET_TEMPLATE: Template = {
   id: "default",
   name: "Default",
   data: {
-    transform: BASE_TRANSFORM,
+    version: CURRENT_SNIPPET_VERSION,
+    width: 600,
+    height: 400,
+    widthHeightLinked: false,
     background: {
       color: {
         type: "gradient",
@@ -52,8 +47,14 @@ export const DEFAULT_SNIPPET_TEMPLATE: Template = {
     elements: [
       getCodeEditorElement({
         id: "code-editor-01",
-        canvasHeight: BASE_TRANSFORM.height,
-        canvasWidth: BASE_TRANSFORM.width,
+        width: 400,
+        height: 93,
+        ...getCenterXYForElement({
+          canvasHeight: 400,
+          canvasWidth: 600,
+          width: 400,
+          height: 93,
+        }),
       }),
     ],
   },

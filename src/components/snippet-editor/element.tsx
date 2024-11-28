@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
-import { iTransform } from "@/lib/validator/transform";
+import { iElement } from "@/lib/validator/elements";
 
 import CodeEditorElement from "./elements/code-editor";
 import TextElement from "./elements/text-element";
@@ -16,13 +16,7 @@ export default function Element({ elementId }: { elementId: string }) {
   if (!element) {
     throw new Error("element not found!");
   }
-
   const elementRef = useRef<HTMLDivElement>(null);
-
-  const updateElementTransform = useStore(
-    snippetStore,
-    (state) => state.updateElementTransform,
-  );
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
   const updateElementState = useStore(
     editorStore,
@@ -92,11 +86,11 @@ export default function Element({ elementId }: { elementId: string }) {
         const width = Math.ceil(entry.contentRect.width);
         const height = Math.ceil(entry.contentRect.height);
 
-        const data: Partial<iTransform> = {};
-        if (element.transform.autoWidth) {
+        const data: Partial<iElement> = {};
+        if (element.autoWidth) {
           data.width = width;
         }
-        if (element.transform.autoHeight) {
+        if (element.autoHeight) {
           data.height = height;
         }
         if (
@@ -105,7 +99,7 @@ export default function Element({ elementId }: { elementId: string }) {
         ) {
           return;
         }
-        updateElementTransform(element.id, data);
+        updateElement(element.id, data);
       }
     });
 
@@ -115,13 +109,13 @@ export default function Element({ elementId }: { elementId: string }) {
       resizeObserver.unobserve(el);
     };
   }, [
+    element.autoHeight,
+    element.autoWidth,
     element.hidden,
     element.id,
     element.locked,
-    element.transform.autoHeight,
-    element.transform.autoWidth,
     readOnly,
-    updateElementTransform,
+    updateElement,
   ]);
 
   return (

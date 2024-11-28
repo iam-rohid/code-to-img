@@ -2,7 +2,7 @@ import { useStore } from "zustand";
 
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Input } from "@/components/ui/input";
-import { iTextElement } from "@/lib/validator/element";
+import { iTextElement } from "@/lib/validator/elements";
 import { useSnippetEditor } from "../../snippet-editor";
 
 export function TextElementProperties({ element }: { element: iTextElement }) {
