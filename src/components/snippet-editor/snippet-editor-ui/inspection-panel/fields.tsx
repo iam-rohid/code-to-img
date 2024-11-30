@@ -10,7 +10,13 @@ import {
 
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -47,7 +53,7 @@ export function ToggleGroupField({
 }: {
   label: string;
   value: string;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; icon?: ReactNode }[];
   onValueChange?: (value: string) => void;
 }) {
   const id = useId();
@@ -60,12 +66,16 @@ export function ToggleGroupField({
           <Button
             variant="ghost"
             key={option.value}
-            className={cn("h-full rounded-sm px-3", {
+            className={cn("h-full rounded-sm", {
               "bg-accent text-accent-foreground": option.value === value,
+              "px-3": !option.icon,
+              "w-9": option.icon,
             })}
             onClick={() => onValueChange?.(option.value)}
+            title={option.label}
           >
-            {option.label}
+            {option.icon ?? option.label}
+            {option.icon && <p className="sr-only">{option.label}</p>}
           </Button>
         ))}
       </div>
@@ -203,6 +213,55 @@ export function Padding({
           })
         }
       />
+    </div>
+  );
+}
+
+const BOX_SHADOWS: string[] = [
+  "none",
+  "rgba(149, 157, 165, 0.2) 0px 8px 24px",
+  "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+  "rgba(255, 255, 255, 0.1) 0px 1px 1px 0px inset, rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px",
+  "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px",
+  "rgb(38, 57, 77) 0px 20px 30px -10px",
+  "rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset",
+  "0 7px 30px -10px rgba(150,170,180,0.5)",
+  "0 2px 1px rgba(0,0,0,0.09), 0 4px 2px rgba(0,0,0,0.09), 0 8px 4px rgba(0,0,0,0.09), 0 16px 8px rgba(0,0,0,0.09), 0 32px 16px rgba(0,0,0,0.09)",
+  "rgba(0, 0, 0, 0.1) 0px 10px 50px",
+];
+export function BoxShadowField({
+  onValueChange,
+  value,
+}: {
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  return (
+    <div className="p-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-full">
+            Box Shadow
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="right" align="start" className="w-fit">
+          <div className="grid grid-cols-3 gap-12 rounded-lg bg-white p-12">
+            {BOX_SHADOWS.map((boxShadow, i) => (
+              <button
+                key={i}
+                style={{ boxShadow }}
+                className="aspect-square w-20 rounded-md border border-zinc-200 transition-transform hover:scale-105"
+                onClick={() => onValueChange(boxShadow)}
+              />
+            ))}
+          </div>
+          <Input
+            value={value}
+            onChange={(e) => onValueChange(e.currentTarget.value)}
+            className="mt-4 w-full"
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

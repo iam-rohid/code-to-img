@@ -35,6 +35,7 @@ export const codeEditorElementSchema = z
     showTabs: z.boolean().optional().default(true),
     tabs: z.array(codeEditorTabSchema).min(1),
     border: z.boolean().optional().default(true),
+    borderRadius: z.number().min(0).default(10),
   })
   .merge(elementBase);
 

@@ -119,18 +119,13 @@ export default function CodeEditorElement({
 
   return (
     <div
-      className="code-editor relative flex h-full w-full flex-col overflow-hidden"
+      className="code-editor relative flex h-full w-full flex-col"
       style={{
         backgroundImage: theme.settings.backgroundImage,
         backgroundColor: theme.settings.background,
         color: theme.settings.foreground,
-        boxShadow: [
-          ...(element.border
-            ? [`0 0 0 0.5px rgba(0,0,0,${theme.isDark ? 0.8 : 0.4})`]
-            : []),
-          "0px 24px 32px -6px rgba(0,0,0,0.6)",
-        ].join(", "),
-        borderRadius: `10px`,
+        boxShadow: element.boxShadow,
+        borderRadius: element.borderRadius,
       }}
     >
       {element.showTitleBar ? (
@@ -184,8 +179,8 @@ export default function CodeEditorElement({
         <div
           className="pointer-events-none absolute inset-0 z-20"
           style={{
-            boxShadow: `inset 0 0 0 1px ${borderColor}`,
-            borderRadius: `10px`,
+            boxShadow: `inset 0 0 0 1px ${borderColor}, 0 0 0 0.5px rgba(0,0,0,${theme.isDark ? 0.8 : 0.4})`,
+            borderRadius: element.borderRadius,
           }}
         />
       )}
@@ -317,6 +312,8 @@ function TitleBar({
           element.border && element.tabs.length > 1
             ? `inset 0 -1px 0 0 ${borderColor}`
             : undefined,
+        borderTopLeftRadius: element.borderRadius,
+        borderTopRightRadius: element.borderRadius,
       }}
     >
       <div

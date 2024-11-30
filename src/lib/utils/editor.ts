@@ -15,10 +15,10 @@ export function getPaddingStyle(padding: iPadding): CSSProperties {
 export function getBackgroundStyle(color: iColor): CSSProperties {
   switch (color.type) {
     case "solid":
-      return { background: color.color };
+      return { backgroundColor: color.color };
     case "gradient":
       return {
-        background: `linear-gradient(${color.angle}deg, ${color.colors.map((colorHash, i) => `${colorHash} ${(i * 100) / (color.colors.length - 1)}%`).join(", ")}`,
+        backgroundImage: `linear-gradient(${color.angle}deg, ${color.colors.map((colorHash, i) => `${colorHash} ${(i * 100) / (color.colors.length - 1)}%`).join(", ")}`,
       };
 
     default:

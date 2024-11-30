@@ -15,6 +15,7 @@ export const elementBase = z.object({
   y: z.number().optional().default(0),
   hidden: z.boolean().optional().default(false),
   locked: z.boolean().optional().default(false),
+  boxShadow: z.string().optional().default("none"),
 });
 
 export type iElementBase = z.infer<typeof elementBase>;

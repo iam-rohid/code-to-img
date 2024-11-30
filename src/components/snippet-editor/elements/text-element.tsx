@@ -6,17 +6,24 @@ export default function TextElement({ element }: { element: iTextElement }) {
     <div
       id={element.id}
       data-cti-element-id={element.id}
-      className="cti-drag-handle h-full w-full select-none overflow-hidden rounded-md leading-none"
+      className="cti-drag-handle flex h-full w-full select-none overflow-hidden whitespace-pre leading-none"
       style={{
+        ...getPaddingStyle(element.padding),
+        ...getBackgroundStyle(element.background.color),
+        borderRadius: element.borderRadius,
+        justifyContent: element.horizontalAlignment,
+        alignItems: element.verticalAlignment,
+        boxShadow: element.boxShadow,
+        color: element.foregrounnd,
+        textShadow: element.textShadow
+          ? `1px 1px 3px rgba(0,0,0,0.5)`
+          : undefined,
         textAlign: element.horizontalAlignment,
         fontSize: element.fontSize,
         fontWeight: element.fontWeight,
         fontFamily: element.fontFamily,
         letterSpacing: element.letterSpacing,
-        color: element.foregrounnd,
         lineHeight: element.lineHeight,
-        ...getPaddingStyle(element.padding),
-        ...getBackgroundStyle(element.background.color),
       }}
     >
       {element.text}

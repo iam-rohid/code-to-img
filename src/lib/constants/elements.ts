@@ -67,6 +67,8 @@ export const getCodeEditorElement = ({
     },
   ],
   border: true,
+  boxShadow: "none",
+  borderRadius: 10,
 });
 
 export interface GetTextElementProps extends GetElementArgs {
@@ -92,7 +94,7 @@ export const getTextElement = ({
   y,
   height,
   width,
-  foregrounnd: "#000",
+  foregrounnd: "#000000",
   background: { color: { type: "solid", color: "#FFFFFF" } },
   fontWeight: "900",
   lineHeight: 1,
@@ -114,4 +116,7 @@ export const getTextElement = ({
   letterSpacing: 1,
   hidden: false,
   locked: false,
+  borderRadius: 10,
+  boxShadow: "none",
+  textShadow: false,
 });

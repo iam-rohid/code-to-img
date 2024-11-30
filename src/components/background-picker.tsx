@@ -65,7 +65,37 @@ export default function BackgroundPicker({
   );
 }
 
-function SolidPicker({
+export function SolidColorPicker({
+  color,
+  onColorChange,
+}: {
+  color: string;
+  onColorChange?: (color: string) => void;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          className="w-full transition-none"
+          variant="outline"
+          style={{
+            backgroundColor: color,
+          }}
+        />
+      </PopoverTrigger>
+      <PopoverContent side="right" align="start">
+        <SolidPicker
+          color={color}
+          onColorChange={(color) => {
+            onColorChange?.(color);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function SolidPicker({
   color,
   onColorChange,
 }: {
@@ -98,7 +128,7 @@ function SolidPicker({
   );
 }
 
-function GradientPicker({
+export function GradientPicker({
   color: gradient,
   onColorChange,
 }: {

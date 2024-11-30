@@ -20,7 +20,13 @@ import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
 import { TITLE_BAR_CONTROLS } from "../../elements/code-editor/controls";
 import { useSnippetEditor } from "../../snippet-editor";
 
-import { NumberField, Padding, SwitchField, ToggleGroupField } from "./fields";
+import {
+  BoxShadowField,
+  NumberField,
+  Padding,
+  SwitchField,
+  ToggleGroupField,
+} from "./fields";
 
 export default function CodeEditorProperties({
   element,
@@ -56,6 +62,13 @@ export default function CodeEditorProperties({
       </div>
       <Separator />
 
+      <BoxShadowField
+        value={element.boxShadow}
+        onValueChange={(value) =>
+          updateElement(element.id, { boxShadow: value })
+        }
+      />
+
       <div className="flex flex-col gap-2 px-2 py-2">
         <Label>Padding</Label>
         <Padding
@@ -65,6 +78,18 @@ export default function CodeEditorProperties({
           }
         />
       </div>
+
+      <NumberField
+        icon={<>BR</>}
+        label="Border Radius"
+        value={element.borderRadius}
+        min={0}
+        onValueChange={(borderRadius) => {
+          updateElement(element.id, {
+            borderRadius,
+          });
+        }}
+      />
 
       <div className="flex h-12 items-center justify-between gap-2 px-2">
         <Label htmlFor="theme">Theme</Label>
