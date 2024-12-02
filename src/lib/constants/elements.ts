@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
 
+import { iImage } from "@/data/images";
 import { iCodeEditorElement, iTextElement } from "../validator/elements";
+import { iImageElement } from "../validator/elements/image";
 
 import { DEFAULT_THEME } from "./code-editor-themes";
 
@@ -119,4 +121,39 @@ export const getTextElement = ({
   borderRadius: 10,
   boxShadow: "none",
   textShadow: false,
+});
+
+export interface GetImageElementProps extends GetElementArgs {
+  image: iImage;
+}
+const CURRENT_IMGAE_ELEMENT_VERSION = "0.1.0";
+
+export const getImageElement = ({
+  id,
+  image,
+  width = image.width ?? 256,
+  height = image.height ?? 256,
+  name = "Image",
+  x = 0,
+  y = 0,
+}: GetImageElementProps): iImageElement => ({
+  version: CURRENT_IMGAE_ELEMENT_VERSION,
+  type: "image",
+  id,
+  name,
+  x,
+  y,
+  height,
+  width,
+  autoHeight: false,
+  autoWidth: false,
+  widthHeightLinked: false,
+  rotation: 0,
+  scale: 1,
+  hidden: false,
+  locked: false,
+  boxShadow: "none",
+  objectFit: "cover",
+  src: image.src,
+  alt: image.alt,
 });

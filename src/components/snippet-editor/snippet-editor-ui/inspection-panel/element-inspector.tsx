@@ -147,6 +147,15 @@ function ElementAlignment({ element }: { element: iElement }) {
   );
 }
 
+const AUTO_WIDTH_SPPORTED_ELEMENTS: iElement["type"][] = [
+  "code-editor",
+  "text",
+];
+const AUTO_HEIGHT_SPPORTED_ELEMENTS: iElement["type"][] = [
+  "code-editor",
+  "text",
+];
+
 function ElementTransformProperties({ element }: { element: iElement }) {
   const { snippetStore } = useSnippetEditor();
   const updateElementTransform = useStore(
@@ -188,25 +197,29 @@ function ElementTransformProperties({ element }: { element: iElement }) {
             updateElementTransform(element.id, { width, height });
           }}
         />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="outline"
-              className={cn("h-6 w-6", {
-                "bg-secondary": element.autoWidth,
-              })}
-              onClick={() =>
-                updateElementTransform(element.id, {
-                  autoWidth: !element.autoWidth,
-                })
-              }
-            >
-              <MoveHorizontalIcon />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Auto width</TooltipContent>
-        </Tooltip>
+        {AUTO_WIDTH_SPPORTED_ELEMENTS.includes(element.type) ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className={cn("h-6 w-6", {
+                  "bg-secondary": element.autoWidth,
+                })}
+                onClick={() =>
+                  updateElementTransform(element.id, {
+                    autoWidth: !element.autoWidth,
+                  })
+                }
+              >
+                <MoveHorizontalIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Auto width</TooltipContent>
+          </Tooltip>
+        ) : (
+          <div />
+        )}
         <InspectorNumberInput
           value={element.height}
           min={20}
@@ -222,25 +235,29 @@ function ElementTransformProperties({ element }: { element: iElement }) {
           disabled={element.autoHeight}
         />
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="outline"
-              className={cn("h-6 w-6", {
-                "bg-secondary": element.autoHeight,
-              })}
-              onClick={() =>
-                updateElementTransform(element.id, {
-                  autoHeight: !element.autoHeight,
-                })
-              }
-            >
-              <MoveVerticalIcon />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Auto height</TooltipContent>
-        </Tooltip>
+        {AUTO_HEIGHT_SPPORTED_ELEMENTS.includes(element.type) ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className={cn("h-6 w-6", {
+                  "bg-secondary": element.autoHeight,
+                })}
+                onClick={() =>
+                  updateElementTransform(element.id, {
+                    autoHeight: !element.autoHeight,
+                  })
+                }
+              >
+                <MoveVerticalIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Auto height</TooltipContent>
+          </Tooltip>
+        ) : (
+          <div />
+        )}
         <InspectorNumberInput
           value={element.rotation}
           icon={<span>R</span>}

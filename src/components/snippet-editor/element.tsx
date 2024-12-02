@@ -4,6 +4,7 @@ import { useStore } from "zustand";
 import { iElement } from "@/lib/validator/elements";
 
 import CodeEditorElement from "./elements/code-editor";
+import ImageElement from "./elements/image";
 import TextElement from "./elements/text-element";
 import { useSnippetEditor } from "./snippet-editor";
 import { getElementWrapperStyle } from "./utils";
@@ -139,6 +140,18 @@ export default function Element({ elementId }: { elementId: string }) {
         />
       ) : element.type === "text" ? (
         <TextElement
+          key={element.id}
+          element={element}
+          onChange={(updatedElement) => {
+            updateElement(element.id, updatedElement);
+          }}
+          readOnly={readOnly}
+          zoom={zoom}
+          onDragStart={() => updateElementState(element.id, { dragging: true })}
+          onDragEnd={() => updateElementState(element.id, { dragging: false })}
+        />
+      ) : element.type === "image" ? (
+        <ImageElement
           key={element.id}
           element={element}
           onChange={(updatedElement) => {

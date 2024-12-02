@@ -19,9 +19,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getCodeEditorElement, getTextElement } from "@/lib/constants/elements";
+import {
+  getCodeEditorElement,
+  getImageElement,
+  getTextElement,
+} from "@/lib/constants/elements";
 import { getCenterXYForElement } from "@/lib/utils";
 import { iElement } from "@/lib/validator/elements";
+import { useImagePickerModal } from "../image-picker-modal";
 import { useSnippetEditor } from "../snippet-editor";
 
 export default function Toolbar() {
@@ -33,6 +38,7 @@ export default function Toolbar() {
   );
   const canvasWidth = useStore(snippetStore, (state) => state.width);
   const canvasHeight = useStore(snippetStore, (state) => state.height);
+  const [ImagePickerModal, , setImagePickerModalOpen] = useImagePickerModal();
 
   const handleAddElement = useCallback(
     (element: iElement) => {
@@ -86,7 +92,11 @@ export default function Toolbar() {
       >
         <TypeIcon />
       </Button>
-      <Button size="icon" variant="ghost">
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => setImagePickerModalOpen(true)}
+      >
         <ImageIcon />
       </Button>
       <DropdownMenu>
@@ -114,6 +124,43 @@ export default function Toolbar() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ImagePickerModal
+        onPick={(image) => {
+          const { height, width } = reduceSize(image.width, image.height, 256);
+          handleAddElement(
+            getImageElement({
+              id: nanoid(),
+              image,
+              name: image.name ? `${image.name} - Image` : "Image",
+              height,
+              width,
+              ...getCenterXYForElement({
+                canvasHeight,
+                canvasWidth,
+                width,
+                height,
+              }),
+            }),
+          );
+        }}
+      />
     </div>
   );
+}
+
+function reduceSize(width: number, height: number, size: number) {
+  if (Math.max(width, height) < size) {
+    return { width, height };
+  } else if (width === height) {
+    return { width: size, height: size };
+  } else if (width > height) {
+    const newWidth = size;
+    const newHeight = (width * newWidth) / height;
+    return { width: newWidth, height: newHeight };
+  } else {
+    const newHeight = size;
+    const newWidth = (height * newHeight) / width;
+    return { width: newWidth, height: newHeight };
+  }
 }
