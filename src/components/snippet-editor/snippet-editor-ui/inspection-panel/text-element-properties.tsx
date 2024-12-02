@@ -14,7 +14,6 @@ import BackgroundPicker, {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { iTextElement } from "@/lib/validator/elements";
 import { useSnippetEditor } from "../../snippet-editor";
@@ -63,20 +62,6 @@ export function TextElementProperties({ element }: { element: iTextElement }) {
           updateElement(element.id, { boxShadow: value })
         }
       />
-
-      <div className="p-2">
-        <p className="mb-2 text-xs text-muted-foreground">Text</p>
-        <Textarea
-          value={element.text}
-          onChange={(e) => {
-            updateElement(element.id, {
-              text: e.currentTarget.value,
-            });
-          }}
-          className="h-fit min-h-0 resize-none"
-          rows={2}
-        />
-      </div>
 
       <div className="p-2">
         <p className="mb-2 text-xs text-muted-foreground">Background</p>
@@ -180,34 +165,6 @@ export function TextElementProperties({ element }: { element: iTextElement }) {
           });
         }}
       />
-      {/* <ToggleGroupField
-        label="Horizontal Alignment"
-        value={element.horizontalAlignment}
-        options={[
-          { label: "Align left", icon: <AlignLeft />, value: "start" },
-          { label: "Align center", icon: <AlignCenter />, value: "center" },
-          { label: "Align right", icon: <AlignRight />, value: "end" },
-        ]}
-        onValueChange={(value) =>
-          updateElement(element.id, {
-            horizontalAlignment: value as iTextElement["horizontalAlignment"],
-          })
-        }
-      />
-      <ToggleGroupField
-        label="Vertical Alignment"
-        value={element.verticalAlignment}
-        options={[
-          { label: "Align top", icon: <ArrowUpToLine />, value: "start" },
-          { label: "Align middle", icon: <FoldVertical />, value: "center" },
-          { label: "Align bottom", icon: <ArrowDownToLine />, value: "end" },
-        ]}
-        onValueChange={(value) =>
-          updateElement(element.id, {
-            verticalAlignment: value as iTextElement["verticalAlignment"],
-          })
-        }
-      /> */}
 
       <div className="p-2">
         <p className="mb-2 text-xs text-muted-foreground">Alignment</p>

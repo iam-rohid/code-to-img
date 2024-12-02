@@ -1,6 +1,13 @@
 /** @jsxImportSource @emotion/react */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { loadLanguage } from "@uiw/codemirror-extensions-langs";
 import CodeMirror, {
   EditorView,
@@ -17,6 +24,7 @@ import {
 } from "@/lib/constants/code-editor-themes";
 import { cn } from "@/lib/utils";
 import { CodeEditorTab, iCodeEditorElement } from "@/lib/validator/elements";
+import { useDragElement } from "../../use-drag-element";
 
 import { TITLE_BAR_CONTROLS } from "./controls";
 
@@ -27,13 +35,32 @@ export default function CodeEditorElement({
   readOnly,
   onChange,
   onTabSelect,
+  onDragEnd,
+  onDragStart,
+  zoom = 1,
 }: {
   element: iCodeEditorElement;
   readOnly?: boolean;
-  onChange?: (element: iCodeEditorElement) => void;
+  onChange?: (element: Partial<iCodeEditorElement>) => void;
   onTabSelect?: (tabId: string) => void;
+  zoom?: number;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }) {
   const [selectedTabId, setSelectedTabId] = useState(() => element.tabs[0].id);
+  const { onMouseDown } = useDragElement({
+    x: element.x,
+    y: element.y,
+    zoom,
+    readOnly,
+    onDrag: (pos) => onChange?.({ x: pos.x, y: pos.y }),
+    onDoubleClick: () => {
+      // setEditing(true);
+    },
+    onDragEnd,
+    onDragStart,
+  });
+
   const theme = useMemo(
     () =>
       CODE_EDITOR_THEMES.find((theme) => theme.id === element.theme) ??
@@ -89,7 +116,6 @@ export default function CodeEditorElement({
       name: "index.js",
     };
     onChange?.({
-      ...element,
       tabs: [...element.tabs, newTab],
     });
     setSelectedTabId(newTab.id);
@@ -103,7 +129,6 @@ export default function CodeEditorElement({
       }
 
       onChange?.({
-        ...element,
         tabs: newTabsList,
       });
       if (tabId === selectedTabId) {
@@ -141,11 +166,12 @@ export default function CodeEditorElement({
           readOnly={readOnly}
           selectedTabId={selectedTabId}
           onSelectedTabChange={setSelectedTabId}
+          onMouseDown={onMouseDown}
         />
       ) : (
         <div
-          data-cti-element-id={element.id}
-          className="cti-drag-handle absolute left-0 right-0 top-0 z-10 h-4"
+          className="absolute left-0 right-0 top-0 z-10 h-4"
+          onMouseDown={onMouseDown}
         />
       )}
 
@@ -164,7 +190,6 @@ export default function CodeEditorElement({
             element={element}
             onCodeChange={(code) =>
               onChange?.({
-                ...element,
                 tabs: element.tabs.map((oldTab) =>
                   oldTab.id === tab.id ? { ...oldTab, code } : oldTab,
                 ),
@@ -278,6 +303,7 @@ function TitleBar({
   onRemoveTabClick,
   selectedTabId,
   onSelectedTabChange,
+  onMouseDown,
 }: {
   element: iCodeEditorElement;
   background: Color;
@@ -290,6 +316,7 @@ function TitleBar({
   onAddTabClick: () => void;
   selectedTabId: string;
   onSelectedTabChange: (tabId: string) => void;
+  onMouseDown?: (e: MouseEvent) => void;
 }) {
   const Control = useMemo(
     () =>
@@ -301,8 +328,7 @@ function TitleBar({
 
   return (
     <div
-      data-cti-element-id={element.id}
-      className="cti-drag-handle flex-shrink-0 overflow-hidden"
+      className="relative flex-shrink-0 overflow-hidden"
       style={{
         backgroundColor:
           element.tabs.length > 1
@@ -316,24 +342,30 @@ function TitleBar({
         borderTopRightRadius: element.borderRadius,
       }}
     >
+      <div className="absolute inset-0" onMouseDown={onMouseDown}></div>
       <div
         className={cn("flex h-10 items-center", {
           "flex-row-reverse": element.titleBarControlPosition === "right",
         })}
       >
         {Control ? (
-          <div className="flex-shrink-0 px-4">
+          <div className="pointer-events-none flex-shrink-0 px-4">
             <Control theme={theme} />
           </div>
         ) : null}
-        <div className="flex h-full flex-1 overflow-hidden">
+        <div className="pointer-events-none flex h-full flex-1 overflow-hidden">
           <div className="flex flex-1 flex-nowrap items-center overflow-hidden">
             {element.tabs.map((tab) => {
               const selected = selectedTabId === tab.id;
               return (
                 <div
                   key={tab.id}
-                  className="group/tab relative flex h-full flex-1 overflow-hidden"
+                  className={cn(
+                    "group/tab relative z-10 flex h-full flex-1 overflow-hidden",
+                    {
+                      "pointer-events-auto": element.tabs.length > 1,
+                    },
+                  )}
                 >
                   <div
                     className={cn(
@@ -379,7 +411,7 @@ function TitleBar({
 
           {!readOnly && element.tabs.length < MAX_TABS && (
             <button
-              className="flex h-full w-7 flex-shrink-0 items-center justify-center"
+              className="pointer-events-auto z-10 flex h-full w-7 flex-shrink-0 items-center justify-center"
               onClick={onAddTabClick}
               css={{
                 ":hover": {

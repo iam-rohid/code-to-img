@@ -81,7 +81,7 @@ export const getTextElement = ({
   width = 72,
   height = 44,
   name = "Text",
-  text = "Text",
+  text: value = "<p>Text</p>",
   x = 0,
   y = 0,
 }: GetTextElementProps): iTextElement => ({
@@ -89,7 +89,7 @@ export const getTextElement = ({
   type: "text",
   id,
   name,
-  text,
+  value,
   x,
   y,
   height,

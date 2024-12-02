@@ -7,7 +7,7 @@ import { alginmentSchema, elementBase, paddingSchema } from "./shared";
 export const textElementSchema = z
   .object({
     type: z.literal("text"),
-    text: z.string().optional().default("Text"),
+    value: z.string().optional().default("<p>Text</p>"),
     fontSize: z.number().min(0).optional().default(16),
     lineHeight: z.number().min(0).default(24),
     borderRadius: z.number().min(0).default(12),

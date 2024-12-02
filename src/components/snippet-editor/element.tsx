@@ -17,6 +17,7 @@ export default function Element({ elementId }: { elementId: string }) {
     throw new Error("element not found!");
   }
   const elementRef = useRef<HTMLDivElement>(null);
+  const zoom = useStore(editorStore, (state) => state.zoom);
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
   const updateElementState = useStore(
     editorStore,
@@ -122,16 +123,13 @@ export default function Element({ elementId }: { elementId: string }) {
     <div
       ref={elementRef}
       style={getElementWrapperStyle(element)}
-      {...(readOnly
-        ? {}
-        : {
-            onMouseEnter: handleMouseEnter,
-            onMouseLeave: handleMouseLeave,
-            onMouseDown: handleMouseDown,
-          })}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
     >
       {element.type === "code-editor" ? (
         <CodeEditorElement
+          key={element.id}
           element={element}
           onChange={(updatedElement) => {
             updateElement(element.id, updatedElement);
@@ -140,7 +138,17 @@ export default function Element({ elementId }: { elementId: string }) {
           onTabSelect={(tabId) => handleTabSelect(element.id, tabId)}
         />
       ) : element.type === "text" ? (
-        <TextElement element={element} />
+        <TextElement
+          key={element.id}
+          element={element}
+          onChange={(updatedElement) => {
+            updateElement(element.id, updatedElement);
+          }}
+          readOnly={readOnly}
+          zoom={zoom}
+          onDragStart={() => updateElementState(element.id, { dragging: true })}
+          onDragEnd={() => updateElementState(element.id, { dragging: false })}
+        />
       ) : null}
     </div>
   );
