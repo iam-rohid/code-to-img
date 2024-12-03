@@ -33,6 +33,9 @@ export default function TextElement({
     readOnly,
     onDrag: (pos) => onChange?.({ x: pos.x, y: pos.y }),
     onDoubleClick: () => {
+      if (readOnly || element.hidden || element.locked) {
+        return;
+      }
       setEditing(true);
     },
     onDragEnd,

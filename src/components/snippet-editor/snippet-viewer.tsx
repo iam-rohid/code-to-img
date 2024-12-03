@@ -9,6 +9,7 @@ import { iElement } from "@/lib/validator/elements";
 import { iSnippetData } from "@/lib/validator/snippet";
 
 import CodeEditorElement from "./elements/code-editor";
+import ImageElement from "./elements/image";
 import TextElement from "./elements/text-element";
 import { getElementWrapperStyle } from "./utils";
 
@@ -63,7 +64,9 @@ function Element({ element }: { element: iElement }) {
       {element.type === "code-editor" ? (
         <CodeEditorElement element={element} readOnly />
       ) : element.type === "text" ? (
-        <TextElement element={element} />
+        <TextElement element={element} readOnly />
+      ) : element.type === "image" ? (
+        <ImageElement element={element} readOnly />
       ) : null}
     </div>
   );

@@ -293,9 +293,7 @@ function TabContent({
 
 function TitleBar({
   element,
-  background,
   secondaryBackground,
-  borderColor,
   theme,
   secondaryBackground2,
   readOnly,
@@ -328,16 +326,9 @@ function TitleBar({
 
   return (
     <div
-      className="relative flex-shrink-0 overflow-hidden"
+      className="relative z-20 flex-shrink-0 overflow-hidden"
       style={{
-        backgroundColor:
-          element.tabs.length > 1
-            ? secondaryBackground.toString()
-            : background.toString(),
-        boxShadow:
-          element.border && element.tabs.length > 1
-            ? `inset 0 -1px 0 0 ${borderColor}`
-            : undefined,
+        backgroundColor: secondaryBackground.toString(),
         borderTopLeftRadius: element.borderRadius,
         borderTopRightRadius: element.borderRadius,
       }}
@@ -353,81 +344,150 @@ function TitleBar({
             <Control theme={theme} />
           </div>
         ) : (
-          <div className="w-4" />
+          <div className="w-2" />
         )}
-        <div className="pointer-events-none flex h-full flex-1 overflow-hidden">
-          <div className="flex flex-1 flex-nowrap items-center overflow-hidden">
+        <div
+          className={cn("pointer-events-none z-10 flex h-full flex-1", {
+            "flex-row-reverse": element.titleBarControlPosition === "right",
+          })}
+        >
+          <div className="flex flex-1 flex-nowrap items-center gap-1">
             {element.tabs.map((tab) => {
               const selected = selectedTabId === tab.id;
               return (
-                <div
+                <TabItem
+                  selected={selected}
+                  onSelect={onSelectedTabChange}
+                  onRemove={onRemoveTabClick}
+                  secondaryBackground2={secondaryBackground2}
+                  tab={tab}
+                  tabsCount={element.tabs.length}
+                  readOnly={readOnly}
                   key={tab.id}
-                  className={cn(
-                    "group/tab relative z-10 flex h-full flex-1 overflow-hidden",
-                    {
-                      "pointer-events-auto": element.tabs.length > 1,
-                    },
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex h-full flex-1 cursor-pointer items-center overflow-hidden truncate px-3 text-center text-sm font-medium hover:bg-red-50",
-                    )}
-                    style={{
-                      backgroundColor: selected
-                        ? theme.settings.background
-                        : "transparent",
-                      boxShadow:
-                        element.border && selected && element.tabs.length > 1
-                          ? `inset 1px 0 0 ${borderColor}, inset -1px 0 0 ${borderColor}`
-                          : undefined,
-                    }}
-                    css={{
-                      ":hover": {
-                        backgroundColor: selected
-                          ? undefined
-                          : secondaryBackground2.toString(),
-                      },
-                    }}
-                    onClick={() => onSelectedTabChange(tab.id)}
-                  >
-                    {tab.name || "Untitled"}
-                  </div>
-                  {!readOnly && element.tabs.length > 1 && (
-                    <div
-                      className="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-secondary group-hover/tab:opacity-100"
-                      onClick={() => onRemoveTabClick(tab.id)}
-                      css={{
-                        ":hover": {
-                          backgroundColor: secondaryBackground2.toString(),
-                        },
-                      }}
-                    >
-                      <XIcon className="h-3 w-3" />
-                    </div>
-                  )}
-                </div>
+                  theme={theme}
+                  secondaryBackground={secondaryBackground}
+                />
               );
             })}
           </div>
 
           {!readOnly && element.tabs.length < MAX_TABS ? (
-            <button
-              className="pointer-events-auto z-10 flex h-full w-7 flex-shrink-0 items-center justify-center"
-              onClick={onAddTabClick}
-              css={{
-                ":hover": {
-                  backgroundColor: secondaryBackground2.toString(),
-                },
-              }}
-            >
-              <PlusIcon className="h-3.5 w-3.5" />
-            </button>
+            <div className="p-1">
+              <button
+                className="pointer-events-auto flex h-full w-6 flex-shrink-0 items-center justify-center rounded-md"
+                onClick={onAddTabClick}
+                css={{
+                  ":hover": {
+                    backgroundColor: secondaryBackground2.toString(),
+                  },
+                }}
+              >
+                <PlusIcon className="h-3 w-3" />
+              </button>
+            </div>
           ) : (
-            <div className="w-4" />
+            <div className="w-2" />
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function TabItem({
+  selected,
+  tab,
+  onSelect,
+  secondaryBackground,
+  secondaryBackground2,
+  readOnly,
+  tabsCount,
+  onRemove,
+  theme,
+}: {
+  tab: CodeEditorTab;
+  selected: boolean;
+  secondaryBackground: Color;
+  secondaryBackground2: Color;
+  onSelect: (tabId: string) => void;
+  readOnly?: boolean;
+  tabsCount: number;
+  onRemove?: (tabId: string) => void;
+  theme: CodeEditorTheme;
+}) {
+  return (
+    <div
+      className={cn(
+        "group/tab pointer-events-auto relative flex h-full max-w-[128px] flex-1 py-1",
+        {
+          "-z-10": selected,
+        },
+      )}
+    >
+      {selected && (
+        <div
+          className="absolute bottom-0 left-0 right-0 h-1"
+          css={{
+            backgroundColor: theme.settings.background,
+          }}
+        >
+          <div
+            css={{
+              background: secondaryBackground.toString(),
+              height: "1em",
+              width: "1em",
+              position: "absolute",
+              bottom: "0em",
+              right: "-1em",
+              borderRadius: "0 0 0 0.5em",
+              boxShadow: `-0.5em 0 0 0 ${theme.settings.background}`,
+            }}
+          ></div>
+          <div
+            css={{
+              background: secondaryBackground.toString(),
+              height: "1em",
+              width: "1em",
+              position: "absolute",
+              bottom: "0em",
+              left: "-1em",
+              borderRadius: "0 0 0 0.5em",
+              boxShadow: `-0.5em 0 0 0 ${theme.settings.background}`,
+              transform: "scaleX(-1)",
+            }}
+          ></div>
+        </div>
+      )}
+      <div
+        className={cn(
+          "pointer-events-auto flex h-full flex-1 cursor-pointer select-none items-center overflow-hidden truncate rounded-t-md px-2 text-center text-xs font-medium group-hover/tab:pr-4",
+          {
+            "rounded-md": !selected,
+          },
+        )}
+        css={{
+          backgroundColor: selected ? theme.settings.background : "transparent",
+          ":hover": {
+            backgroundColor: theme.settings.background,
+          },
+        }}
+        onMouseDown={() => onSelect(tab.id)}
+      >
+        <span className="truncate">{tab.name || "Untitled"}</span>
+      </div>
+      {!readOnly && tabsCount > 1 && (
+        <div
+          className="pointer-events-auto absolute right-1 top-1/2 z-10 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-secondary group-hover/tab:opacity-100"
+          onClick={() => onRemove?.(tab.id)}
+          css={{
+            ":hover": {
+              backgroundColor: secondaryBackground2.toString(),
+            },
+          }}
+        >
+          <XIcon className="h-3 w-3" />
+        </div>
+      )}
     </div>
   );
 }
