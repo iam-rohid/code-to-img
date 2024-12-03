@@ -11,7 +11,7 @@ export default function Page() {
       <div className="fixed left-0 right-0 top-0 flex items-center px-4 py-2">
         <Link href="/" className="flex h-10 w-10 items-center justify-center">
           <Image
-            src="/code-to-img.svg"
+            src="/images/code-to-img.svg"
             alt="codetoimg logo"
             width={48}
             height={48}

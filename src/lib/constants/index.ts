@@ -1,4 +1,4 @@
-export const APP_NAME = "Code To Img";
+export const APP_NAME = "CodeToImg";
 
 export const SESSION_COOKIE = "session";
 

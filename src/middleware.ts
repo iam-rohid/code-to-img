@@ -15,6 +15,8 @@ const publicPages = [
   "/readonly",
   "/blog.*",
   "/docs.*",
+  "/privacy",
+  "/terms",
 ];
 
 const getWorkspaceRedirectPath = async (
@@ -74,6 +76,10 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
     }
   }
 
+  if (sessionToken && req.nextUrl.pathname === "/login") {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
   if (req.method === "GET") {
     const response = NextResponse.next();
     if (sessionToken) {
@@ -122,6 +128,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|site.webmanifest|browserconfig.xml|manifest.webmanifest).*)",
+    "/((?!api|_next/static|_next/image|images|favicon.ico|sitemap.xml|robots.txt|manifest.json|site.webmanifest|browserconfig.xml|manifest.webmanifest).*)",
   ],
 };

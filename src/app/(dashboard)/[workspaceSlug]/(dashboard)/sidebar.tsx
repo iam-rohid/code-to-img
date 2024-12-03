@@ -57,7 +57,7 @@ export default function WorkspcaeSidebar() {
                 className="flex h-10 w-10 items-center justify-center"
               >
                 <Image
-                  src="/code-to-img.svg"
+                  src="/images/code-to-img.svg"
                   alt="codetoimg logo"
                   width={48}
                   height={48}
