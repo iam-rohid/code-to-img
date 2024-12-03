@@ -137,6 +137,9 @@ export default function Element({ elementId }: { elementId: string }) {
           }}
           readOnly={readOnly}
           onTabSelect={(tabId) => handleTabSelect(element.id, tabId)}
+          zoom={zoom}
+          onDragStart={() => updateElementState(element.id, { dragging: true })}
+          onDragEnd={() => updateElementState(element.id, { dragging: false })}
         />
       ) : element.type === "text" ? (
         <TextElement

@@ -352,7 +352,9 @@ function TitleBar({
           <div className="pointer-events-none flex-shrink-0 px-4">
             <Control theme={theme} />
           </div>
-        ) : null}
+        ) : (
+          <div className="w-4" />
+        )}
         <div className="pointer-events-none flex h-full flex-1 overflow-hidden">
           <div className="flex flex-1 flex-nowrap items-center overflow-hidden">
             {element.tabs.map((tab) => {
@@ -409,7 +411,7 @@ function TitleBar({
             })}
           </div>
 
-          {!readOnly && element.tabs.length < MAX_TABS && (
+          {!readOnly && element.tabs.length < MAX_TABS ? (
             <button
               className="pointer-events-auto z-10 flex h-full w-7 flex-shrink-0 items-center justify-center"
               onClick={onAddTabClick}
@@ -421,6 +423,8 @@ function TitleBar({
             >
               <PlusIcon className="h-3.5 w-3.5" />
             </button>
+          ) : (
+            <div className="w-4" />
           )}
         </div>
       </div>
