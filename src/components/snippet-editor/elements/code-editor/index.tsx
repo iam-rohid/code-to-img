@@ -351,7 +351,7 @@ function TitleBar({
             "flex-row-reverse": element.titleBarControlPosition === "right",
           })}
         >
-          <div className="flex flex-1 flex-nowrap items-center gap-1">
+          <div className="flex flex-1 flex-shrink items-center gap-1">
             {element.tabs.map((tab) => {
               const selected = selectedTabId === tab.id;
               return (
@@ -372,9 +372,9 @@ function TitleBar({
           </div>
 
           {!readOnly && element.tabs.length < MAX_TABS ? (
-            <div className="p-1">
+            <div className="flex items-center justify-center p-1">
               <button
-                className="pointer-events-auto flex h-full w-6 flex-shrink-0 items-center justify-center rounded-md"
+                className="pointer-events-auto flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
                 onClick={onAddTabClick}
                 css={{
                   ":hover": {
@@ -415,24 +415,27 @@ function TabItem({
   onRemove?: (tabId: string) => void;
   theme: CodeEditorTheme;
 }) {
+  const [mouseHovering, setMouseHovering] = useState(false);
   return (
     <div
       className={cn(
-        "group/tab pointer-events-auto relative flex h-full max-w-[128px] flex-1 py-1",
+        "group/tab pointer-events-auto relative flex h-full max-w-[128px] flex-1 flex-shrink py-1",
         {
           "-z-10": selected,
         },
       )}
+      onMouseEnter={() => setMouseHovering(true)}
+      onMouseLeave={() => setMouseHovering(false)}
     >
       {selected && (
         <div
-          className="absolute bottom-0 left-0 right-0 h-1"
-          css={{
+          className="pointer-events-none absolute bottom-0 left-0 right-0 h-1"
+          style={{
             backgroundColor: theme.settings.background,
           }}
         >
           <div
-            css={{
+            style={{
               background: secondaryBackground.toString(),
               height: "1em",
               width: "1em",
@@ -444,7 +447,7 @@ function TabItem({
             }}
           ></div>
           <div
-            css={{
+            style={{
               background: secondaryBackground.toString(),
               height: "1em",
               width: "1em",
@@ -460,32 +463,42 @@ function TabItem({
       )}
       <div
         className={cn(
-          "pointer-events-auto flex h-full flex-1 cursor-pointer select-none items-center overflow-hidden truncate rounded-t-md px-2 text-center text-xs font-medium group-hover/tab:pr-4",
+          "pointer-events-auto relative flex h-full flex-1 cursor-pointer select-none items-center overflow-hidden truncate rounded-t-md px-2 text-center text-xs font-medium",
           {
             "rounded-md": !selected,
           },
         )}
-        css={{
-          backgroundColor: selected ? theme.settings.background : "transparent",
-          ":hover": {
-            backgroundColor: theme.settings.background,
-          },
+        style={{
+          backgroundColor: selected
+            ? theme.settings.background
+            : mouseHovering
+              ? theme.settings.background
+              : "transparent",
         }}
         onMouseDown={() => onSelect(tab.id)}
       >
-        <span className="truncate">{tab.name || "Untitled"}</span>
-      </div>
-      {!readOnly && tabsCount > 1 && (
-        <div
-          className="pointer-events-auto absolute right-1 top-1/2 z-10 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-secondary group-hover/tab:opacity-100"
-          onClick={() => onRemove?.(tab.id)}
-          css={{
-            ":hover": {
-              backgroundColor: secondaryBackground2.toString(),
-            },
+        <span
+          className="absolute left-2 top-1/2 -translate-y-1/2 truncate text-left"
+          style={{
+            right: !readOnly && mouseHovering ? "20px" : "8px",
           }}
         >
-          <XIcon className="h-3 w-3" />
+          {tab.name || "Untitled"}
+        </span>
+      </div>
+      {!readOnly && tabsCount > 1 && (
+        <div className="absolute right-1 top-1/2 z-10 -translate-y-1/2 opacity-0 transition-opacity group-hover/tab:opacity-100">
+          <div
+            className="pointer-events-auto flex h-4 w-4 cursor-pointer items-center justify-center rounded-full hover:bg-secondary"
+            onClick={() => onRemove?.(tab.id)}
+            css={{
+              ":hover": {
+                backgroundColor: secondaryBackground2.toString(),
+              },
+            }}
+          >
+            <XIcon className="h-3 w-3" />
+          </div>
         </div>
       )}
     </div>
