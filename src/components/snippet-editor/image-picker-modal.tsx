@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import {
@@ -8,7 +9,6 @@ import {
   useState,
 } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
-import Image from "next/image";
 
 import { allImages, iImage } from "@/data/images";
 import { cn } from "@/lib/utils";
@@ -47,55 +47,58 @@ export default function ImagePickerModal({
 
   return (
     <Dialog {...props}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="flex h-screen max-w-[1024px] flex-col justify-start gap-0 space-y-0 p-0 md:h-[calc(100%-4rem)]">
+        <DialogHeader className="sticky top-0 z-20 space-y-0 border-b bg-card p-6">
           <DialogTitle>Add Image</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            className={cn({
-              "bg-accent text-accent-foreground": category === "",
-            })}
-            onClick={() => setCategory("")}
-            size="sm"
-          >
-            All Images
-          </Button>
-          {allTags.map((t) => (
+          <div className="flex flex-wrap gap-2 pt-4">
             <Button
-              key={t}
               variant="outline"
-              size="sm"
-              onClick={() => setCategory(t)}
               className={cn({
-                "bg-accent text-accent-foreground": category === t,
+                "bg-accent text-accent-foreground": category === "",
               })}
+              onClick={() => setCategory("")}
+              size="sm"
             >
-              {categoryMapName(t)}
+              All Images
             </Button>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          {images.map((image) => (
-            <Button
-              key={image.id}
-              variant="outline"
-              className="aspect-square h-fit w-full p-2"
-              onClick={() => {
-                onPick?.(image);
-                props.onOpenChange?.(false);
-              }}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt ?? image.id}
-                className="h-full w-full object-contain"
-                width={image.width}
-                height={image.height}
-              />
-            </Button>
-          ))}
+            {allTags.map((t) => (
+              <Button
+                key={t}
+                variant="outline"
+                size="sm"
+                onClick={() => setCategory(t)}
+                className={cn({
+                  "bg-accent text-accent-foreground": category === t,
+                })}
+              >
+                {categoryMapName(t)}
+              </Button>
+            ))}
+          </div>
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-3 md:grid-cols-4">
+            {images.map((image) => (
+              <Button
+                key={image.id}
+                variant="outline"
+                className="aspect-square h-fit w-full rounded-lg p-2"
+                onClick={() => {
+                  onPick?.(image);
+                  props.onOpenChange?.(false);
+                }}
+                style={{
+                  background: `repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
+                }}
+              >
+                <img
+                  src={image.src}
+                  alt={image.alt ?? image.id}
+                  className="h-full w-full object-contain"
+                />
+              </Button>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

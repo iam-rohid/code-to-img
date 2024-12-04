@@ -7,15 +7,25 @@ import {
   AlignVerticalJustifyEndIcon,
   AlignVerticalJustifyStartIcon,
   CopyIcon,
+  Link2Icon,
   MoveHorizontalIcon,
+  MoveIcon,
   MoveVerticalIcon,
   RotateCcwIcon,
+  RulerIcon,
   TrashIcon,
+  Unlink2Icon,
 } from "lucide-react";
 import { useStore } from "zustand";
 
 import { InspectorNumberInput } from "@/components/inspector-number-input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -147,14 +157,7 @@ function ElementAlignment({ element }: { element: iElement }) {
   );
 }
 
-const AUTO_WIDTH_SPPORTED_ELEMENTS: iElement["type"][] = [
-  "code-editor",
-  "text",
-];
-const AUTO_HEIGHT_SPPORTED_ELEMENTS: iElement["type"][] = [
-  "code-editor",
-  "text",
-];
+const AUTO_SIZE_SPPORTED_ELEMENTS: iElement["type"][] = ["code-editor", "text"];
 
 function ElementTransformProperties({ element }: { element: iElement }) {
   const { snippetStore } = useSnippetEditor();
@@ -189,15 +192,39 @@ function ElementTransformProperties({ element }: { element: iElement }) {
           icon={<span>W</span>}
           disabled={element.autoWidth}
           onValueChange={(value) => {
-            const width = value;
+            let width = value;
             let height = element.height;
             if (element.widthHeightLinked) {
               height = (element.height * width) / element.width;
             }
+            if (height < 20) {
+              width = (width * 20) / height;
+              height = 20;
+            }
             updateElementTransform(element.id, { width, height });
           }}
         />
-        {AUTO_WIDTH_SPPORTED_ELEMENTS.includes(element.type) ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="outline"
+              className={cn("h-6 w-6", {
+                "bg-secondary": element.widthHeightLinked,
+              })}
+              onClick={() =>
+                updateElementTransform(element.id, {
+                  widthHeightLinked: !element.widthHeightLinked,
+                })
+              }
+              disabled={element.autoHeight || element.autoWidth}
+            >
+              {element.widthHeightLinked ? <Link2Icon /> : <Unlink2Icon />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Link width height</TooltipContent>
+        </Tooltip>
+        {/* {AUTO_WIDTH_SPPORTED_ELEMENTS.includes(element.type) ? (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -219,41 +246,119 @@ function ElementTransformProperties({ element }: { element: iElement }) {
           </Tooltip>
         ) : (
           <div />
-        )}
+        )} */}
         <InspectorNumberInput
           value={element.height}
           min={20}
           icon={<span>H</span>}
           onValueChange={(value) => {
-            const height = value;
+            let height = value;
             let width = element.width;
             if (element.widthHeightLinked) {
               width = (element.width * height) / element.height;
+            }
+            if (width < 20) {
+              height = (height * 20) / width;
+              width = 20;
             }
             updateElementTransform(element.id, { height, width });
           }}
           disabled={element.autoHeight}
         />
 
-        {AUTO_HEIGHT_SPPORTED_ELEMENTS.includes(element.type) ? (
+        {AUTO_SIZE_SPPORTED_ELEMENTS.includes(element.type) ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className={cn("h-6 w-6", {
-                  "bg-secondary": element.autoHeight,
-                })}
-                onClick={() =>
-                  updateElementTransform(element.id, {
-                    autoHeight: !element.autoHeight,
-                  })
-                }
-              >
-                <MoveVerticalIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Auto height</TooltipContent>
+            <DropdownMenu>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="outline" className="h-6 w-6">
+                    {element.autoHeight && element.autoWidth ? (
+                      <MoveIcon />
+                    ) : element.autoHeight ? (
+                      <MoveVerticalIcon />
+                    ) : element.autoWidth ? (
+                      <MoveHorizontalIcon />
+                    ) : (
+                      <RulerIcon />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateElementTransform(element.id, {
+                      autoWidth: true,
+                      autoHeight: true,
+                      widthHeightLinked: false,
+                    })
+                  }
+                  className={cn({
+                    "bg-accent text-accent-foreground":
+                      element.autoHeight && element.autoWidth,
+                  })}
+                >
+                  <MoveIcon />
+                  Auto Size
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateElementTransform(element.id, {
+                      autoWidth: true,
+                      autoHeight: false,
+                      widthHeightLinked: false,
+                    })
+                  }
+                  className={cn({
+                    "bg-accent text-accent-foreground":
+                      !element.autoHeight && element.autoWidth,
+                  })}
+                >
+                  <MoveHorizontalIcon />
+                  Auto Width
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateElementTransform(element.id, {
+                      autoHeight: true,
+                      autoWidth: false,
+                      widthHeightLinked: false,
+                    })
+                  }
+                  className={cn({
+                    "bg-accent text-accent-foreground":
+                      element.autoHeight && !element.autoWidth,
+                  })}
+                >
+                  <MoveVerticalIcon />
+                  Auto Height
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateElementTransform(element.id, {
+                      autoHeight: false,
+                      autoWidth: false,
+                    })
+                  }
+                  className={cn({
+                    "bg-accent text-accent-foreground":
+                      !element.autoHeight && !element.autoWidth,
+                  })}
+                >
+                  <RulerIcon />
+                  Fixed Size
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <TooltipContent>
+              {element.autoHeight && element.autoWidth
+                ? "Auto Size"
+                : element.autoHeight
+                  ? "Auto Height"
+                  : element.autoWidth
+                    ? "Auto Width"
+                    : "Fixed Size"}
+            </TooltipContent>
           </Tooltip>
         ) : (
           <div />

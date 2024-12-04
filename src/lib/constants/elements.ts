@@ -69,7 +69,7 @@ export const getCodeEditorElement = ({
     },
   ],
   border: true,
-  boxShadow: "none",
+  boxShadow: "0 22px 32px -6px rgba(0,0,0,0.65)",
   borderRadius: 10,
 });
 

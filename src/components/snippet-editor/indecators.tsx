@@ -426,23 +426,42 @@ function ElementTransformIndecator({
       switch (position) {
         case "top-left":
           width += difX;
-          height += difY;
           x -= difX;
-          y -= difY;
+          if (element.widthHeightLinked) {
+            height = (elementHeight * width) / elementWidth;
+            y -= height - elementHeight;
+          } else {
+            height += difY;
+            y -= difY;
+          }
           break;
         case "top-right":
           width -= difX;
-          height += difY;
-          y -= difY;
+          if (element.widthHeightLinked) {
+            height = (elementHeight * width) / elementWidth;
+            y -= height - elementHeight;
+          } else {
+            height += difY;
+            y -= difY;
+          }
           break;
         case "bottom-left":
           width += difX;
-          height -= difY;
-          x -= difX;
+          if (element.widthHeightLinked) {
+            height = (elementHeight * width) / elementWidth;
+            x -= width - elementWidth;
+          } else {
+            height -= difY;
+            x -= difX;
+          }
           break;
         case "bottom-right":
           width -= difX;
-          height -= difY;
+          if (element.widthHeightLinked) {
+            height = (elementHeight * width) / elementWidth;
+          } else {
+            height -= difY;
+          }
           break;
 
         default:
@@ -452,30 +471,44 @@ function ElementTransformIndecator({
       const newStartPos = pos;
 
       if (width < elementMinWidth) {
-        let dif = elementWidth - elementMinWidth;
-        if (position === "top-right" || position === "bottom-right") {
-          dif = 0;
+        if (element.widthHeightLinked) {
+          width = element.width;
+          height = element.height;
+          x = element.x;
+          y = element.y;
+        } else {
+          let dif = elementWidth - elementMinWidth;
+          if (position === "top-right" || position === "bottom-right") {
+            dif = 0;
+          }
+          width = elementMinWidth;
+          x = element.x + dif;
+          newStartPos.x = startMousePos.x;
         }
-        width = elementMinWidth;
-        x = element.x + dif;
-        newStartPos.x = startMousePos.x;
       }
 
       if (height < elementMinHeight) {
-        let dif = elementHeight - elementMinHeight;
-        if (position === "bottom-left" || position === "bottom-right") {
-          dif = 0;
+        if (element.widthHeightLinked) {
+          width = element.width;
+          height = element.height;
+          x = element.x;
+          y = element.y;
+        } else {
+          let dif = elementHeight - elementMinHeight;
+          if (position === "bottom-left" || position === "bottom-right") {
+            dif = 0;
+          }
+          height = elementMinHeight;
+          y = element.y + dif;
+          newStartPos.y = startMousePos.y;
         }
-        height = elementMinHeight;
-        y = element.y + dif;
-        newStartPos.y = startMousePos.y;
       }
 
       updateElement(elementId, {
-        width: Math.round(width / element.scale),
-        height: Math.round(height / element.scale),
-        x: Math.round(x),
-        y: Math.round(y),
+        width: width / element.scale,
+        height: height / element.scale,
+        x: x,
+        y: y,
         autoWidth: false,
         autoHeight: false,
       });
@@ -487,6 +520,7 @@ function ElementTransformIndecator({
       element.height,
       element.x,
       element.y,
+      element.widthHeightLinked,
       startMousePos.x,
       startMousePos.y,
       zoom,
@@ -533,50 +567,86 @@ function ElementTransformIndecator({
           break;
       }
 
+      if (element.widthHeightLinked) {
+        switch (position) {
+          case "left":
+          case "right":
+            height = (elementHeight * width) / elementWidth;
+            y -= (height - elementHeight) / 2;
+            break;
+          case "top":
+          case "bottom":
+            width = (elementWidth * height) / elementHeight;
+            x -= (width - elementWidth) / 2;
+            break;
+
+          default:
+            break;
+        }
+      }
+
       const newStartPos = pos;
 
       if (width < elementMinWidth) {
-        const dif = elementWidth - elementMinWidth;
-        width = elementMinWidth;
-        x = element.x + dif * (position === "left" ? 1 : 0);
-        newStartPos.x = startMousePos.x;
+        if (element.widthHeightLinked) {
+          width = element.width;
+          height = element.height;
+          x = element.x;
+          y = element.y;
+        } else {
+          const dif = elementWidth - elementMinWidth;
+          width = elementMinWidth;
+          x = element.x + dif * (position === "left" ? 1 : 0);
+          newStartPos.x = startMousePos.x;
+        }
       }
       if (height < elementMinHeight) {
-        const dif = elementHeight - elementMinHeight;
-        height = elementMinHeight;
-        y = element.y + dif * (position === "top" ? 1 : 0);
-        newStartPos.y = startMousePos.y;
+        if (element.widthHeightLinked) {
+          width = element.width;
+          height = element.height;
+          x = element.x;
+          y = element.y;
+        } else {
+          const dif = elementHeight - elementMinHeight;
+          height = elementMinHeight;
+          y = element.y + dif * (position === "top" ? 1 : 0);
+          newStartPos.y = startMousePos.y;
+        }
       }
 
       const updatedTransform: Partial<iElement> = {
-        width: Math.round(width / element.scale),
-        height: Math.round(height / element.scale),
-        x: Math.round(x),
-        y: Math.round(y),
+        width: width / element.scale,
+        height: height / element.scale,
+        x: x,
+        y: y,
       };
 
-      if (element.autoWidth && (position === "left" || position === "right")) {
-        updatedTransform.autoWidth = false;
-      }
-      if (element.autoHeight && (position === "top" || position === "bottom")) {
+      if (element.widthHeightLinked) {
         updatedTransform.autoHeight = false;
+        updatedTransform.autoWidth = false;
+      } else {
+        if (position === "left" || position === "right") {
+          updatedTransform.autoWidth = false;
+        }
+        if (position === "top" || position === "bottom") {
+          updatedTransform.autoHeight = false;
+        }
       }
       updateElement(elementId, updatedTransform);
       setStartMousePos(newStartPos);
     },
     [
-      elementId,
-      startMousePos.x,
-      startMousePos.y,
-      element.autoHeight,
-      element.autoWidth,
+      element.width,
+      element.scale,
       element.height,
       element.x,
       element.y,
-      element.scale,
-      element.width,
-      updateElement,
+      element.widthHeightLinked,
+      startMousePos.x,
+      startMousePos.y,
       zoom,
+      updateElement,
+      elementId,
     ],
   );
 
@@ -961,7 +1031,7 @@ function DraggingIndecator({ elementId }: { elementId: string }) {
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
-        X: {element.x}, Y: {element.y}
+        X: {element.x.toFixed(2)}, Y: {element.y.toFixed(2)}
       </div>
     </div>
   );
@@ -994,7 +1064,7 @@ function ResizeIndecator({ elementId }: { elementId: string }) {
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
-        {element.width} x {element.height}
+        {element.width.toFixed(2)} x {element.height.toFixed(2)}
       </div>
     </div>
   );
@@ -1028,7 +1098,7 @@ function RotatingIndecator({ elementId }: { elementId: string }) {
       className="pointer-events-none absolute z-20"
     >
       <div className="absolute -top-8 left-0 z-20 flex h-6 w-fit items-center justify-center whitespace-pre rounded-md border bg-background p-2 text-xs font-medium text-muted-foreground shadow-sm">
-        {element.rotation}deg
+        {element.rotation.toFixed(2)}deg
       </div>
     </div>
   );
