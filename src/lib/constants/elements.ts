@@ -11,6 +11,9 @@ export interface GetElementArgs {
   name?: string;
   width?: number;
   height?: number;
+  autoHeight?: boolean;
+  autoWidth?: boolean;
+  widthHeightLinked?: boolean;
   x?: number;
   y?: number;
 }
@@ -28,6 +31,9 @@ export const getCodeEditorElement = ({
   theme = DEFAULT_THEME,
   x = 0,
   y = 0,
+  autoHeight = true,
+  autoWidth = false,
+  widthHeightLinked = false,
 }: GetCodeEditorElementProps): iCodeEditorElement => ({
   version: CURRENT_CODE_EDITOR_ELEMENT_VERSION,
   type: "code-editor",
@@ -38,9 +44,9 @@ export const getCodeEditorElement = ({
   x,
   y,
   theme,
-  autoWidth: false,
-  autoHeight: true,
-  widthHeightLinked: false,
+  autoWidth,
+  autoHeight,
+  widthHeightLinked,
   rotation: 0,
   scale: 1,
   fontSize: 16,
@@ -86,6 +92,9 @@ export const getTextElement = ({
   text: value = "<p>Text</p>",
   x = 0,
   y = 0,
+  autoHeight = true,
+  autoWidth = true,
+  widthHeightLinked = false,
 }: GetTextElementProps): iTextElement => ({
   version: CURRENT_TEXT_ELEMENT_VERSION,
   type: "text",
@@ -96,14 +105,14 @@ export const getTextElement = ({
   y,
   height,
   width,
+  autoHeight,
+  autoWidth,
+  widthHeightLinked,
   foregrounnd: "#000000",
   background: { color: { type: "solid", color: "#FFFFFF" } },
   fontWeight: "900",
   lineHeight: 1,
   fontSize: 24,
-  autoHeight: true,
-  autoWidth: true,
-  widthHeightLinked: false,
   rotation: 0,
   scale: 1,
   fontFamily: "Inter",
@@ -136,6 +145,9 @@ export const getImageElement = ({
   name = "Image",
   x = 0,
   y = 0,
+  autoHeight = false,
+  autoWidth = false,
+  widthHeightLinked = false,
 }: GetImageElementProps): iImageElement => ({
   version: CURRENT_IMGAE_ELEMENT_VERSION,
   type: "image",
@@ -145,9 +157,9 @@ export const getImageElement = ({
   y,
   height,
   width,
-  autoHeight: false,
-  autoWidth: false,
-  widthHeightLinked: false,
+  autoHeight,
+  autoWidth,
+  widthHeightLinked,
   rotation: 0,
   scale: 1,
   hidden: false,

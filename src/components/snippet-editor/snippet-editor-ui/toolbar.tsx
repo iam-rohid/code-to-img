@@ -135,6 +135,7 @@ export default function Toolbar() {
               name: image.name ? `${image.name} - Image` : "Image",
               height,
               width,
+              widthHeightLinked: true,
               ...getCenterXYForElement({
                 canvasHeight,
                 canvasWidth,
