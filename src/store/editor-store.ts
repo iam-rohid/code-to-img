@@ -7,6 +7,7 @@ export interface ElementState {
   dragging?: boolean;
   resizing?: boolean;
   rotating?: boolean;
+  editing?: boolean;
 }
 
 export interface SnippetEditorState {

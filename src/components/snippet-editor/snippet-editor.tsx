@@ -90,9 +90,9 @@ export default function SnippetEditor({
   defaultValue,
   snippetId,
 }: SnippetEditorProps) {
-  const storeRef = useRef<SnippetStore>();
-  if (!storeRef.current) {
-    storeRef.current = createSnippetStore(defaultValue);
+  const snippetStoreRef = useRef<SnippetStore>();
+  if (!snippetStoreRef.current) {
+    snippetStoreRef.current = createSnippetStore(defaultValue);
   }
   const editorStoreRef = useRef<SnippetEditorStore>();
   if (!editorStoreRef.current) {
@@ -138,11 +138,11 @@ export default function SnippetEditor({
     if (readOnly) {
       return;
     }
-    if (!storeRef.current) {
+    if (!snippetStoreRef.current) {
       return;
     }
 
-    const unsub = storeRef.current.subscribe((state, prevState) => {
+    const unsub = snippetStoreRef.current.subscribe((state, prevState) => {
       if (JSON.stringify(state) !== JSON.stringify(prevState)) {
         onChnage?.(JSON.parse(JSON.stringify(state)));
       }
@@ -185,11 +185,99 @@ export default function SnippetEditor({
     };
   }, [onChnage, readOnly, snippetId]);
 
+  useEffect(() => {
+    if (readOnly) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editorStoreRef.current || !snippetStoreRef.current) {
+        return;
+      }
+
+      const editorStore = editorStoreRef.current.getState();
+      const snippetStore = snippetStoreRef.current.getState();
+
+      const element = editorStore.selectedElementId
+        ? snippetStore.elements.find(
+            (element) => element.id === editorStore.selectedElementId,
+          )
+        : null;
+      if (e.metaKey && e.code === "Equal") {
+        e.preventDefault();
+        editorStore.setZoom(Math.min(editorStore.zoom + 0.1, 30));
+      }
+      if (e.metaKey && e.code === "Minus") {
+        e.preventDefault();
+        editorStore.setZoom(Math.max(editorStore.zoom - 0.1, 0.1));
+      }
+      if (element) {
+        const elementState = editorStore.elementState[element.id];
+        if (elementState?.editing) {
+          return;
+        }
+
+        if (e.code === "Backspace") {
+          e.preventDefault();
+          snippetStore.removeElement(element.id);
+          return;
+        }
+        if (e.code === "ArrowUp") {
+          e.preventDefault();
+          const incrementBy = e.shiftKey ? 10 : 1;
+          snippetStore.updateElement(element.id, {
+            y: element.y - incrementBy,
+          });
+        }
+        if (e.code === "ArrowDown") {
+          e.preventDefault();
+          const incrementBy = e.shiftKey ? 10 : 1;
+          snippetStore.updateElement(element.id, {
+            y: element.y + incrementBy,
+          });
+        }
+        if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          const incrementBy = e.shiftKey ? 10 : 1;
+          snippetStore.updateElement(element.id, {
+            x: element.x - incrementBy,
+          });
+        }
+        if (e.code === "ArrowRight") {
+          e.preventDefault();
+          const incrementBy = e.shiftKey ? 10 : 1;
+          snippetStore.updateElement(element.id, {
+            x: element.x + incrementBy,
+          });
+        }
+        if (e.code === "ArrowRight") {
+          e.preventDefault();
+          const incrementBy = e.shiftKey ? 10 : 1;
+          snippetStore.updateElement(element.id, {
+            x: element.x + incrementBy,
+          });
+        }
+        if (e.metaKey && e.code === "KeyD") {
+          e.preventDefault();
+          const duplicatedElement = snippetStore.duplicateElement(element.id);
+          if (duplicatedElement) {
+            editorStore.setSelectedElement(duplicatedElement.id);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [readOnly]);
+
   return (
     <SnippetEditorContext.Provider
       value={{
         size: { width, height },
-        snippetStore: storeRef.current,
+        snippetStore: snippetStoreRef.current,
         editorStore: editorStoreRef.current,
         readOnly,
       }}

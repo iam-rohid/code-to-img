@@ -405,7 +405,14 @@ function LayersPanel() {
                     </ContextMenuTrigger>
                     <ContextMenuContent>
                       <ContextMenuItem
-                        onClick={() => duplicateElement(element.id)}
+                        onClick={() => {
+                          const duplicatedElement = duplicateElement(
+                            element.id,
+                          );
+                          if (duplicatedElement) {
+                            setSelectedElement(duplicatedElement.id);
+                          }
+                        }}
                       >
                         <CopyIcon />
                         Duplicate

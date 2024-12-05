@@ -15,6 +15,8 @@ export default function TextElement({
   zoom = 1,
   onDragEnd,
   onDragStart,
+  onEditingEnd,
+  onEditingStart,
 }: {
   element: iTextElement;
   onChange?: (element: Partial<iTextElement>) => void;
@@ -22,6 +24,8 @@ export default function TextElement({
   zoom?: number;
   onDragStart?: () => void;
   onDragEnd?: () => void;
+  onEditingStart?: () => void;
+  onEditingEnd?: () => void;
 }) {
   const [value, setValue] = useState(element.value);
   const [editing, setEditing] = useState(false);
@@ -37,6 +41,7 @@ export default function TextElement({
         return;
       }
       setEditing(true);
+      onEditingStart?.();
     },
     onDragEnd,
     onDragStart,
@@ -71,7 +76,10 @@ export default function TextElement({
               onChange?.({ value });
             }, 200);
           }}
-          onBlur={() => setEditing(false)}
+          onBlur={() => {
+            onEditingEnd?.();
+            setEditing(false);
+          }}
         />
       ) : (
         <div

@@ -38,6 +38,8 @@ export default function CodeEditorElement({
   onDragEnd,
   onDragStart,
   zoom = 1,
+  onEditingEnd,
+  onEditingStart,
 }: {
   element: iCodeEditorElement;
   readOnly?: boolean;
@@ -46,6 +48,8 @@ export default function CodeEditorElement({
   zoom?: number;
   onDragStart?: () => void;
   onDragEnd?: () => void;
+  onEditingStart?: () => void;
+  onEditingEnd?: () => void;
 }) {
   const [selectedTabId, setSelectedTabId] = useState(() => element.tabs[0].id);
   const { onMouseDown } = useDragElement({
@@ -195,6 +199,8 @@ export default function CodeEditorElement({
                 ),
               })
             }
+            onFocus={onEditingStart}
+            onBlur={onEditingEnd}
             readOnly={readOnly}
           />
         </div>
@@ -220,6 +226,8 @@ function TabContent({
   theme,
   onCodeChange,
   readOnly,
+  onBlur,
+  onFocus,
 }: {
   tab: CodeEditorTab;
   extensions?: Extension[];
@@ -227,6 +235,8 @@ function TabContent({
   onCodeChange?: (value: string) => void;
   readOnly?: boolean;
   element: iCodeEditorElement;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const [code, setCode] = useState(tab.code);
   const extensions = useMemo(() => {
@@ -261,6 +271,8 @@ function TabContent({
           onCodeChange?.(value);
         }, 200);
       }}
+      onFocus={onFocus}
+      onBlur={onBlur}
       readOnly={readOnly}
       basicSetup={{
         highlightActiveLine: false,

@@ -140,6 +140,12 @@ export default function Element({ elementId }: { elementId: string }) {
           zoom={zoom}
           onDragStart={() => updateElementState(element.id, { dragging: true })}
           onDragEnd={() => updateElementState(element.id, { dragging: false })}
+          onEditingStart={() =>
+            updateElementState(element.id, { editing: true })
+          }
+          onEditingEnd={() =>
+            updateElementState(element.id, { editing: false })
+          }
         />
       ) : element.type === "text" ? (
         <TextElement
@@ -152,6 +158,12 @@ export default function Element({ elementId }: { elementId: string }) {
           zoom={zoom}
           onDragStart={() => updateElementState(element.id, { dragging: true })}
           onDragEnd={() => updateElementState(element.id, { dragging: false })}
+          onEditingStart={() =>
+            updateElementState(element.id, { editing: true })
+          }
+          onEditingEnd={() =>
+            updateElementState(element.id, { editing: false })
+          }
         />
       ) : element.type === "image" ? (
         <ImageElement
