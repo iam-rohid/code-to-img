@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AuthProvider from "@/providers/auth-provider";
+import { CSPostHogProvider } from "@/providers/posthog-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TRPCProvider } from "@/trpc/client";
 
@@ -44,19 +45,21 @@ export default async function RootLayout({
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <TRPCProvider>
-              <AuthProvider>{children}</AuthProvider>
-            </TRPCProvider>
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>
+        <CSPostHogProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              <TRPCProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </TRPCProvider>
+              <Toaster />
+            </TooltipProvider>
+          </ThemeProvider>
+        </CSPostHogProvider>
       </body>
     </html>
   );

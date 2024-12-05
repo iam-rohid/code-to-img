@@ -1,7 +1,14 @@
 "use client";
 
-import { createContext, ReactNode, useCallback, useContext } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+} from "react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 import { signOut } from "@/auth/actions";
 import { SessionValidationResult } from "@/auth/utils";
@@ -42,10 +49,19 @@ export default function AuthProvider({
 
   const router = useRouter();
   const handleSignOut = useCallback(async () => {
+    posthog.reset();
     await signOut();
     localStorage.clear();
     router.refresh();
   }, [router]);
+
+  useEffect(() => {
+    if (sessionQuery.isSuccess && sessionQuery.data) {
+      posthog.identify(sessionQuery.data?.user.id, {
+        email: sessionQuery.data?.user.email,
+      });
+    }
+  }, [sessionQuery.data, sessionQuery.isSuccess]);
 
   return (
     <Context.Provider
