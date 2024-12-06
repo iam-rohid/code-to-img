@@ -203,6 +203,8 @@ export default function SnippetEditor({
             (element) => element.id === editorStore.selectedElementId,
           )
         : null;
+      console.log(e.code);
+      e.preventDefault();
       if (e.metaKey && e.code === "Equal") {
         e.preventDefault();
         editorStore.setZoom(Math.min(editorStore.zoom + 0.1, 30));
@@ -263,6 +265,46 @@ export default function SnippetEditor({
           if (duplicatedElement) {
             editorStore.setSelectedElement(duplicatedElement.id);
           }
+        }
+        if (e.code === "BracketRight") {
+          e.preventDefault();
+          const elementIndex = snippetStore.elements.findIndex(
+            (el) => el.id === element.id,
+          );
+          if (elementIndex <= 0) {
+            return;
+          }
+          let elements = [...snippetStore.elements];
+          if (e.metaKey) {
+            elements[elementIndex] = elements[elementIndex - 1];
+            elements[elementIndex - 1] = element;
+          } else {
+            elements = [
+              element,
+              ...elements.filter((el) => el.id !== element.id),
+            ];
+          }
+          snippetStore.updateSnippet({ elements });
+        }
+        if (e.code === "BracketLeft") {
+          e.preventDefault();
+          const elementIndex = snippetStore.elements.findIndex(
+            (el) => el.id === element.id,
+          );
+          if (elementIndex >= snippetStore.elements.length - 1) {
+            return;
+          }
+          let elements = [...snippetStore.elements];
+          if (e.metaKey) {
+            elements[elementIndex] = elements[elementIndex + 1];
+            elements[elementIndex + 1] = element;
+          } else {
+            elements = [
+              ...elements.filter((el) => el.id !== element.id),
+              element,
+            ];
+          }
+          snippetStore.updateSnippet({ elements });
         }
       }
     };
