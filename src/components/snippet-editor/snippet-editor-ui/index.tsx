@@ -336,7 +336,10 @@ export default function SnippetEditorUI() {
       </div>
 
       {snippetDataForExportImage && (
-        <ExportImageModal snippetData={snippetDataForExportImage} />
+        <ExportImageModal
+          snippetData={snippetDataForExportImage}
+          name={snippet?.title}
+        />
       )}
     </div>
   );
