@@ -441,34 +441,53 @@ function TabItem({
     >
       {selected && (
         <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 h-1"
+          className="pointer-events-none absolute -bottom-1 left-0 right-0 h-2"
           style={{
             backgroundColor: theme.settings.background,
           }}
         >
           <div
             style={{
-              background: secondaryBackground.toString(),
-              height: "1em",
-              width: "1em",
+              background: theme.settings.background,
+              height: "16px",
+              width: "16px",
               position: "absolute",
-              bottom: "0em",
-              right: "-1em",
-              borderRadius: "0 0 0 0.5em",
-              boxShadow: `-0.5em 0 0 0 ${theme.settings.background}`,
+              bottom: "4px",
+              right: "-8px",
+              borderRadius: "0 0 0 8px",
             }}
           ></div>
           <div
             style={{
               background: secondaryBackground.toString(),
-              height: "1em",
-              width: "1em",
+              height: "16px",
+              width: "16px",
               position: "absolute",
-              bottom: "0em",
-              left: "-1em",
-              borderRadius: "0 0 0 0.5em",
-              boxShadow: `-0.5em 0 0 0 ${theme.settings.background}`,
-              transform: "scaleX(-1)",
+              bottom: "4px",
+              right: "-16px",
+              borderRadius: "0 0 0 8px",
+            }}
+          ></div>
+          <div
+            style={{
+              background: theme.settings.background,
+              height: "16px",
+              width: "16px",
+              position: "absolute",
+              bottom: "4px",
+              left: "-8px",
+              borderRadius: "0 0 8px 0",
+            }}
+          ></div>
+          <div
+            style={{
+              background: secondaryBackground.toString(),
+              height: "16px",
+              width: "16px",
+              position: "absolute",
+              bottom: "4px",
+              left: "-16px",
+              borderRadius: "0 0 8px 0",
             }}
           ></div>
         </div>

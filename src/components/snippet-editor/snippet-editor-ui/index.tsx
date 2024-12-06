@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useMemo } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
 import { Reorder } from "framer-motion";
 import {
   AppWindowMacIcon,
@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { useStore } from "zustand";
 
+import { useExportImageModal } from "@/components/modals/export-image-modal";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -52,6 +53,7 @@ import {
 } from "@/components/ui/tooltip";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { cn } from "@/lib/utils";
+import { iSnippetData } from "@/lib/validator/snippet";
 import { useAuth } from "@/providers/auth-provider";
 import { useSnippet } from "@/providers/snippet-provider";
 import { useRenameSnippetModal } from "../../modals/rename-snippet-modal";
@@ -75,6 +77,10 @@ export default function SnippetEditorUI() {
   const sidebarContext = useContext(SidebarContext);
   const snippet = useSnippet();
   const [RenameModal, , setShowRenameModal] = useRenameSnippetModal();
+  const [ExportImageModal, , setExportImageModalOpen] = useExportImageModal();
+
+  const [snippetDataForExportImage, setSnippetDataForExportImage] =
+    useState<iSnippetData | null>(null);
 
   const zoomPercentage = useMemo(() => Math.round(zoom * 100), [zoom]);
 
@@ -91,6 +97,11 @@ export default function SnippetEditorUI() {
   const handleResetZoom = useCallback(() => {
     setZoom(1);
   }, [setZoom]);
+
+  const handleExportImage = useCallback(() => {
+    setSnippetDataForExportImage(snippetStore.getState());
+    setExportImageModalOpen(true);
+  }, [setExportImageModalOpen, snippetStore]);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex flex-col gap-4 p-4">
@@ -143,7 +154,7 @@ export default function SnippetEditorUI() {
                   </DropdownMenuItem>
                 )}
 
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportImage}>
                   <ImagePlusIcon />
                   Export as Image
                 </DropdownMenuItem>
@@ -208,9 +219,9 @@ export default function SnippetEditorUI() {
                 </TooltipContent>
               </Tooltip>
 
-              <Button className="flex-shrink-0">
+              <Button className="flex-shrink-0" onClick={handleExportImage}>
                 <Share />
-                Share
+                Export
               </Button>
             </div>
           )}
@@ -323,6 +334,10 @@ export default function SnippetEditorUI() {
           </div>
         </div>
       </div>
+
+      {snippetDataForExportImage && (
+        <ExportImageModal snippetData={snippetDataForExportImage} />
+      )}
     </div>
   );
 }

@@ -16,9 +16,11 @@ import { getElementWrapperStyle } from "./utils";
 export default function SnippetViewer({
   data,
   className,
+  snippetElementId,
 }: {
   data: iSnippetData;
   className?: string;
+  snippetElementId?: string;
 }) {
   const { ref, height, width } = useElementSize();
 
@@ -33,25 +35,35 @@ export default function SnippetViewer({
     <div ref={ref} className={cn("relative", className)}>
       <div
         style={{
-          width: data.width,
-          height: data.height,
+          position: "absolute",
+          left: "50%",
+          top: "50%",
           transform: `translate(-50%, -50%) scale(${scale})`,
         }}
-        className="absolute left-1/2 top-1/2"
+        className="overflow-hidden"
       >
         <div
-          className="absolute inset-0 z-0"
-          style={
-            data.background.color
-              ? getBackgroundStyle(data.background.color)
-              : {}
-          }
-        ></div>
+          style={{
+            width: data.width,
+            height: data.height,
+          }}
+          id={snippetElementId}
+          className="overflow-hidden"
+        >
+          <div
+            className="absolute inset-0 z-0"
+            style={
+              data.background.color
+                ? getBackgroundStyle(data.background.color)
+                : {}
+            }
+          ></div>
 
-        <div className="pointer-events-none absolute inset-0 z-10">
-          {data.elements.toReversed().map((element) => (
-            <Element key={element.id} element={element} />
-          ))}
+          <div className="pointer-events-none absolute inset-0 z-10">
+            {data.elements.toReversed().map((element) => (
+              <Element key={element.id} element={element} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -203,8 +203,6 @@ export default function SnippetEditor({
             (element) => element.id === editorStore.selectedElementId,
           )
         : null;
-      console.log(e.code);
-      e.preventDefault();
       if (e.metaKey && e.code === "Equal") {
         e.preventDefault();
         editorStore.setZoom(Math.min(editorStore.zoom + 0.1, 30));
