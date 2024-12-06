@@ -1,5 +1,5 @@
-import "prosemirror-view/style/prosemirror.css";
 import "prosemirror-menu/style/menu.css";
+import "prosemirror-view/style/prosemirror.css";
 import "./style.css";
 
 import { useEffect, useRef, useState } from "react";
@@ -8,12 +8,12 @@ import { dropCursor } from "prosemirror-dropcursor";
 import { buildInputRules, buildKeymap } from "prosemirror-example-setup";
 import { gapCursor } from "prosemirror-gapcursor";
 import { keymap } from "prosemirror-keymap";
-import { menuBar } from "prosemirror-menu";
 import { DOMParser as ProseMirrorDOMParser } from "prosemirror-model";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
-import { buildMenuItems } from "./menu";
+// import { buildMenuItems } from "./menu";
+import CustomMenu from "./menu";
 import { schema } from "./schema";
 
 interface ProseMirrorEditorProps {
@@ -29,8 +29,13 @@ export default function ProseMirrorEditor({
   defaultValue,
   onBlur,
 }: ProseMirrorEditorProps) {
+  const [editorState, setEditorState] = useState<EditorState | undefined>(
+    undefined,
+  );
+  const [editorView, setEditorView] = useState<EditorView | undefined>(
+    undefined,
+  );
   const editorRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
   const [docValue, setDocValue] = useState(value || defaultValue || "");
 
   useEffect(() => {
@@ -54,23 +59,24 @@ export default function ProseMirrorEditor({
         keymap(baseKeymap),
         dropCursor(),
         gapCursor(),
-        menuBar({
-          floating: true,
-          content: buildMenuItems(schema).fullMenu,
-        }),
       ],
     });
 
-    viewRef.current = new EditorView(editorRef.current, {
+    const view = new EditorView(editorRef.current, {
       state: editorState,
       dispatchTransaction(transaction) {
-        const newState = viewRef.current!.state.apply(transaction);
-        viewRef.current!.updateState(newState);
+        try {
+          const newState = view.state.apply(transaction);
+          view.updateState(newState);
+          setEditorState(newState);
 
-        if (transaction.docChanged) {
-          const newHTML = viewRef.current!.dom.innerHTML;
-          setDocValue(newHTML);
-          onChange?.(newHTML);
+          if (transaction.docChanged) {
+            const newHTML = view.dom.innerHTML;
+            setDocValue(newHTML);
+            onChange?.(newHTML);
+          }
+        } catch (error) {
+          console.log(error);
         }
       },
       handleDOMEvents: {
@@ -81,36 +87,44 @@ export default function ProseMirrorEditor({
       },
     });
 
-    const state = viewRef.current.state;
+    const state = view.state;
     const transaction = state.tr.setSelection(
       TextSelection.create(state.doc, 0, state.doc.content.size),
     );
-    viewRef.current.dispatch(transaction);
-    viewRef.current.focus();
+    view.dispatch(transaction);
+    view.focus();
+
+    setEditorView(view);
 
     return () => {
-      if (viewRef.current) {
-        viewRef.current.destroy();
-        viewRef.current = null;
-      }
+      view.destroy();
+      setEditorView(undefined);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    if (!editorView) {
+      return;
+    }
     if (value && value !== docValue) {
       const newDoc = ProseMirrorDOMParser.fromSchema(schema).parse(
         new DOMParser().parseFromString(value, "text/html"),
       );
-      const transaction = viewRef.current!.state.tr.replaceWith(
+      const transaction = editorView.state.tr.replaceWith(
         0,
-        viewRef.current!.state.doc.content.size,
+        editorView.state.doc.content.size,
         newDoc.content,
       );
 
-      viewRef.current!.dispatch(transaction);
+      editorView.dispatch(transaction);
     }
-  }, [docValue, value]);
+  }, [docValue, editorView, value]);
 
-  return <div ref={editorRef} className="h-full w-full" />;
+  return (
+    <>
+      <div ref={editorRef} className="h-full w-full outline-none" />
+      <CustomMenu editorState={editorState} editorView={editorView} />
+    </>
+  );
 }

@@ -167,6 +167,9 @@ importers:
       next-themes:
         specifier: ^0.4.3
         version: 0.4.3(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
+      orderedmap:
+        specifier: ^2.1.1
+        version: 2.1.1
       posthog-js:
         specifier: ^1.194.3
         version: 1.194.3
