@@ -20,6 +20,15 @@ export default function Element({ elementId }: { elementId: string }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const zoom = useStore(editorStore, (state) => state.zoom);
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
+  const selectedElementId = useStore(
+    editorStore,
+    (state) => state.selectedElementId,
+  );
+  const tipTapEditors = useStore(editorStore, (state) => state.tipTapEditors);
+  const setTipTapEditor = useStore(
+    editorStore,
+    (state) => state.setTipTapEditor,
+  );
   const updateElementState = useStore(
     editorStore,
     (state) => state.updateElementState,
@@ -164,6 +173,17 @@ export default function Element({ elementId }: { elementId: string }) {
           onEditingEnd={() =>
             updateElementState(element.id, { editing: false })
           }
+          isSelected={selectedElementId === element.id}
+          editor={tipTapEditors[element.id]}
+          onTransaction={({ editor }) => {
+            setTipTapEditor(element.id, editor);
+          }}
+          onUpdate={({ editor, transaction }) => {
+            if (transaction.docChanged) {
+              const content = editor.getJSON();
+              updateElement(element.id, { content });
+            }
+          }}
         />
       ) : element.type === "image" ? (
         <ImageElement

@@ -80,7 +80,7 @@ export const getCodeEditorElement = ({
 });
 
 export interface GetTextElementProps extends GetElementArgs {
-  text?: string;
+  content?: Record<string, unknown>;
 }
 const CURRENT_TEXT_ELEMENT_VERSION = "0.1.0";
 
@@ -89,7 +89,32 @@ export const getTextElement = ({
   width = 72,
   height = 44,
   name = "Text",
-  text: value = "<p>Text</p>",
+  content = {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        attrs: {
+          textAlign: "left",
+        },
+        content: [
+          {
+            type: "text",
+            marks: [
+              {
+                type: "textStyle",
+                attrs: {
+                  color: "rgb(0, 0, 0)",
+                  fontSize: 16,
+                },
+              },
+            ],
+            text: "Text",
+          },
+        ],
+      },
+    ],
+  },
   x = 0,
   y = 0,
   autoHeight = true,
@@ -100,7 +125,7 @@ export const getTextElement = ({
   type: "text",
   id,
   name,
-  value,
+  content,
   x,
   y,
   height,
@@ -108,7 +133,6 @@ export const getTextElement = ({
   autoHeight,
   autoWidth,
   widthHeightLinked,
-  foregrounnd: "#000000",
   background: { color: { type: "solid", color: "#FFFFFF" } },
   fontWeight: "900",
   lineHeight: 1,

@@ -24,6 +24,7 @@ import {
   getImageElement,
   getTextElement,
 } from "@/lib/constants/elements";
+import { getEditor } from "@/lib/tiptap";
 import { getCenterXYForElement } from "@/lib/utils";
 import { iElement } from "@/lib/validator/elements";
 import { useImagePickerModal } from "../image-picker-modal";
@@ -36,6 +37,10 @@ export default function Toolbar() {
     editorStore,
     (state) => state.setSelectedElement,
   );
+  const setTipTapEditor = useStore(
+    editorStore,
+    (state) => state.setTipTapEditor,
+  );
   const canvasWidth = useStore(snippetStore, (state) => state.width);
   const canvasHeight = useStore(snippetStore, (state) => state.height);
   const [ImagePickerModal, , setImagePickerModalOpen] = useImagePickerModal();
@@ -44,8 +49,11 @@ export default function Toolbar() {
     (element: iElement) => {
       addElement(element);
       setSelectedElement(element.id);
+      if (element.type === "text") {
+        setTipTapEditor(element.id, getEditor(element));
+      }
     },
-    [addElement, setSelectedElement],
+    [addElement, setSelectedElement, setTipTapEditor],
   );
 
   return (

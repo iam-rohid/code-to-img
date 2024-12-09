@@ -18,6 +18,7 @@ export function InspectorNumberInput({
   min,
   id,
   disabled,
+  className,
 }: {
   id?: string;
   value: number;
@@ -26,6 +27,7 @@ export function InspectorNumberInput({
   min?: number;
   max?: number;
   disabled?: boolean;
+  className?: string;
 }) {
   const [text, setText] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
@@ -75,7 +77,7 @@ export function InspectorNumberInput({
   const handleMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {
       const currentX = e.clientX;
-      let newValue = Math.floor(value + (currentX - startX));
+      let newValue = Math.floor((value ?? 0) + (currentX - startX));
       newValue = clampValue(newValue);
       onValueChange?.(newValue);
       setText(String(newValue));
@@ -130,7 +132,7 @@ export function InspectorNumberInput({
           handleCommitValue();
           setIsFocused(false);
         }}
-        className="pl-10"
+        className={cn("pl-10", className)}
         disabled={disabled}
       />
       <div

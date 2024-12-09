@@ -1,3 +1,4 @@
+import { Editor as TipTapEditor } from "@tiptap/core";
 import { create } from "zustand";
 
 import { SnippetState } from "./snippet-store";
@@ -15,6 +16,7 @@ export interface SnippetEditorState {
   historyIndex: number;
   elementState: Record<string, ElementState>;
   selectedElementId: string | null;
+  tipTapEditors: Record<string, TipTapEditor>;
   zoom: number;
   scrollX: number;
   scrollY: number;
@@ -29,6 +31,7 @@ export interface SnippetEditorActions {
   setScrollX: (scrollY: number) => void;
   setLayersOpen: (open: boolean) => void;
   setSelectedElement: (elemenntId: string | null) => void;
+  setTipTapEditor: (elemenntId: string, editor: TipTapEditor) => void;
   handleTabSelect: (elementId: string, tabId: string) => void;
   updateElementState: (elemenntId: string, data: Partial<ElementState>) => void;
   commitHistory: (state: SnippetState) => void;
@@ -49,6 +52,7 @@ export const createSnippetEditorStore = (
     selectedElementId: null,
     layersOpen: false,
     selectedTabIds: {},
+    tipTapEditors: {},
     ...initState,
     setLayersOpen: (layersOpen) => set({ layersOpen }),
     setZoom: (zoom) => set({ zoom }),
@@ -67,6 +71,12 @@ export const createSnippetEditorStore = (
       });
     },
     setSelectedElement: (elementId) => set({ selectedElementId: elementId }),
+    setTipTapEditor: (elementId: string, editor) =>
+      set((state) => {
+        const tipTapEditors = { ...state.tipTapEditors };
+        tipTapEditors[elementId] = editor;
+        return { tipTapEditors };
+      }),
     commitHistory: (snippetState) => {
       set((state) => ({
         history: [...state.history.slice(0, state.historyIndex), snippetState],

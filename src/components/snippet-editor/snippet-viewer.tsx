@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import useElementSize from "@/hooks/use-element-size";
+import { getEditor } from "@/lib/tiptap";
 import { cn } from "@/lib/utils";
 import { getBackgroundStyle } from "@/lib/utils/editor";
 import { iElement } from "@/lib/validator/elements";
@@ -76,7 +77,7 @@ function Element({ element }: { element: iElement }) {
       {element.type === "code-editor" ? (
         <CodeEditorElement element={element} readOnly />
       ) : element.type === "text" ? (
-        <TextElement element={element} readOnly />
+        <TextElement element={element} readOnly editor={getEditor(element)} />
       ) : element.type === "image" ? (
         <ImageElement element={element} readOnly />
       ) : null}

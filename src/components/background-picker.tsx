@@ -1,9 +1,10 @@
 "use client";
 
-import { Fragment, useCallback, useMemo } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import { ColorPicker } from "react-aria-components";
 
+import { cn } from "@/lib/utils";
 import { iColor, iGradientColor } from "@/lib/validator/color";
 
 import {
@@ -68,15 +69,18 @@ export default function BackgroundPicker({
 export function SolidColorPicker({
   color,
   onColorChange,
+  className,
 }: {
   color: string;
   onColorChange?: (color: string) => void;
+  className?: string;
 }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          className="w-full transition-none"
+          className={cn("w-full transition-none", className)}
           variant="outline"
           style={{
             backgroundColor: color,

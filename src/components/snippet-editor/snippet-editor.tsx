@@ -9,10 +9,12 @@ import {
   useRef,
   WheelEvent,
 } from "react";
+import { Editor } from "@tiptap/core";
 import { z } from "zod";
 import { useStore } from "zustand";
 
 import useElementSize from "@/hooks/use-element-size";
+import { getEditor } from "@/lib/tiptap";
 import { cn } from "@/lib/utils";
 import { iSnippetData } from "@/lib/validator/snippet";
 import {
@@ -104,8 +106,15 @@ export default function SnippetEditor({
     if (snippetId) {
       scrollPosition = getScrollPosition(snippetId);
     }
+    const tipTapEditors: Record<string, Editor> = {};
+    defaultValue.elements.forEach((element) => {
+      if (element.type === "text") {
+        tipTapEditors[element.id] = getEditor(element);
+      }
+    });
     editorStoreRef.current = createSnippetEditorStore({
       ...scrollPosition,
+      tipTapEditors,
     });
   }
 
@@ -163,7 +172,11 @@ export default function SnippetEditor({
     let timeout: NodeJS.Timeout | null = null;
 
     const unsub = editorStoreRef.current.subscribe((state, prevState) => {
-      if (JSON.stringify(state) !== JSON.stringify(prevState)) {
+      if (
+        state.scrollX !== prevState.scrollX ||
+        state.scrollY !== prevState.scrollY ||
+        state.zoom !== prevState.zoom
+      ) {
         if (timeout) {
           clearTimeout(timeout);
         }

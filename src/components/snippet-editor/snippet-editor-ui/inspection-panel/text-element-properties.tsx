@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   AlignCenter,
   AlignLeft,
@@ -41,8 +42,17 @@ const verticalAlignmentOptions = [
 ];
 
 export function TextElementProperties({ element }: { element: iTextElement }) {
-  const { snippetStore } = useSnippetEditor();
+  const { editorStore, snippetStore } = useSnippetEditor();
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
+  const tipTapEditors = useStore(editorStore, (state) => state.tipTapEditors);
+  const editor = useMemo(
+    () => tipTapEditors[element.id],
+    [element.id, tipTapEditors],
+  );
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div>
@@ -74,28 +84,25 @@ export function TextElementProperties({ element }: { element: iTextElement }) {
           }
         />
       </div>
+
       <div className="p-2">
         <p className="mb-2 text-xs text-muted-foreground">Foreground</p>
         <SolidColorPicker
-          color={element.foregrounnd}
-          onColorChange={(color) =>
-            updateElement(element.id, {
-              foregrounnd: color,
-            })
-          }
+          color={editor.getAttributes("textStyle").color}
+          onColorChange={(color) => {
+            editor.chain().setColor(color).run();
+          }}
         />
       </div>
 
       <NumberField
         icon={<>FS</>}
         label="Font Size"
-        value={element.fontSize}
+        value={editor.getAttributes("textStyle").fontSize}
         min={12}
         max={128}
         onValueChange={(fontSize) => {
-          updateElement(element.id, {
-            fontSize,
-          });
+          editor.chain().setFontSize(fontSize).run();
         }}
       />
 

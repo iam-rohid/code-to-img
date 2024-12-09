@@ -1,12 +1,14 @@
-import "prosemirror-view/style/prosemirror.css";
+import "./style.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { Editor, EditorContent, EditorEvents } from "@tiptap/react";
 
-import ProseMirrorEditor from "@/components/prosemirror-editor";
 import { cn } from "@/lib/utils";
 import { getBackgroundStyle, getPaddingStyle } from "@/lib/utils/editor";
 import { iTextElement } from "@/lib/validator/elements";
 import { useDragElement } from "../../use-drag-element";
+
+import Menu from "./menu";
 
 export default function TextElement({
   element,
@@ -17,6 +19,10 @@ export default function TextElement({
   onDragStart,
   onEditingEnd,
   onEditingStart,
+  isSelected,
+  editor,
+  onTransaction,
+  onUpdate,
 }: {
   element: iTextElement;
   onChange?: (element: Partial<iTextElement>) => void;
@@ -26,10 +32,12 @@ export default function TextElement({
   onDragEnd?: () => void;
   onEditingStart?: () => void;
   onEditingEnd?: () => void;
+  editor: Editor;
+  isSelected?: boolean;
+  onTransaction?: (props: EditorEvents["transaction"]) => void;
+  onUpdate?: (props: EditorEvents["update"]) => void;
 }) {
-  const [value, setValue] = useState(element.value);
-  const [editing, setEditing] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [editable, setEditing] = useState(false);
   const { onMouseDown } = useDragElement({
     x: element.x,
     y: element.y,
@@ -42,18 +50,46 @@ export default function TextElement({
       }
       setEditing(true);
       onEditingStart?.();
+      editor?.commands.focus("all");
     },
     onDragEnd,
     onDragStart,
   });
 
   useEffect(() => {
-    setValue(element.value);
-  }, [element.value]);
+    if (!isSelected && editable) {
+      editor.chain().selectAll().blur().run();
+      setEditing(false);
+      onEditingEnd?.();
+    }
+  }, [editable, editor, isSelected, onEditingEnd]);
+
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(editable);
+    }
+  }, [editable, editor]);
+
+  useEffect(() => {
+    if (onTransaction) {
+      editor.on("transaction", onTransaction);
+    }
+    if (onUpdate) {
+      editor.on("update", onUpdate);
+    }
+    return () => {
+      if (onTransaction) {
+        editor.off("transaction", onTransaction);
+      }
+      if (onUpdate) {
+        editor.off("update", onUpdate);
+      }
+    };
+  }, [editor, onTransaction, onUpdate]);
 
   return (
     <div
-      className={cn("flex h-full w-full overflow-hidden", {
+      className={cn("relative flex h-full w-full overflow-hidden", {
         "[&_.ProseMirror]:whitespace-pre": element.autoWidth,
       })}
       style={{
@@ -61,32 +97,15 @@ export default function TextElement({
         ...getBackgroundStyle(element.background.color),
         borderRadius: element.borderRadius,
         boxShadow: element.boxShadow,
-        color: element.foregrounnd,
       }}
     >
-      {editing ? (
-        <ProseMirrorEditor
-          value={value}
-          onChange={(value) => {
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-            setValue(value);
-            timeoutRef.current = setTimeout(() => {
-              onChange?.({ value });
-            }, 200);
-          }}
-          onBlur={() => {
-            onEditingEnd?.();
-            setEditing(false);
-          }}
-        />
-      ) : (
-        <div
-          dangerouslySetInnerHTML={{ __html: value }}
-          onMouseDown={onMouseDown}
-          className="ProseMirror select-none"
-        />
+      {editable && <Menu editor={editor} padding={element.padding} />}
+      <EditorContent
+        editor={editor ?? null}
+        className="h-full w-full overflow-hidden [&_.ProseMirror]:h-full [&_.ProseMirror]:w-full [&_.ProseMirror]:outline-none"
+      />
+      {!editable && (
+        <div onMouseDown={onMouseDown} className="absolute inset-0 z-10" />
       )}
     </div>
   );

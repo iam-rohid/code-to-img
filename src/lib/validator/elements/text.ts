@@ -7,14 +7,13 @@ import { alginmentSchema, elementBase, paddingSchema } from "./shared";
 export const textElementSchema = z
   .object({
     type: z.literal("text"),
-    value: z.string().optional().default("<p>Text</p>"),
+    content: z.record(z.any()),
     fontSize: z.number().min(0).optional().default(16),
     lineHeight: z.number().min(0).default(24),
     borderRadius: z.number().min(0).default(12),
     letterSpacing: z.number().optional().default(1),
     fontFamily: z.string().optional().default("Inter"),
     fontWeight: z.string().optional().default("400"),
-    foregrounnd: z.string().optional().default("#000000"),
     background: backgroundSchema
       .optional()
       .default({ color: { type: "solid", color: "#FFFFFF" } }),
