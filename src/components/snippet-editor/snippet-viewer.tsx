@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { getBackgroundStyle } from "@/lib/utils/editor";
 import { iElement } from "@/lib/validator/elements";
 import { iSnippetData } from "@/lib/validator/snippet";
+import { ContextMenu } from "../ui/context-menu";
 
 import CodeEditorElement from "./elements/code-editor";
 import ImageElement from "./elements/image";
@@ -73,14 +74,16 @@ export default function SnippetViewer({
 
 function Element({ element }: { element: iElement }) {
   return (
-    <div style={getElementWrapperStyle(element)}>
-      {element.type === "code-editor" ? (
-        <CodeEditorElement element={element} readOnly />
-      ) : element.type === "text" ? (
-        <TextElement element={element} readOnly editor={getEditor(element)} />
-      ) : element.type === "image" ? (
-        <ImageElement element={element} readOnly />
-      ) : null}
-    </div>
+    <ContextMenu>
+      <div style={getElementWrapperStyle(element)}>
+        {element.type === "code-editor" ? (
+          <CodeEditorElement element={element} readOnly />
+        ) : element.type === "text" ? (
+          <TextElement element={element} readOnly editor={getEditor(element)} />
+        ) : element.type === "image" ? (
+          <ImageElement element={element} readOnly />
+        ) : null}
+      </div>
+    </ContextMenu>
   );
 }

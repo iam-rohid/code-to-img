@@ -6,7 +6,7 @@ import {
   AlignVerticalJustifyCenterIcon,
   AlignVerticalJustifyEndIcon,
   AlignVerticalJustifyStartIcon,
-  CopyIcon,
+  CopyPlusIcon,
   Link2Icon,
   MoveHorizontalIcon,
   MoveIcon,
@@ -461,7 +461,7 @@ function ElementActions({ element }: { element: iElement }) {
                 }
               }}
             >
-              <CopyIcon />
+              <CopyPlusIcon />
               <span className="sr-only">Duplicate</span>
             </Button>
           </TooltipTrigger>
