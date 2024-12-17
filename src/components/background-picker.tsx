@@ -4,6 +4,7 @@ import { Fragment, useCallback, useMemo, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import { ColorPicker } from "react-aria-components";
 
+import { COLORS, GRADIENTS } from "@/lib/constants/colors";
 import { cn } from "@/lib/utils";
 import { iColor, iGradientColor } from "@/lib/validator/color";
 
@@ -108,7 +109,7 @@ export function SolidPicker({
 }) {
   return (
     <ColorPicker
-      defaultValue={color}
+      value={color}
       onChange={(color) => {
         onColorChange?.(color.toFormat("rgba").toString());
       }}
@@ -126,6 +127,19 @@ export function SolidPicker({
           <MyColorSwatch />
           <MyColorField colorSpace="hsb" className="flex-1" />
           <MyEyeDroper />
+        </div>
+
+        <div className="mt-4 grid grid-cols-6 gap-2">
+          {COLORS.map((color) => (
+            <Button
+              style={{
+                background: color.color,
+              }}
+              className="aspect-square h-fit rounded-lg border p-0"
+              key={color.color}
+              onClick={() => onColorChange?.(color.color)}
+            />
+          ))}
         </div>
       </div>
     </ColorPicker>
@@ -236,6 +250,20 @@ export function GradientPicker({
           max={360}
           step={1}
         />
+      </div>
+
+      <div className="mt-4 grid grid-cols-5 gap-2">
+        {GRADIENTS.map((gradient) => (
+          <Button
+            style={{
+              background: `linear-gradient(${gradient.angle}deg, ${gradient.colors.join(", ")}),
+              repeating-conic-gradient(#CCC 0% 25%, white 0% 50%) 50% / 16px 16px`,
+            }}
+            className="aspect-square h-fit rounded-lg border p-0"
+            key={`${gradient.angle}-${gradient.colors.join("-")}`}
+            onClick={() => onColorChange?.(gradient)}
+          />
+        ))}
       </div>
     </div>
   );

@@ -134,26 +134,19 @@ export const getTextElement = ({
   autoWidth,
   widthHeightLinked,
   background: { color: { type: "solid", color: "#FFFFFF" } },
-  fontWeight: "900",
-  lineHeight: 1,
-  fontSize: 24,
   rotation: 0,
   scale: 1,
-  fontFamily: "Inter",
   padding: {
     bottom: 8,
     left: 8,
     right: 8,
     top: 8,
   },
-  horizontalAlignment: "center",
   verticalAlignment: "center",
-  letterSpacing: 1,
   hidden: false,
   locked: false,
   borderRadius: 10,
   boxShadow: "none",
-  textShadow: false,
 });
 
 export interface GetImageElementProps extends GetElementArgs {
