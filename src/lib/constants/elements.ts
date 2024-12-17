@@ -57,7 +57,7 @@ export const getCodeEditorElement = ({
   lineHeight: 24,
   showLineNumbers: true,
   padding: {
-    top: 0,
+    top: 12,
     left: 12,
     right: 12,
     bottom: 12,
@@ -73,7 +73,7 @@ export const getCodeEditorElement = ({
   tabs: [
     {
       id: nanoid(),
-      name: "Tab 01",
+      name: "index.js",
       code: 'console.log("Hello, World")',
       language: "javascript",
     },

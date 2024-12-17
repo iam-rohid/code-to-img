@@ -1,6 +1,7 @@
 import { getCenterXYForElement } from "../utils";
 import { iSnippetData } from "../validator/snippet";
 
+import { GRADIENTS } from "./colors";
 import { getCodeEditorElement } from "./elements";
 import { CURRENT_SNIPPET_VERSION } from "./snippet";
 
@@ -19,11 +20,10 @@ export const BLANK_SNIPPET_TEMPLATE: Template = {
     height: 400,
     widthHeightLinked: false,
     background: {
-      color: {
-        type: "gradient",
-        colors: ["#FBDA61", "#FF5ACD"],
-        angle: 45,
-      },
+      color: GRADIENTS[2],
+      image:
+        "/images/wallpapers/codioful-formerly-gradienta-aAcAeRyhDX0-unsplash.jpg",
+      imageFill: "cover",
     },
     elements: [],
   },
@@ -38,11 +38,10 @@ export const DEFAULT_SNIPPET_TEMPLATE: Template = {
     height: 400,
     widthHeightLinked: false,
     background: {
-      color: {
-        type: "gradient",
-        colors: ["#4158D0", "#C850C0", "#FFCC70"],
-        angle: 43,
-      },
+      color: GRADIENTS[8],
+      image:
+        "/images/wallpapers/codioful-formerly-gradienta-C0EW4NoDg_E-unsplash.jpg",
+      imageFill: "cover",
     },
     elements: [
       getCodeEditorElement({
