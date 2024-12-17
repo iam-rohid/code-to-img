@@ -52,7 +52,7 @@ export function ToggleGroupField({
   onValueChange,
   options,
 }: {
-  label: string;
+  label?: string;
   value: string;
   options: { value: string; label: string; icon?: ReactNode }[];
   onValueChange?: (value: string) => void;
@@ -61,7 +61,7 @@ export function ToggleGroupField({
 
   return (
     <div className="flex h-12 items-center justify-between gap-2 px-2">
-      <Label htmlFor={id}>{label}</Label>
+      {label && <Label htmlFor={id}>{label}</Label>}
       <div className="flex h-10 gap-0.5 rounded-lg border p-0.5">
         {options.map((option) => (
           <Button

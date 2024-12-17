@@ -24,24 +24,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 export default function BackgroundPicker({
   color,
   onColorChange,
+  className,
 }: {
-  color: iColor;
+  color?: iColor | null;
   onColorChange?: (color: iColor) => void;
+  className?: string;
 }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          className="w-full transition-none"
+          className={cn("w-full overflow-hidden transition-none", className)}
           variant="outline"
           style={{
-            background: `linear-gradient(${color.type === "gradient" ? color.angle : 0}deg, ${color.type === "solid" ? [color.color, color.color].join(", ") : color.colors.join(", ")}),
-              repeating-conic-gradient(#CCC 0% 25%, white 0% 50%) 50% / 16px 16px`,
+            background: `${color ? `linear-gradient(${color.type === "gradient" ? color.angle : 0}deg, ${color.type === "solid" ? [color.color, color.color].join(", ") : color.colors.join(", ")}), ` : ""}repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
           }}
         />
       </PopoverTrigger>
       <PopoverContent side="right" align="start">
-        <Tabs defaultValue={color.type}>
+        <Tabs defaultValue={color?.type ?? "solid"}>
           <TabsList className="w-full">
             <TabsTrigger value="solid" className="w-full">
               Solid
@@ -52,7 +53,7 @@ export default function BackgroundPicker({
           </TabsList>
           <TabsContent className="mt-4" value="solid">
             <SolidPicker
-              color={color.type === "solid" ? color.color : undefined}
+              color={color?.type === "solid" ? color.color : undefined}
               onColorChange={(color) => {
                 onColorChange?.({ type: "solid", color });
               }}
@@ -150,19 +151,19 @@ export function GradientPicker({
   color: gradient,
   onColorChange,
 }: {
-  color: iColor;
+  color?: iColor | null;
   onColorChange?: (color: iGradientColor) => void;
 }) {
   const angle = useMemo(
-    () => (gradient.type === "gradient" ? gradient.angle : 90),
+    () => (gradient?.type === "gradient" ? gradient.angle : 90),
     [gradient],
   );
 
   const colors = useMemo(() => {
-    if (gradient.type === "solid") {
+    if (gradient?.type === "solid") {
       return [gradient.color, gradient.color];
     }
-    return gradient.colors;
+    return gradient?.colors ?? ["transparent", "transparent"];
   }, [gradient]);
 
   const setColors = useCallback(
@@ -190,7 +191,7 @@ export function GradientPicker({
     <div className="flex flex-col gap-4">
       <div className="relative z-10 flex items-center justify-between">
         <div
-          className="absolute left-0 right-0 top-1/2 -z-10 h-2 -translate-y-1/2"
+          className="absolute left-0 right-0 top-1/2 -z-10 h-2 -translate-y-1/2 border-b border-t"
           style={{
             background: `linear-gradient(90deg, ${colors.join(", ")})`,
           }}
@@ -200,7 +201,9 @@ export function GradientPicker({
             <Popover>
               <PopoverTrigger>
                 <div
-                  style={{ backgroundColor: color }}
+                  style={{
+                    background: `linear-gradient(0deg, ${color}, ${color}), repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
+                  }}
                   className="flex h-6 w-6 rounded-md border shadow-sm"
                   onMouseDown={(e) => {
                     if (e.button === 1 && colors.length > 2) {
@@ -257,7 +260,7 @@ export function GradientPicker({
           <Button
             style={{
               background: `linear-gradient(${gradient.angle}deg, ${gradient.colors.join(", ")}),
-              repeating-conic-gradient(#CCC 0% 25%, white 0% 50%) 50% / 16px 16px`,
+              repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
             }}
             className="aspect-square h-fit rounded-lg border p-0"
             key={`${gradient.angle}-${gradient.colors.join("-")}`}

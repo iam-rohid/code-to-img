@@ -26,6 +26,7 @@ const categoryMapName = (category: string) => {
 
 export type ImagePickerModalProps = DialogProps & {
   onPick?: (image: iImage) => void;
+  category?: string;
 };
 
 const allTags = [
@@ -34,9 +35,10 @@ const allTags = [
 
 export default function ImagePickerModal({
   onPick,
+  category: initalCategory,
   ...props
 }: ImagePickerModalProps) {
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(initalCategory);
   const images = useMemo(() => {
     let images = allImages;
     if (category) {

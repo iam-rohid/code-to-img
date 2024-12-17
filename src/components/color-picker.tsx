@@ -38,7 +38,7 @@ export function MyColorSlider(props: ColorSliderProps) {
       <SliderTrack
         style={({ defaultStyle }) => ({
           background: `${defaultStyle.background},
-            repeating-conic-gradient(#CCC 0% 25%, white 0% 50%) 50% / 16px 16px`,
+            repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
         })}
         className="h-8 rounded-lg border"
       >
@@ -60,7 +60,7 @@ export function MyColorSwatch({ className, ...props }: ColorSwatchProps) {
     <ColorSwatch
       style={({ color }) => ({
         background: `linear-gradient(${color}, ${color}),
-        repeating-conic-gradient(#CCC 0% 25%, white 0% 50%) 50% / 16px 16px`,
+        repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
       })}
       className={cn("h-10 w-10 flex-shrink-0 rounded-lg border", className)}
       {...props}

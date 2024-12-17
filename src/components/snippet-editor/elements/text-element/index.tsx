@@ -96,7 +96,9 @@ export default function TextElement({
       })}
       style={{
         ...getPaddingStyle(element.padding),
-        ...getBackgroundStyle(element.background.color),
+        ...(element.background.color
+          ? getBackgroundStyle(element.background.color)
+          : {}),
         borderRadius: element.borderRadius,
         boxShadow: element.boxShadow,
         justifyContent: element.verticalAlignment,

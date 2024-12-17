@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useRef } from "react";
@@ -31,14 +32,27 @@ export default function Canvas() {
       ref={canvasRef}
     >
       <div
-        className="absolute inset-0 z-0"
-        style={background.color ? getBackgroundStyle(background.color) : {}}
+        className="absolute inset-0 z-0 overflow-hidden"
+        style={
+          background.color ? getBackgroundStyle(background.color) : undefined
+        }
         onClick={() => {
           if (!readOnly) {
             setSelectedElement("canvas");
           }
         }}
-      ></div>
+      >
+        {background.image && (
+          <img
+            src={background.image}
+            alt="Background Image"
+            className="absolute inset-0 h-full w-full"
+            style={{
+              objectFit: background.imageFill ?? "cover",
+            }}
+          />
+        )}
+      </div>
 
       <div className="pointer-events-none absolute inset-0 z-10">
         {elementIds.map((elementId) => (
