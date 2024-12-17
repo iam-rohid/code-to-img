@@ -16,6 +16,7 @@ import {
 } from "../ui/context-menu";
 
 import CodeEditorElement from "./elements/code-editor";
+import EmojiElement from "./elements/emoji";
 import ImageElement from "./elements/image";
 import TextElement from "./elements/text-element";
 import { useSnippetEditor } from "./snippet-editor";
@@ -216,6 +217,22 @@ export default function Element({ elementId }: { elementId: string }) {
           />
         ) : element.type === "image" ? (
           <ImageElement
+            key={element.id}
+            element={element}
+            onChange={(updatedElement) => {
+              updateElement(element.id, updatedElement);
+            }}
+            readOnly={readOnly}
+            zoom={zoom}
+            onDragStart={() =>
+              updateElementState(element.id, { dragging: true })
+            }
+            onDragEnd={() =>
+              updateElementState(element.id, { dragging: false })
+            }
+          />
+        ) : element.type === "emoji" ? (
+          <EmojiElement
             key={element.id}
             element={element}
             onChange={(updatedElement) => {

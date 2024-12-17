@@ -1,18 +1,20 @@
 import { useCallback } from "react";
-import { AppWindowMacIcon, ImageIcon, TypeIcon } from "lucide-react";
+import { AppWindowMacIcon, ImageIcon, SmileIcon, TypeIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useStore } from "zustand";
 
+import { useEmojiPickerModal } from "@/components/modals/emoji-picker-modal";
+import { useImagePickerModal } from "@/components/modals/image-picker-modal";
 import { Button } from "@/components/ui/button";
 import {
   getCodeEditorElement,
+  getEmojiElement,
   getImageElement,
   getTextElement,
 } from "@/lib/constants/elements";
 import { getEditor } from "@/lib/tiptap";
 import { getCenterXYForElement } from "@/lib/utils";
 import { iElement } from "@/lib/validator/elements";
-import { useImagePickerModal } from "../image-picker-modal";
 import { useSnippetEditor } from "../snippet-editor";
 
 export default function Toolbar() {
@@ -29,6 +31,7 @@ export default function Toolbar() {
   const canvasWidth = useStore(snippetStore, (state) => state.width);
   const canvasHeight = useStore(snippetStore, (state) => state.height);
   const [ImagePickerModal, , setImagePickerModalOpen] = useImagePickerModal();
+  const [EmojiPickerModal, , setEmojiPickerModalOpen] = useEmojiPickerModal();
 
   const handleAddElement = useCallback(
     (element: iElement) => {
@@ -92,6 +95,13 @@ export default function Toolbar() {
       >
         <ImageIcon />
       </Button>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => setEmojiPickerModalOpen(true)}
+      >
+        <SmileIcon />
+      </Button>
 
       {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -135,6 +145,27 @@ export default function Toolbar() {
                 canvasWidth,
                 width,
                 height,
+              }),
+            }),
+          );
+        }}
+      />
+      <EmojiPickerModal
+        onPick={(emoji) => {
+          const size = 128;
+          handleAddElement(
+            getEmojiElement({
+              id: nanoid(),
+              emoji,
+              height: size,
+              width: size,
+              name: `${emoji} - Emoji`,
+              widthHeightLinked: true,
+              ...getCenterXYForElement({
+                canvasHeight,
+                canvasWidth,
+                width: size,
+                height: size,
               }),
             }),
           );

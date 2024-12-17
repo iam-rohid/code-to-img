@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { cn } from "@/lib/utils";
 
-import { useImagePickerModal } from "./snippet-editor/image-picker-modal";
+import { useImagePickerModal } from "./modals/image-picker-modal";
 import { Button } from "./ui/button";
 
 export default function ImagePicker({

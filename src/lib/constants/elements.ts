@@ -1,7 +1,11 @@
 import { nanoid } from "nanoid";
 
 import { iImage } from "@/data/images";
-import { iCodeEditorElement, iTextElement } from "../validator/elements";
+import {
+  iCodeEditorElement,
+  iEmojiElement,
+  iTextElement,
+} from "../validator/elements";
 import { iImageElement } from "../validator/elements/image";
 
 import { DEFAULT_THEME } from "./code-editor-themes";
@@ -164,7 +168,7 @@ export const getImageElement = ({
   y = 0,
   autoHeight = false,
   autoWidth = false,
-  widthHeightLinked = false,
+  widthHeightLinked = true,
 }: GetImageElementProps): iImageElement => ({
   version: CURRENT_IMGAE_ELEMENT_VERSION,
   type: "image",
@@ -185,4 +189,40 @@ export const getImageElement = ({
   objectFit: "cover",
   src: image.src,
   alt: image.alt,
+});
+
+export interface GetEmojiElementProps extends GetElementArgs {
+  emoji: string;
+}
+const CURRENT_EMOJI_ELEMENT_VERSION = "0.1.0";
+
+export const getEmojiElement = ({
+  id,
+  emoji,
+  width = 256,
+  height = 256,
+  name = "Emoji",
+  x = 0,
+  y = 0,
+  autoHeight = false,
+  autoWidth = false,
+  widthHeightLinked = true,
+}: GetEmojiElementProps): iEmojiElement => ({
+  version: CURRENT_EMOJI_ELEMENT_VERSION,
+  type: "emoji",
+  id,
+  name,
+  x,
+  y,
+  height,
+  width,
+  autoHeight,
+  autoWidth,
+  widthHeightLinked,
+  rotation: 0,
+  scale: 1,
+  hidden: false,
+  locked: false,
+  boxShadow: "none",
+  emoji,
 });
