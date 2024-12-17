@@ -13,18 +13,17 @@ import BackgroundPicker, {
   SolidColorPicker,
 } from "@/components/background-picker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { iTextElement } from "@/lib/validator/elements";
 import { useSnippetEditor } from "../../snippet-editor";
 
-import { BoxShadowField, NumberField, Padding, SwitchField } from "./fields";
+import { BoxShadowField, NumberField, Padding } from "./fields";
 
 const horizontalAlignmentOptions = [
-  { label: "Align left", icon: <AlignLeft />, value: "start" },
+  { label: "Align left", icon: <AlignLeft />, value: "left" },
   { label: "Align center", icon: <AlignCenter />, value: "center" },
-  { label: "Align right", icon: <AlignRight />, value: "end" },
+  { label: "Align right", icon: <AlignRight />, value: "right" },
 ];
 
 const verticalAlignmentOptions = [
@@ -98,14 +97,14 @@ export function TextElementProperties({ element }: { element: iTextElement }) {
       <NumberField
         icon={<>FS</>}
         label="Font Size"
-        value={editor.getAttributes("textStyle").fontSize}
+        value={editor.getAttributes("textStyle").fontSize || 16}
         min={12}
         max={128}
         onValueChange={(fontSize) => {
           editor.chain().setFontSize(fontSize).run();
         }}
       />
-
+      {/* 
       <SwitchField
         label="Text Shadow"
         checked={element.textShadow}
@@ -160,7 +159,7 @@ export function TextElementProperties({ element }: { element: iTextElement }) {
             lineHeight,
           });
         }}
-      />
+      /> */}
       <NumberField
         icon={<>BR</>}
         label="Border Radius"
@@ -182,21 +181,19 @@ export function TextElementProperties({ element }: { element: iTextElement }) {
                 variant="ghost"
                 key={option.value}
                 className={cn("h-full flex-1 rounded-sm", {
-                  "bg-accent text-accent-foreground":
-                    option.value === element.horizontalAlignment,
+                  "bg-accent text-accent-foreground": editor.isActive({
+                    textAlign: option.value,
+                  }),
                   "px-3": !option.icon,
                   "w-9": option.icon,
                 })}
-                onClick={() =>
-                  updateElement(element.id, {
-                    horizontalAlignment:
-                      option.value as iTextElement["verticalAlignment"],
-                  })
-                }
+                onClick={() => {
+                  editor.chain().focus().setTextAlign(option.value).run();
+                }}
                 title={option.label}
               >
-                {option.icon ?? option.label}
-                {option.icon && <p className="sr-only">{option.label}</p>}
+                {option.icon}
+                <p className="sr-only">{option.label}</p>
               </Button>
             ))}
           </div>

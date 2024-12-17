@@ -1,24 +1,9 @@
 import { useCallback } from "react";
-import {
-  AppWindowMacIcon,
-  ArrowRightIcon,
-  CircleIcon,
-  HexagonIcon,
-  ImageIcon,
-  ShapesIcon,
-  SquareIcon,
-  TypeIcon,
-} from "lucide-react";
+import { AppWindowMacIcon, ImageIcon, TypeIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useStore } from "zustand";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   getCodeEditorElement,
   getImageElement,
@@ -107,7 +92,8 @@ export default function Toolbar() {
       >
         <ImageIcon />
       </Button>
-      <DropdownMenu>
+
+      {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="icon" variant="ghost">
             <ShapesIcon />
@@ -131,7 +117,7 @@ export default function Toolbar() {
             Arrow
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu> */}
 
       <ImagePickerModal
         onPick={(image) => {

@@ -10,6 +10,21 @@ import { useDragElement } from "../../use-drag-element";
 
 import Menu from "./menu";
 
+export interface TextElementProps {
+  element: iTextElement;
+  onChange?: (element: Partial<iTextElement>) => void;
+  readOnly?: boolean;
+  zoom?: number;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+  onEditingStart?: () => void;
+  onEditingEnd?: () => void;
+  editor: Editor;
+  isSelected?: boolean;
+  onTransaction?: (props: EditorEvents["transaction"]) => void;
+  onUpdate?: (props: EditorEvents["update"]) => void;
+}
+
 export default function TextElement({
   element,
   readOnly,
@@ -23,20 +38,7 @@ export default function TextElement({
   editor,
   onTransaction,
   onUpdate,
-}: {
-  element: iTextElement;
-  onChange?: (element: Partial<iTextElement>) => void;
-  readOnly?: boolean;
-  zoom?: number;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
-  onEditingStart?: () => void;
-  onEditingEnd?: () => void;
-  editor: Editor;
-  isSelected?: boolean;
-  onTransaction?: (props: EditorEvents["transaction"]) => void;
-  onUpdate?: (props: EditorEvents["update"]) => void;
-}) {
+}: TextElementProps) {
   const [editable, setEditing] = useState(false);
   const { onMouseDown } = useDragElement({
     x: element.x,
@@ -89,7 +91,7 @@ export default function TextElement({
 
   return (
     <div
-      className={cn("relative flex h-full w-full overflow-hidden", {
+      className={cn("relative flex h-full w-full flex-col overflow-hidden", {
         "[&_.ProseMirror]:whitespace-pre": element.autoWidth,
       })}
       style={{
@@ -97,12 +99,18 @@ export default function TextElement({
         ...getBackgroundStyle(element.background.color),
         borderRadius: element.borderRadius,
         boxShadow: element.boxShadow,
+        justifyContent: element.verticalAlignment,
       }}
     >
       {editable && <Menu editor={editor} padding={element.padding} />}
       <EditorContent
         editor={editor ?? null}
-        className="h-full w-full overflow-hidden [&_.ProseMirror]:h-full [&_.ProseMirror]:w-full [&_.ProseMirror]:outline-none"
+        className={cn("overflow-hidden [&_.ProseMirror]:outline-none", {
+          "w-full [&_.ProseMirror]:w-full": !element.autoWidth,
+        })}
+        style={{
+          height: element.autoHeight ? "h-full" : undefined,
+        }}
       />
       {!editable && (
         <div onMouseDown={onMouseDown} className="absolute inset-0 z-10" />
