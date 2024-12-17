@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useMemo } from "react";
@@ -53,13 +54,24 @@ export default function SnippetViewer({
           className="overflow-hidden"
         >
           <div
-            className="absolute inset-0 z-0"
+            className="absolute inset-0 z-0 overflow-hidden"
             style={
               data.background.color
                 ? getBackgroundStyle(data.background.color)
                 : {}
             }
-          ></div>
+          >
+            {data.background.image && (
+              <img
+                src={data.background.image}
+                alt="Background Image"
+                className="absolute inset-0 h-full w-full"
+                style={{
+                  objectFit: data.background.imageFill ?? "cover",
+                }}
+              />
+            )}
+          </div>
 
           <div className="pointer-events-none absolute inset-0 z-10">
             {data.elements.toReversed().map((element) => (
