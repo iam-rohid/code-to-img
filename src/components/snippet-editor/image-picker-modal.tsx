@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import {
@@ -9,6 +8,7 @@ import {
   useState,
 } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
+import Image from "next/image";
 
 import { allImages, iImage } from "@/data/images";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ const categoryMapName = (category: string) => {
   const rec: Record<string, string> = {
     social_media: "Social Media",
     wallpaper: "Wallpaper",
-    element: "Element",
+    element: "Elements",
   };
   return rec[category] ?? category;
 };
@@ -93,9 +93,11 @@ export default function ImagePickerModal({
                   background: `repeating-conic-gradient(hsl(var(--border)) 0% 25%, hsl(var(--background)) 0% 50%) 50% / 16px 16px`,
                 }}
               >
-                <img
+                <Image
                   src={image.src}
                   alt={image.alt ?? image.id}
+                  width={image.width}
+                  height={image.height}
                   className="h-full w-full object-contain"
                 />
               </Button>

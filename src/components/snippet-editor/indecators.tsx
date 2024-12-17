@@ -813,12 +813,12 @@ function ScaleIndecator({
     <div
       onMouseDown={handleMouseDown}
       className={cn(
-        "pointer-events-auto absolute z-20 h-3 w-3 rounded-full border-2 border-blue-500 bg-background",
+        "pointer-events-auto absolute z-20 h-4 w-4 rounded-full border-2 border-white bg-blue-500",
         {
-          "-left-1.5 -top-1.5": position === "top-left",
-          "-right-1.5 -top-1.5": position === "top-right",
-          "-bottom-1.5 -left-1.5": position === "bottom-left",
-          "-bottom-1.5 -right-1.5": position === "bottom-right",
+          "-left-2 -top-2": position === "top-left",
+          "-right-2 -top-2": position === "top-right",
+          "-bottom-2 -left-2": position === "bottom-left",
+          "-bottom-2 -right-2": position === "bottom-right",
         },
         cursorClass,
       )}
@@ -888,7 +888,7 @@ function BarIndecator({
   return (
     <div
       onMouseDown={handleMouseDown}
-      className={cn("z pointer-events-auto absolute z-10", cursorClass, {
+      className={cn("pointer-events-auto absolute z-10", cursorClass, {
         "-top-1 left-0 right-0 h-2": position === "top",
         "-bottom-1 left-0 right-0 h-2": position === "bottom",
         "-right-1 bottom-0 top-0 w-2": position === "right",
@@ -897,9 +897,9 @@ function BarIndecator({
     >
       <div
         className={cn("absolute bg-blue-500", {
-          "left-0 right-0 top-1/2 h-0.5 -translate-y-1/2":
+          "left-0 right-0 top-1/2 h-[2px] -translate-y-1/2":
             position === "top" || position === "bottom",
-          "bottom-0 left-1/2 top-0 w-0.5 -translate-x-1/2":
+          "bottom-0 left-1/2 top-0 w-[2px] -translate-x-1/2":
             position === "left" || position === "right",
         })}
       ></div>
@@ -958,15 +958,18 @@ function RotationIndecator({
   }, [handleMouseMove, handleMouseUp, isRotating]);
 
   return (
-    <div
-      className={cn(
-        "pointer-events-auto absolute -top-6 left-1/2 h-4 w-4 -translate-x-1/2 cursor-grab rounded-full border-2 border-blue-500 bg-background",
-        {
-          "cursor-grabbing": isRotating,
-        },
-      )}
-      onMouseDown={handleMouseDown}
-    ></div>
+    <>
+      <div
+        className={cn(
+          "pointer-events-auto absolute -top-10 left-1/2 h-4 w-4 -translate-x-1/2 cursor-grab rounded-full border-2 border-blue-500 bg-white",
+          {
+            "cursor-grabbing": isRotating,
+          },
+        )}
+        onMouseDown={handleMouseDown}
+      ></div>
+      <div className="absolute -top-6 left-1/2 h-6 w-[2px] -translate-x-1/2 bg-blue-500"></div>
+    </>
   );
 }
 
