@@ -18,6 +18,7 @@ import Color from "color";
 import { PlusIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 
+import { ContextMenuTrigger } from "@/components/ui/context-menu";
 import {
   CODE_EDITOR_THEMES,
   CodeEditorTheme,
@@ -173,7 +174,7 @@ export default function CodeEditorElement({
           onMouseDown={onMouseDown}
         />
       ) : (
-        <div
+        <ContextMenuTrigger
           className="absolute left-0 right-0 top-0 z-10 h-4"
           onMouseDown={onMouseDown}
         />
@@ -345,7 +346,10 @@ function TitleBar({
         borderTopRightRadius: element.borderRadius,
       }}
     >
-      <div className="absolute inset-0" onMouseDown={onMouseDown}></div>
+      <ContextMenuTrigger
+        className="absolute inset-0"
+        onMouseDown={onMouseDown}
+      ></ContextMenuTrigger>
       <div
         className={cn("flex h-10 items-center", {
           "flex-row-reverse": element.titleBarControlPosition === "right",

@@ -32,6 +32,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getEditor } from "@/lib/tiptap";
 import { cn } from "@/lib/utils";
 import { iElement } from "@/lib/validator/elements";
 import { useSnippetEditor } from "../../snippet-editor";
@@ -429,6 +430,10 @@ function ElementActions({ element }: { element: iElement }) {
     snippetStore,
     (state) => state.duplicateElement,
   );
+  const setTipTapEditor = useStore(
+    editorStore,
+    (state) => state.setTipTapEditor,
+  );
   const setSelectedElement = useStore(
     editorStore,
     (state) => state.setSelectedElement,
@@ -446,6 +451,12 @@ function ElementActions({ element }: { element: iElement }) {
               onClick={() => {
                 const duplicatedElement = duplicateElement(element.id);
                 if (duplicatedElement) {
+                  if (duplicatedElement.type === "text") {
+                    setTipTapEditor(
+                      duplicatedElement.id,
+                      getEditor(duplicatedElement),
+                    );
+                  }
                   setSelectedElement(duplicatedElement.id);
                 }
               }}

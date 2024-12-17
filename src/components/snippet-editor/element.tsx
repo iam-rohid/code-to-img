@@ -1,7 +1,19 @@
 import { useCallback, useEffect, useRef } from "react";
+import {
+  BringToFrontIcon,
+  CopyPlusIcon,
+  SendToBackIcon,
+  TrashIcon,
+} from "lucide-react";
 import { useStore } from "zustand";
 
+import { getEditor } from "@/lib/tiptap";
 import { iElement } from "@/lib/validator/elements";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "../ui/context-menu";
 
 import CodeEditorElement from "./elements/code-editor";
 import ImageElement from "./elements/image";
@@ -20,6 +32,14 @@ export default function Element({ elementId }: { elementId: string }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const zoom = useStore(editorStore, (state) => state.zoom);
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
+  const removeElement = useStore(snippetStore, (state) => state.removeElement);
+  const bringToFront = useStore(snippetStore, (state) => state.bringToFront);
+  const sendToBack = useStore(snippetStore, (state) => state.sendToBack);
+  const duplicateElement = useStore(
+    snippetStore,
+    (state) => state.duplicateElement,
+  );
+
   const selectedElementId = useStore(
     editorStore,
     (state) => state.selectedElementId,
@@ -130,74 +150,119 @@ export default function Element({ elementId }: { elementId: string }) {
   ]);
 
   return (
-    <div
-      ref={elementRef}
-      style={getElementWrapperStyle(element)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
-    >
-      {element.type === "code-editor" ? (
-        <CodeEditorElement
-          key={element.id}
-          element={element}
-          onChange={(updatedElement) => {
-            updateElement(element.id, updatedElement);
-          }}
-          readOnly={readOnly}
-          onTabSelect={(tabId) => handleTabSelect(element.id, tabId)}
-          zoom={zoom}
-          onDragStart={() => updateElementState(element.id, { dragging: true })}
-          onDragEnd={() => updateElementState(element.id, { dragging: false })}
-          onEditingStart={() =>
-            updateElementState(element.id, { editing: true })
-          }
-          onEditingEnd={() =>
-            updateElementState(element.id, { editing: false })
-          }
-        />
-      ) : element.type === "text" ? (
-        <TextElement
-          key={element.id}
-          element={element}
-          onChange={(updatedElement) => {
-            updateElement(element.id, updatedElement);
-          }}
-          readOnly={readOnly}
-          zoom={zoom}
-          onDragStart={() => updateElementState(element.id, { dragging: true })}
-          onDragEnd={() => updateElementState(element.id, { dragging: false })}
-          onEditingStart={() =>
-            updateElementState(element.id, { editing: true })
-          }
-          onEditingEnd={() =>
-            updateElementState(element.id, { editing: false })
-          }
-          isSelected={selectedElementId === element.id}
-          editor={tipTapEditors[element.id]}
-          onTransaction={({ editor }) => {
-            setTipTapEditor(element.id, editor);
-          }}
-          onUpdate={({ editor, transaction }) => {
-            if (transaction.docChanged) {
-              const content = editor.getJSON();
-              updateElement(element.id, { content });
+    <ContextMenu>
+      <div
+        ref={elementRef}
+        style={getElementWrapperStyle(element)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseDown={handleMouseDown}
+      >
+        {element.type === "code-editor" ? (
+          <CodeEditorElement
+            key={element.id}
+            element={element}
+            onChange={(updatedElement) => {
+              updateElement(element.id, updatedElement);
+            }}
+            readOnly={readOnly}
+            onTabSelect={(tabId) => handleTabSelect(element.id, tabId)}
+            zoom={zoom}
+            onDragStart={() =>
+              updateElementState(element.id, { dragging: true })
+            }
+            onDragEnd={() =>
+              updateElementState(element.id, { dragging: false })
+            }
+            onEditingStart={() =>
+              updateElementState(element.id, { editing: true })
+            }
+            onEditingEnd={() =>
+              updateElementState(element.id, { editing: false })
+            }
+          />
+        ) : element.type === "text" ? (
+          <TextElement
+            key={element.id}
+            element={element}
+            onChange={(updatedElement) => {
+              updateElement(element.id, updatedElement);
+            }}
+            readOnly={readOnly}
+            zoom={zoom}
+            onDragStart={() =>
+              updateElementState(element.id, { dragging: true })
+            }
+            onDragEnd={() =>
+              updateElementState(element.id, { dragging: false })
+            }
+            onEditingStart={() =>
+              updateElementState(element.id, { editing: true })
+            }
+            onEditingEnd={() =>
+              updateElementState(element.id, { editing: false })
+            }
+            isSelected={selectedElementId === element.id}
+            editor={tipTapEditors[element.id]}
+            onTransaction={({ editor }) => {
+              setTipTapEditor(element.id, editor);
+            }}
+            onUpdate={({ editor, transaction }) => {
+              if (transaction.docChanged) {
+                const content = editor.getJSON();
+                updateElement(element.id, { content });
+              }
+            }}
+          />
+        ) : element.type === "image" ? (
+          <ImageElement
+            key={element.id}
+            element={element}
+            onChange={(updatedElement) => {
+              updateElement(element.id, updatedElement);
+            }}
+            readOnly={readOnly}
+            zoom={zoom}
+            onDragStart={() =>
+              updateElementState(element.id, { dragging: true })
+            }
+            onDragEnd={() =>
+              updateElementState(element.id, { dragging: false })
+            }
+          />
+        ) : null}
+      </div>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={() => removeElement(element.id)}>
+          <TrashIcon />
+          Delete
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => {
+            const duplicatedElement = duplicateElement(element.id);
+            if (duplicatedElement) {
+              if (duplicatedElement.type === "text") {
+                setTipTapEditor(
+                  duplicatedElement.id,
+                  getEditor(duplicatedElement),
+                );
+              }
+              setSelectedElement(duplicatedElement.id);
             }
           }}
-        />
-      ) : element.type === "image" ? (
-        <ImageElement
-          key={element.id}
-          element={element}
-          onChange={(updatedElement) => {
-            updateElement(element.id, updatedElement);
-          }}
-          readOnly={readOnly}
-          zoom={zoom}
-          onDragStart={() => updateElementState(element.id, { dragging: true })}
-          onDragEnd={() => updateElementState(element.id, { dragging: false })}
-        />
-      ) : null}
-    </div>
+        >
+          <CopyPlusIcon />
+          Duplicate
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => sendToBack(element.id)}>
+          <SendToBackIcon />
+          Send to Back
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => bringToFront(element.id)}>
+          <BringToFrontIcon />
+          Bring to Front
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }

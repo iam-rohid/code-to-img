@@ -52,6 +52,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
+import { getEditor } from "@/lib/tiptap";
 import { cn } from "@/lib/utils";
 import { iSnippetData } from "@/lib/validator/snippet";
 import { useAuth } from "@/providers/auth-provider";
@@ -354,6 +355,10 @@ function LayersPanel() {
     snippetStore,
     (state) => state.duplicateElement,
   );
+  const setTipTapEditor = useStore(
+    editorStore,
+    (state) => state.setTipTapEditor,
+  );
   const removeElement = useStore(snippetStore, (state) => state.removeElement);
   const updateElement = useStore(snippetStore, (state) => state.updateElement);
 
@@ -428,6 +433,12 @@ function LayersPanel() {
                             element.id,
                           );
                           if (duplicatedElement) {
+                            if (duplicatedElement.type === "text") {
+                              setTipTapEditor(
+                                duplicatedElement.id,
+                                getEditor(duplicatedElement),
+                              );
+                            }
                             setSelectedElement(duplicatedElement.id);
                           }
                         }}

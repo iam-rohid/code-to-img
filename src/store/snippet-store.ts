@@ -17,6 +17,8 @@ export type SnipetActions = {
   // updateSnippetTransform: (transform: Partial<Snip>) => void;
   addElement: (element: iElement) => void;
   updateElement: (elementId: string, data: Partial<iElement>) => void;
+  bringToFront: (elementId: string, allTheWayFront?: boolean) => void;
+  sendToBack: (elementId: string, allTheWayFront?: boolean) => void;
   // updateElementTransform: (
   //   elementId: string,
   //   transform: Partial<iTransform>,
@@ -126,6 +128,41 @@ export const createSnippetStore = (snippetData: iSnippetData) => {
           element.id === elementId ? { ...element, x, y } : element,
         ),
       });
+    },
+    sendToBack: (elementId, allTheWayBack) => {
+      const elements = get().elements;
+      const elementIndex = elements.findIndex((el) => el.id === elementId);
+      const element = elements.find((el) => el.id === elementId);
+
+      if (elementIndex >= elements.length - 1 || !element) {
+        return;
+      }
+      let newList = structuredClone(elements);
+      if (allTheWayBack) {
+        newList = [...newList.filter((el) => el.id !== element.id), element];
+      } else {
+        newList[elementIndex] = newList[elementIndex + 1];
+        newList[elementIndex + 1] = element;
+      }
+      set({ elements: newList });
+    },
+    bringToFront: (elementId, allTheWayFront) => {
+      const elements = get().elements;
+      const elementIndex = elements.findIndex((el) => el.id === elementId);
+      const element = elements.find((el) => el.id === elementId);
+
+      if (elementIndex <= 0 || !element) {
+        return;
+      }
+
+      let newList = structuredClone(elements);
+      if (allTheWayFront) {
+        newList = [element, ...newList.filter((el) => el.id !== elementId)];
+      } else {
+        newList[elementIndex] = newList[elementIndex - 1];
+        newList[elementIndex - 1] = element;
+      }
+      set({ elements: newList });
     },
   }));
 };

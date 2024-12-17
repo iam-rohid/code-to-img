@@ -3,6 +3,7 @@ import "./style.css";
 import { useEffect, useState } from "react";
 import { Editor, EditorContent, EditorEvents } from "@tiptap/react";
 
+import { ContextMenuTrigger } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import { getBackgroundStyle, getPaddingStyle } from "@/lib/utils/editor";
 import { iTextElement } from "@/lib/validator/elements";
@@ -115,7 +116,10 @@ export default function TextElement({
         }}
       />
       {!editable && (
-        <div onMouseDown={onMouseDown} className="absolute inset-0 z-10" />
+        <ContextMenuTrigger
+          onMouseDown={onMouseDown}
+          className="absolute inset-0 z-10"
+        />
       )}
     </div>
   );

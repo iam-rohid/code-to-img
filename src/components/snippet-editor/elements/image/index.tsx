@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import { ContextMenuTrigger } from "@/components/ui/context-menu";
 import { iImageElement } from "@/lib/validator/elements/image";
 import { useDragElement } from "../../use-drag-element";
 
@@ -29,7 +30,7 @@ export default function ImageElement({
   });
 
   return (
-    <div
+    <ContextMenuTrigger
       className="h-full min-h-full w-full min-w-full whitespace-pre"
       onMouseDown={onMouseDown}
     >
@@ -45,6 +46,6 @@ export default function ImageElement({
         }}
         className="pointer-events-none h-full w-full"
       />
-    </div>
+    </ContextMenuTrigger>
   );
 }
