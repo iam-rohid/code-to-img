@@ -57,6 +57,13 @@
       "when": 1731989578345,
       "tag": "0007_moaning_doctor_faustus",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1734500576804,
+      "tag": "0008_calm_carnage",
+      "breakpoints": true
     }
   ]
 }

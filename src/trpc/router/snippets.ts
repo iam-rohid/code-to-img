@@ -3,7 +3,7 @@ import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { Snippet, snippetTable } from "@/db/schema";
+import { folderTable, Snippet, snippetTable } from "@/db/schema";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { snippetSchema } from "@/lib/validator/snippet";
 import protectedProcedure from "../procedures/protected";
@@ -50,6 +50,7 @@ export const snippetsRouter = router({
     .input(
       z.object({
         workspaceId: z.string(),
+        parentId: z.string().nullish(),
         trashed: z.boolean().default(false),
       }),
     )
@@ -65,6 +66,9 @@ export const snippetsRouter = router({
         .where(
           and(
             eq(snippetTable.workspaceId, workspace.id),
+            ...(input.parentId
+              ? [eq(snippetTable.parentId, input.parentId)]
+              : [isNull(snippetTable.parentId)]),
             ...(input.trashed
               ? [isNotNull(snippetTable.trashedAt)]
               : [isNull(snippetTable.trashedAt)]),
@@ -80,6 +84,7 @@ export const snippetsRouter = router({
         dto: z.object({
           title: z.string(),
           data: snippetSchema.optional(),
+          parentId: z.string().nullish(),
         }),
       }),
     )
@@ -88,12 +93,31 @@ export const snippetsRouter = router({
         input.workspaceId,
         ctx.session.user.id,
       );
+      if (input.dto.parentId) {
+        const [parentFolder] = await db
+          .select({ id: folderTable.id })
+          .from(folderTable)
+          .where(
+            and(
+              eq(folderTable.id, input.dto.parentId),
+              eq(folderTable.workspaceId, workspace.id),
+            ),
+          );
+        if (!parentFolder) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Parent folder not found!",
+          });
+        }
+      }
+
       const [snippet] = await ctx.db
         .insert(snippetTable)
         .values({
           workspaceId: workspace.id,
           title: input.dto.title,
           data: input.dto.data,
+          parentId: input.dto.parentId,
         })
         .returning();
       if (!snippet) {

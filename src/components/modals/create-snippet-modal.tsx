@@ -28,10 +28,12 @@ import { Input } from "../ui/input";
 
 export type CreateSnippetModalProps = DialogProps & {
   onCreated?: (snippet: Snippet) => void;
+  parentId?: string;
 };
 
 export default function CreateSnippetModal({
   onCreated,
+  parentId,
   ...props
 }: CreateSnippetModalProps) {
   return (
@@ -41,6 +43,7 @@ export default function CreateSnippetModal({
           <DialogTitle>Create Snippet</DialogTitle>
         </DialogHeader>
         <CreateSnippetForm
+          parentId={parentId}
           onCreated={(snippet) => {
             props.onOpenChange?.(false);
             onCreated?.(snippet);
@@ -58,8 +61,10 @@ const schema = z.object({
 
 function CreateSnippetForm({
   onCreated,
+  parentId,
 }: {
   onCreated?: (snippet: Snippet) => void;
+  parentId?: string;
 }) {
   const { workspace } = useWorkspace();
   const [templates] = useState(SYSTEM_SNIPPET_TEMPLATES);
@@ -74,10 +79,14 @@ function CreateSnippetForm({
 
   const utils = trpc.useUtils();
   const createSnippetMut = trpc.snippets.createSnippet.useMutation({
-    onSuccess: (snippet) => {
+    onSuccess: (snippet, vars) => {
       toast.success("Snippet created");
       utils.snippets.getSnippets.setData(
-        { workspaceId: workspace.id, trashed: false },
+        {
+          workspaceId: workspace.id,
+          trashed: false,
+          parentId: vars.dto.parentId,
+        },
         (snippets) => [snippet, ...(snippets ?? [])],
       );
       utils.snippets.getSnippet.setData({ snippetId: snippet.id }, snippet);
@@ -99,10 +108,10 @@ function CreateSnippetForm({
       }
       createSnippetMut.mutate({
         workspaceId: workspace.id,
-        dto: { title: data.name, data: template.data },
+        dto: { title: data.name, data: template.data, parentId },
       });
     },
-    [createSnippetMut, form, templates, workspace.id],
+    [createSnippetMut, form, parentId, templates, workspace.id],
   );
 
   return (

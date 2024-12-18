@@ -2,6 +2,7 @@ import { createContext } from "../context";
 import { createCallerFactory, router } from "../trpc";
 
 import { authRouter } from "./auth";
+import { foldersRouter } from "./folders";
 import { snippetsRouter } from "./snippets";
 import { usersRouter } from "./users";
 import { workspacesRouter } from "./workspaces";
@@ -11,6 +12,7 @@ export const appRouter = router({
   users: usersRouter,
   workspaces: workspacesRouter,
   snippets: snippetsRouter,
+  folders: foldersRouter,
 });
 
 export type AppRouter = typeof appRouter;

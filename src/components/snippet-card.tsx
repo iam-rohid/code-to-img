@@ -46,7 +46,7 @@ export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
   );
 
   return (
-    <div className="group relative rounded-xl border transition-shadow hover:shadow-lg">
+    <div className="group relative rounded-xl border transition-shadow hover:shadow-lg dark:hover:bg-secondary/50">
       {snippet.trashedAt ? (
         <div className="absolute inset-0 z-10 rounded-xl"></div>
       ) : (

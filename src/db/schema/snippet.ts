@@ -3,6 +3,7 @@ import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { BLANK_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { iSnippetData } from "@/lib/validator/snippet";
 
+import { folderTable } from "./folder";
 import { createdAt, id } from "./shared";
 import { workspaceTable } from "./workspace";
 
@@ -22,6 +23,9 @@ export const snippetTable = pgTable("snippet", {
     mode: "date",
   }),
   trashedAt: timestamp("trashed_at", { withTimezone: true, mode: "date" }),
+  parentId: uuid("parent_id").references(() => folderTable.id, {
+    onDelete: "cascade",
+  }),
 });
 
 export type Snippet = typeof snippetTable.$inferSelect;
