@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 import WorkspaceProvider from "@/providers/workspace-provider";
+
 import DndProvider from "./dnd-provider";
 
 export const dynamic = "force-static";

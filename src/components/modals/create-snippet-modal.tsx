@@ -84,7 +84,6 @@ function CreateSnippetForm({
       utils.snippets.getSnippets.setData(
         {
           workspaceId: workspace.id,
-          trashed: false,
           projectId: vars.dto.projectId,
         },
         (snippets) => [snippet, ...(snippets ?? [])],

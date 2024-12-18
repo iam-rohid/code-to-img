@@ -33,7 +33,6 @@ export default function EditorSidebar() {
   const router = useRouter();
   const snippetsQuery = trpc.snippets.getSnippets.useQuery({
     workspaceId: workspace.id,
-    trashed: false,
   });
   const [CreateSnippetModal, , setCreateSnippetModalOpen] =
     useCreateSnippetModal();

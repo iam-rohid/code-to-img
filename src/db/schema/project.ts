@@ -1,4 +1,4 @@
-import { pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { createdAt, id } from "./shared";
 import { workspaceTable } from "./workspace";
@@ -10,6 +10,7 @@ export const projectTable = pgTable("project", {
     .notNull()
     .references(() => workspaceTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  trashedAt: timestamp("trashed_at", { withTimezone: true, mode: "date" }),
 });
 
 export type Project = typeof projectTable.$inferSelect;

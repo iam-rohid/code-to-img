@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Clock3Icon,
   FileIcon,
@@ -11,7 +12,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useMemo } from "react";
 
 import {
   Sidebar,
@@ -108,7 +108,7 @@ export default function WorkspcaeSidebar() {
           </div>
           <WorkspaceSwitcher />
         </SidebarHeader>
-        {items.map((group, i) => (
+        {items.map((group) => (
           <SidebarGroup key={group.id}>
             {group.label && (
               <SidebarGroupLabel>{group.label}</SidebarGroupLabel>

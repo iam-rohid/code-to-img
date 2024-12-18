@@ -1,16 +1,17 @@
 "use client";
 
+import { PlusIcon } from "lucide-react";
+
 import AppBar from "@/components/app-bar";
 import { useCreateProjectModal } from "@/components/modals/create-project-modal";
 import { ProjectList, ProjectListSkeleton } from "@/components/project-list";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
-import { PlusIcon } from "lucide-react";
 
 export default function PageClient() {
   const { workspace } = useWorkspace();
-  const projectsQuery = trpc.projects.getProjects.useQuery({
+  const projectsQuery = trpc.projects.getAllProjects.useQuery({
     workspaceId: workspace.id,
   });
 
@@ -34,7 +35,7 @@ export default function PageClient() {
           <ProjectListSkeleton />
         ) : projectsQuery.isError ? (
           <p>{projectsQuery.error.message}</p>
-        ) : projectsQuery.data.length <= 1 ? (
+        ) : projectsQuery.data.length < 1 ? (
           <div className="rounded-lg border px-6 py-16">
             <div className="container mx-auto flex max-w-screen-sm flex-col items-center">
               <h3 className="text-center text-lg font-semibold">

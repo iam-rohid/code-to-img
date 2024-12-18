@@ -70,7 +70,7 @@ function CreateProjectForm({
   const createProjectMut = trpc.projects.createProject.useMutation({
     onSuccess: (project) => {
       toast.success("Project created");
-      utils.projects.getProjects.setData(
+      utils.projects.getAllProjects.setData(
         { workspaceId: workspace.id },
         (projects) => [project, ...(projects ?? [])],
       );

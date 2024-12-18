@@ -1,5 +1,6 @@
 "use client";
 
+import { PlusIcon } from "lucide-react";
 import { notFound, useParams } from "next/navigation";
 
 import AppBar from "@/components/app-bar";
@@ -8,7 +9,6 @@ import { SnippetList, SnippetListSkeleton } from "@/components/snippet-list";
 import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
-import { PlusIcon } from "lucide-react";
 
 export default function PageClient() {
   const { workspace } = useWorkspace();
@@ -50,11 +50,11 @@ export default function PageClient() {
           <SnippetListSkeleton />
         ) : snippetsQuery.isError ? (
           <p>{snippetsQuery.error.message}</p>
-        ) : snippetsQuery.data.length <= 1 ? (
+        ) : snippetsQuery.data.length < 1 ? (
           <div className="rounded-lg border px-6 py-16">
             <div className="container mx-auto flex max-w-screen-sm flex-col items-center">
               <h3 className="text-center text-lg font-semibold">
-                This project doesn't have any snippets.
+                This project doesn&apos;t have any snippets.
               </h3>
               <p className="mt-2 text-center text-muted-foreground">
                 Create a new snippet to start from scratch.

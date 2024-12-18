@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
@@ -51,7 +51,6 @@ export const snippetsRouter = router({
       z.object({
         workspaceId: z.string(),
         projectId: z.string().nullish(),
-        trashed: z.boolean().default(false),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -66,12 +65,10 @@ export const snippetsRouter = router({
         .where(
           and(
             eq(snippetTable.workspaceId, workspace.id),
+            isNull(snippetTable.trashedAt),
             ...(input.projectId
               ? [eq(snippetTable.projectId, input.projectId)]
               : [isNull(snippetTable.projectId)]),
-            ...(input.trashed
-              ? [isNotNull(snippetTable.trashedAt)]
-              : [isNull(snippetTable.trashedAt)]),
           ),
         )
         .orderBy(desc(snippetTable.createdAt));
@@ -95,6 +92,26 @@ export const snippetsRouter = router({
           ),
         )
         .orderBy(desc(snippetTable.lastSeenAt), desc(snippetTable.createdAt));
+      return snippets.map(parseSnippet);
+    }),
+  getTrashedSnippets: protectedProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { workspace } = await getWorkspaceById(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      const snippets = await db
+        .select()
+        .from(snippetTable)
+        .where(
+          and(
+            eq(snippetTable.workspaceId, workspace.id),
+            isNotNull(snippetTable.trashedAt),
+          ),
+        )
+        .orderBy(desc(snippetTable.trashedAt));
       return snippets.map(parseSnippet);
     }),
   createSnippet: protectedProcedure
@@ -206,15 +223,15 @@ export const snippetsRouter = router({
     .input(z.object({ snippetId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
-      const [updateedSnippet] = await ctx.db
+      const [updatedSnippet] = await ctx.db
         .update(snippetTable)
         .set({ trashedAt: null })
         .where(eq(snippetTable.id, snippet.id))
         .returning();
-      if (!updateedSnippet) {
+      if (!updatedSnippet) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-      return updateedSnippet;
+      return updatedSnippet;
     }),
   deleteSnippet: protectedProcedure
     .input(
