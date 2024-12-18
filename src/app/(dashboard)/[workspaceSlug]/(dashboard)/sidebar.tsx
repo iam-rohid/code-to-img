@@ -1,16 +1,24 @@
 "use client";
 
-import { useMemo } from "react";
-import { HomeIcon, LucideIcon, SettingsIcon, TrashIcon } from "lucide-react";
+import {
+  Clock3Icon,
+  FileIcon,
+  LayoutGridIcon,
+  LucideIcon,
+  SettingsIcon,
+  TrashIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { useMemo } from "react";
 
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -24,23 +32,54 @@ export default function WorkspcaeSidebar() {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
 
   const items = useMemo(
-    (): { title: string; url: string; icon: LucideIcon; exact?: boolean }[] => [
+    (): {
+      id: string;
+      label?: string;
+      items: {
+        title: string;
+        url: string;
+        icon: LucideIcon;
+        exact?: boolean;
+      }[];
+    }[] => [
       {
-        title: "Snippets",
-        url: `/${workspaceSlug}`,
-        icon: HomeIcon,
-        exact: true,
+        id: "menu",
+        items: [
+          {
+            title: "Recents",
+            url: `/${workspaceSlug}/recents`,
+            icon: Clock3Icon,
+            exact: true,
+          },
+          {
+            title: "Drafts",
+            url: `/${workspaceSlug}/drafts`,
+            icon: FileIcon,
+            exact: true,
+          },
+          {
+            title: "All Projects",
+            url: `/${workspaceSlug}/projects`,
+            icon: LayoutGridIcon,
+            exact: true,
+          },
+          {
+            title: "Trash",
+            url: `/${workspaceSlug}/trash`,
+            icon: TrashIcon,
+            exact: true,
+          },
+          {
+            title: "Settings",
+            url: `/${workspaceSlug}/settings`,
+            icon: SettingsIcon,
+          },
+        ],
       },
       {
-        title: "Trash",
-        url: `/${workspaceSlug}/trash`,
-        icon: TrashIcon,
-        exact: true,
-      },
-      {
-        title: "Settings",
-        url: `/${workspaceSlug}/settings`,
-        icon: SettingsIcon,
+        id: "stars",
+        label: "Stars",
+        items: [],
       },
     ],
     [workspaceSlug],
@@ -69,29 +108,34 @@ export default function WorkspcaeSidebar() {
           </div>
           <WorkspaceSwitcher />
         </SidebarHeader>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      item.exact
-                        ? pathname === item.url
-                        : pathname.startsWith(item.url)
-                    }
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {items.map((group, i) => (
+          <SidebarGroup key={group.id}>
+            {group.label && (
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        item.exact
+                          ? pathname === item.url
+                          : pathname.startsWith(item.url)
+                      }
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );

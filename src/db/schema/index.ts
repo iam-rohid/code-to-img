@@ -1,4 +1,4 @@
 export * from "./auth";
 export * from "./workspace";
-export * from "./folder";
+export * from "./project";
 export * from "./snippet";

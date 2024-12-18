@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { folderTable, Snippet, snippetTable } from "@/db/schema";
+import { projectTable, Snippet, snippetTable } from "@/db/schema";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { snippetSchema } from "@/lib/validator/snippet";
 import protectedProcedure from "../procedures/protected";
@@ -50,7 +50,7 @@ export const snippetsRouter = router({
     .input(
       z.object({
         workspaceId: z.string(),
-        parentId: z.string().nullish(),
+        projectId: z.string().nullish(),
         trashed: z.boolean().default(false),
       }),
     )
@@ -66,15 +66,35 @@ export const snippetsRouter = router({
         .where(
           and(
             eq(snippetTable.workspaceId, workspace.id),
-            ...(input.parentId
-              ? [eq(snippetTable.parentId, input.parentId)]
-              : [isNull(snippetTable.parentId)]),
+            ...(input.projectId
+              ? [eq(snippetTable.projectId, input.projectId)]
+              : [isNull(snippetTable.projectId)]),
             ...(input.trashed
               ? [isNotNull(snippetTable.trashedAt)]
               : [isNull(snippetTable.trashedAt)]),
           ),
         )
         .orderBy(desc(snippetTable.createdAt));
+      return snippets.map(parseSnippet);
+    }),
+  getRecentSnippets: protectedProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { workspace } = await getWorkspaceById(
+        input.workspaceId,
+        ctx.session.user.id,
+      );
+
+      const snippets = await db
+        .select()
+        .from(snippetTable)
+        .where(
+          and(
+            eq(snippetTable.workspaceId, workspace.id),
+            isNull(snippetTable.trashedAt),
+          ),
+        )
+        .orderBy(desc(snippetTable.lastSeenAt), desc(snippetTable.createdAt));
       return snippets.map(parseSnippet);
     }),
   createSnippet: protectedProcedure
@@ -84,7 +104,7 @@ export const snippetsRouter = router({
         dto: z.object({
           title: z.string(),
           data: snippetSchema.optional(),
-          parentId: z.string().nullish(),
+          projectId: z.string().nullish(),
         }),
       }),
     )
@@ -93,20 +113,20 @@ export const snippetsRouter = router({
         input.workspaceId,
         ctx.session.user.id,
       );
-      if (input.dto.parentId) {
-        const [parentFolder] = await db
-          .select({ id: folderTable.id })
-          .from(folderTable)
+      if (input.dto.projectId) {
+        const [project] = await db
+          .select({ id: projectTable.id })
+          .from(projectTable)
           .where(
             and(
-              eq(folderTable.id, input.dto.parentId),
-              eq(folderTable.workspaceId, workspace.id),
+              eq(projectTable.id, input.dto.projectId),
+              eq(projectTable.workspaceId, workspace.id),
             ),
           );
-        if (!parentFolder) {
+        if (!project) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Parent folder not found!",
+            message: "Project not found!",
           });
         }
       }
@@ -117,7 +137,7 @@ export const snippetsRouter = router({
           workspaceId: workspace.id,
           title: input.dto.title,
           data: input.dto.data,
-          parentId: input.dto.parentId,
+          projectId: input.dto.projectId,
         })
         .returning();
       if (!snippet) {
@@ -142,6 +162,7 @@ export const snippetsRouter = router({
         .set({
           title: input.dto.title,
           data: input.dto.data,
+          lastSeenAt: new Date(),
         })
         .where(eq(snippetTable.id, snippet.id))
         .returning();

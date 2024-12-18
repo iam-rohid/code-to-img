@@ -3,7 +3,7 @@ import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { BLANK_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { iSnippetData } from "@/lib/validator/snippet";
 
-import { folderTable } from "./folder";
+import { projectTable } from "./project";
 import { createdAt, id } from "./shared";
 import { workspaceTable } from "./workspace";
 
@@ -21,9 +21,11 @@ export const snippetTable = pgTable("snippet", {
   lastSeenAt: timestamp("last_seen_at", {
     withTimezone: true,
     mode: "date",
-  }),
+  })
+    .notNull()
+    .defaultNow(),
   trashedAt: timestamp("trashed_at", { withTimezone: true, mode: "date" }),
-  parentId: uuid("parent_id").references(() => folderTable.id, {
+  projectId: uuid("project_id").references(() => projectTable.id, {
     onDelete: "cascade",
   }),
 });

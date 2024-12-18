@@ -9,9 +9,11 @@ import {
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useDrag } from "react-dnd";
 
 import { Snippet } from "@/db/schema";
 import { useSnippetActions } from "@/hooks/use-snippet-actions";
+import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
@@ -44,9 +46,33 @@ export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
       },
     },
   );
+  const [{ isDragging }, drag, dragPreview] = useDrag(
+    () => ({
+      type: "snippet",
+      item: { id: snippet.id },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }),
+    [snippet.id],
+  );
 
-  return (
-    <div className="group relative rounded-xl border transition-shadow hover:shadow-lg dark:hover:bg-secondary/50">
+  return isDragging ? (
+    <div
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      ref={dragPreview}
+      className="rounded-xl border-2 border-dashed border-primary bg-primary/10"
+    />
+  ) : (
+    <div
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      ref={drag}
+      className={cn(
+        "group relative rounded-xl border transition-shadow hover:shadow-lg dark:hover:bg-secondary/50",
+      )}
+    >
       {snippet.trashedAt ? (
         <div className="absolute inset-0 z-10 rounded-xl"></div>
       ) : (
@@ -69,7 +95,7 @@ export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
             {snippet.title || "Untitled"}
           </p>
           <p className="truncate text-sm text-muted-foreground">
-            {dayjs(snippet.createdAt).fromNow()}
+            Edited {dayjs(snippet.lastSeenAt).fromNow()}
           </p>
         </div>
 

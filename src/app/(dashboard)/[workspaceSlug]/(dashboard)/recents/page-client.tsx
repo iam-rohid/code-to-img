@@ -1,56 +1,36 @@
 "use client";
 
-import { PlusIcon, SearchIcon } from "lucide-react";
-
+import AppBar from "@/components/app-bar";
 import { useCreateSnippetModal } from "@/components/modals/create-snippet-modal";
 import { SnippetList, SnippetListSkeleton } from "@/components/snippet-list";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
+import { PlusIcon } from "lucide-react";
 
-export default function FoldersAndSnippetsList({
-  projectId,
-}: {
-  projectId?: string | null;
-}) {
+export default function PageClient() {
   const { workspace } = useWorkspace();
+
   const [CreateSnippetModal, , setCreateSnippetModalOpen] =
     useCreateSnippetModal();
 
-  const snippetsQuery = trpc.snippets.getSnippets.useQuery({
+  const snippetsQuery = trpc.snippets.getRecentSnippets.useQuery({
     workspaceId: workspace.id,
-    trashed: false,
-    projectId,
   });
 
   return (
-    <div className="mx-auto my-16 w-full max-w-screen-xl space-y-8 px-4">
-      <div className="flex gap-4">
-        {/* <div className="flex gap-2">
-          <Button variant="outline">
-            <FilterIcon />
-            Filter
-            <ChevronDownIcon className="h-3 w-3 text-muted-foreground" />
-          </Button>
-        </div> */}
-
-        <div className="flex flex-1 items-center justify-end gap-2">
-          <form className="relative w-full max-w-sm">
-            <Input className="w-full pl-10 pr-10" placeholder="Search..." />
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          </form>
+    <>
+      <AppBar
+        title="Recents"
+        trailing={
           <Button onClick={() => setCreateSnippetModalOpen(true)}>
             <PlusIcon />
             Create Snippet
           </Button>
-        </div>
-      </div>
+        }
+      />
 
-      <div>
-        <div className="mb-4">
-          <h2 className="font-medium">Snippets</h2>
-        </div>
+      <div className="mx-auto my-16 w-full max-w-screen-xl space-y-8 px-4">
         {snippetsQuery.isPending ? (
           <SnippetListSkeleton />
         ) : snippetsQuery.isError ? (
@@ -79,7 +59,7 @@ export default function FoldersAndSnippetsList({
         )}
       </div>
 
-      <CreateSnippetModal projectId={projectId} />
-    </div>
+      <CreateSnippetModal />
+    </>
   );
 }

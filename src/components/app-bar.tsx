@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, ReactNode } from "react";
 import Link from "next/link";
 
 import {
@@ -13,15 +13,17 @@ import { SidebarTrigger } from "./ui/sidebar";
 export default function AppBar({
   title,
   links,
+  trailing,
 }: {
   title: string;
   links?: { title: string; url: string }[];
+  trailing?: ReactNode;
 }) {
   return (
-    <div className="sticky top-0 z-30 flex h-14 items-center bg-background px-4">
+    <div className="sticky top-0 z-30 flex h-14 items-center border-b bg-background px-4">
       <SidebarTrigger />
       <p className="mx-4 h-8 w-px bg-border" />
-      <Breadcrumb>
+      <Breadcrumb className="flex-1">
         <BreadcrumbList>
           {links?.map((link) => (
             <Fragment key={link.title}>
@@ -34,6 +36,7 @@ export default function AppBar({
           <BreadcrumbPage>{title}</BreadcrumbPage>
         </BreadcrumbList>
       </Breadcrumb>
+      {trailing}
     </div>
   );
 }

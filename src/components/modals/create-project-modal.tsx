@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Folder } from "@/db/schema";
+import { Project } from "@/db/schema";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 import { Button } from "../ui/button";
@@ -23,27 +23,24 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 
-export type CreateFolderModalProps = DialogProps & {
-  onCreated?: (folder: Folder) => void;
-  parentId?: string;
+export type CreateProjectModalProps = DialogProps & {
+  onCreated?: (project: Project) => void;
 };
 
-export default function CreateFolderModal({
+export default function CreateProjectModal({
   onCreated,
-  parentId,
   ...props
-}: CreateFolderModalProps) {
+}: CreateProjectModalProps) {
   return (
     <Dialog {...props}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Folder</DialogTitle>
+          <DialogTitle>Create Project</DialogTitle>
         </DialogHeader>
-        <CreateFolderForm
-          parentId={parentId}
-          onCreated={(folder) => {
+        <CreateProjectForm
+          onCreated={(project) => {
             props.onOpenChange?.(false);
-            onCreated?.(folder);
+            onCreated?.(project);
           }}
         />
       </DialogContent>
@@ -55,12 +52,10 @@ const schema = z.object({
   name: z.string().min(1, { message: "Name is required" }).max(100),
 });
 
-function CreateFolderForm({
+function CreateProjectForm({
   onCreated,
-  parentId,
 }: {
-  onCreated?: (folder: Folder) => void;
-  parentId?: string;
+  onCreated?: (project: Project) => void;
 }) {
   const { workspace } = useWorkspace();
 
@@ -72,36 +67,35 @@ function CreateFolderForm({
   });
 
   const utils = trpc.useUtils();
-  const createFolderMut = trpc.folders.createFolder.useMutation({
-    onSuccess: (folder, vars) => {
-      toast.success("Folder created");
-      utils.folders.getFolders.setData(
-        { workspaceId: workspace.id, parentId: vars.parentId },
-        (folders) => [folder, ...(folders ?? [])],
+  const createProjectMut = trpc.projects.createProject.useMutation({
+    onSuccess: (project) => {
+      toast.success("Project created");
+      utils.projects.getProjects.setData(
+        { workspaceId: workspace.id },
+        (projects) => [project, ...(projects ?? [])],
       );
-      onCreated?.(folder);
+      onCreated?.(project);
     },
     onError: (error) => {
-      toast.error("Failed to create folder", { description: error.message });
+      toast.error("Failed to create project", { description: error.message });
     },
   });
 
-  const handleCreateFolder = useCallback(
+  const handleCreateProject = useCallback(
     (data: z.infer<typeof schema>) => {
-      createFolderMut.mutate({
+      createProjectMut.mutate({
         workspaceId: workspace.id,
         name: data.name,
-        parentId,
       });
     },
-    [createFolderMut, parentId, workspace.id],
+    [createProjectMut, workspace.id],
   );
 
   return (
     <Form {...form}>
       <form
         className="grid gap-6"
-        onSubmit={form.handleSubmit(handleCreateFolder)}
+        onSubmit={form.handleSubmit(handleCreateProject)}
       >
         <FormField
           control={form.control}
@@ -117,27 +111,27 @@ function CreateFolderForm({
           )}
         />
 
-        <Button disabled={createFolderMut.isPending}>
-          {createFolderMut.isPending ? (
+        <Button disabled={createProjectMut.isPending}>
+          {createProjectMut.isPending ? (
             <Loader2Icon className="animate-spin" />
           ) : null}
-          Create Folder
+          Create Project
         </Button>
       </form>
     </Form>
   );
 }
 
-export const useCreateFolderModal = (): [
-  (props: CreateFolderModalProps) => JSX.Element,
+export const useCreateProjectModal = (): [
+  (props: CreateProjectModalProps) => JSX.Element,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {
   const [open, setOpen] = useState(false);
 
   const Modal = useCallback(
-    (props: CreateFolderModalProps) => (
-      <CreateFolderModal open={open} onOpenChange={setOpen} {...props} />
+    (props: CreateProjectModalProps) => (
+      <CreateProjectModal open={open} onOpenChange={setOpen} {...props} />
     ),
     [open],
   );

@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { Folder } from "@/db/schema";
+import { Project } from "@/db/schema";
+import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 
 import { Button } from "./ui/button";
@@ -18,18 +19,36 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { trpc } from "@/trpc/client";
 
-export default function FolderCard({ folder }: { folder: Folder }) {
+export default function ProjectCard({
+  project: initProject,
+}: {
+  project: Project;
+}) {
   const { workspace } = useWorkspace();
+  const { data: project } = trpc.projects.getProject.useQuery(
+    { projectId: initProject.id },
+    {
+      initialData: initProject,
+      placeholderData: (data) => {
+        return data ?? initProject;
+      },
+    },
+  );
 
   return (
-    <div className="group relative flex h-14 items-center gap-4 rounded-xl border px-2 transition-shadow hover:shadow-lg dark:hover:bg-secondary/50">
+    <div
+      className={cn(
+        "group relative flex h-14 items-center gap-4 rounded-xl border px-2 transition-shadow hover:shadow-lg dark:hover:bg-secondary/50",
+      )}
+    >
       <Link
-        href={`/${workspace.slug}/folders/${folder.id}`}
+        href={`/${workspace.slug}/projects/${project.id}`}
         className="absolute inset-0 z-10 rounded-xl ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       />
       <FolderIcon className="ml-2 h-6 w-6" />
-      <p className="flex-1 truncate font-semibold">{folder.name}</p>
+      <p className="flex-1 truncate font-semibold">{project.name}</p>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -41,13 +60,13 @@ export default function FolderCard({ folder }: { folder: Folder }) {
             <MoreVerticalIcon />
           </Button>
         </DropdownMenuTrigger>
-        <FolderActionDropdownContent folder={folder} />
+        <FolderActionDropdownContent project={project} />
       </DropdownMenu>
     </div>
   );
 }
 
-function FolderActionDropdownContent({ folder }: { folder: Folder }) {
+function FolderActionDropdownContent({}: { project: Project }) {
   // const [RenameModal, , setRenameModalOpen] = useRenameSnippetModal();
 
   // const {
