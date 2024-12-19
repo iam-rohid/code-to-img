@@ -46,7 +46,7 @@ export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
       },
     },
   );
-  const [{ isDragging }, drag, dragPreview] = useDrag(
+  const [{ isDragging }, drag] = useDrag(
     () => ({
       type: "snippet",
       item: { id: snippet.id },
@@ -57,20 +57,14 @@ export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
     [snippet.id],
   );
 
-  return isDragging ? (
-    <div
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      ref={dragPreview}
-      className="rounded-xl border-2 border-dashed border-primary bg-primary/10"
-    />
-  ) : (
+  return (
     <div
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       ref={drag}
       className={cn(
-        "group relative rounded-xl border transition-shadow hover:shadow-lg dark:hover:bg-secondary/50",
+        "group relative rounded-xl border transition-shadow hover:shadow-lg active:shadow-none dark:hover:bg-secondary/50",
+        { "opacity-50": isDragging },
       )}
     >
       {snippet.trashedAt ? (
