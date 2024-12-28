@@ -5,12 +5,20 @@ import {
   EditIcon,
   FolderIcon,
   MoreVerticalIcon,
+  StarIcon,
+  StarOffIcon,
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 
 import { Project } from "@/db/schema";
+import {
+  useAddProjectToSidebarMutation,
+  useDeleteProjectMutation,
+  useMoveProjectToTrashMutation,
+  useRemoveProjectFromSidebarMutation,
+  useRestoreProjectFromTrashMutation,
+} from "@/hooks/project-mutations";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
@@ -31,7 +39,7 @@ export default function ProjectCard({
 }) {
   const { workspace } = useWorkspace();
   const { data: project } = trpc.projects.getProject.useQuery(
-    { projectId: initProject.id },
+    { projectId: initProject.id, workspaceId: workspace.id },
     {
       initialData: initProject,
       placeholderData: (data) => {
@@ -72,139 +80,18 @@ export default function ProjectCard({
 function FolderActionDropdownContent({ project }: { project: Project }) {
   const [RenameModal, , setRenameModalOpen] = useRenameProjectModal();
 
-  const utils = trpc.useUtils();
+  const moveToTrashMut = useMoveProjectToTrashMutation();
+  const restoreFromTrashMut = useRestoreProjectFromTrashMutation();
+  const deleteProjectMut = useDeleteProjectMutation();
+  const addProjectToSidebarMut = useAddProjectToSidebarMutation();
+  const removeProjectFromSidebarMut = useRemoveProjectFromSidebarMutation();
 
-  const moveToTrashMut = trpc.projects.moveToTrash.useMutation({
-    onMutate: (vars) => {
-      const toastId = toast.loading("Moving project to trash...");
-
-      utils.projects.getAllProjects.setData(
-        { workspaceId: project.workspaceId },
-        (oldData) =>
-          oldData
-            ? oldData.filter((item) => item.id !== vars.projectId)
-            : undefined,
-      );
-      utils.projects.getTrashedProjects.setData(
-        { workspaceId: project.workspaceId },
-        (oldData) =>
-          oldData
-            ? [{ ...project, trashedAt: new Date() }, ...oldData]
-            : undefined,
-      );
-      utils.projects.getProject.setData(
-        { projectId: vars.projectId },
-        { ...project, trashedAt: new Date() },
-      );
-
-      return {
-        toastId,
-      };
-    },
-    onSuccess: (_data, _vars, ctx) => {
-      toast.success("Project moved to trash", {
-        id: ctx.toastId,
-      });
-    },
-    onError: (error, _vars, ctx) => {
-      toast.error("Failed to move project to trash", {
-        description: error.message,
-        id: ctx?.toastId,
-      });
-    },
-    onSettled: () => {
-      utils.projects.getAllProjects.invalidate({
-        workspaceId: project.workspaceId,
-      });
-      utils.projects.getTrashedProjects.invalidate({
-        workspaceId: project.workspaceId,
-      });
-      utils.projects.getProject.invalidate({ projectId: project.id });
-    },
-  });
-
-  const restoreFromTrashMut = trpc.projects.restoreFromTrash.useMutation({
-    onMutate: (vars) => {
-      const toastId = toast.loading("Restoring project from trash...");
-
-      utils.projects.getAllProjects.setData(
-        { workspaceId: project.workspaceId },
-        (oldData) =>
-          oldData ? [{ ...project, trashedAt: null }, ...oldData] : undefined,
-      );
-      utils.projects.getTrashedProjects.setData(
-        { workspaceId: project.workspaceId },
-        (oldData) =>
-          oldData
-            ? oldData.filter((item) => item.id !== vars.projectId)
-            : undefined,
-      );
-      utils.projects.getProject.setData(
-        { projectId: vars.projectId },
-        { ...project, trashedAt: null },
-      );
-      return {
-        toastId,
-      };
-    },
-    onSuccess: (_data, _vars, ctx) => {
-      toast.success("Project restored from trash", {
-        id: ctx.toastId,
-      });
-    },
-    onError: (error, _vars, ctx) => {
-      toast.error("Failed to restore project from trash", {
-        description: error.message,
-        id: ctx?.toastId,
-      });
-    },
-    onSettled: () => {
-      utils.projects.getAllProjects.invalidate({
-        workspaceId: project.workspaceId,
-      });
-      utils.projects.getTrashedProjects.invalidate({
-        workspaceId: project.workspaceId,
-      });
-      utils.projects.getProject.invalidate({ projectId: project.id });
-    },
-  });
-
-  const deleteProjectMut = trpc.projects.deleteProject.useMutation({
-    onMutate: (vars) => {
-      const toastId = toast.loading("Permanently deleting project...");
-
-      utils.projects.getTrashedProjects.setData(
-        { workspaceId: project.workspaceId },
-        (oldData) =>
-          oldData
-            ? oldData.filter((item) => item.id !== vars.projectId)
-            : undefined,
-      );
-
-      return {
-        toastId,
-      };
-    },
-    onSuccess: (_data, _vars, ctx) => {
-      toast.success("Project permanently deleted", {
-        id: ctx.toastId,
-      });
-    },
-    onError: (error, _vars, ctx) => {
-      toast.error("Failed to delete project", {
-        description: error.message,
-        id: ctx?.toastId,
-      });
-    },
-    onSettled: () => {
-      utils.projects.getTrashedProjects.invalidate({
-        workspaceId: project.workspaceId,
-      });
-      utils.projects.getProject.invalidate({
-        projectId: project.id,
-      });
-    },
-  });
+  const disabled =
+    moveToTrashMut.isPending ||
+    restoreFromTrashMut.isPending ||
+    deleteProjectMut.isPending ||
+    addProjectToSidebarMut.isPending ||
+    removeProjectFromSidebarMut.isPending;
 
   return (
     <>
@@ -213,14 +100,24 @@ function FolderActionDropdownContent({ project }: { project: Project }) {
           <>
             <DropdownMenuItem
               onClick={() =>
-                restoreFromTrashMut.mutate({ projectId: project.id })
+                restoreFromTrashMut.mutate({
+                  projectId: project.id,
+                  workspaceId: project.workspaceId,
+                })
               }
+              disabled={disabled}
             >
               <ArchiveRestoreIcon />
               Restore
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => deleteProjectMut.mutate({ projectId: project.id })}
+              onClick={() =>
+                deleteProjectMut.mutate({
+                  projectId: project.id,
+                  workspaceId: project.workspaceId,
+                })
+              }
+              disabled={disabled}
             >
               <TrashIcon />
               Permanently Delete
@@ -228,12 +125,48 @@ function FolderActionDropdownContent({ project }: { project: Project }) {
           </>
         ) : (
           <>
-            <DropdownMenuItem onClick={() => setRenameModalOpen(true)}>
+            <DropdownMenuItem
+              onClick={() => setRenameModalOpen(true)}
+              disabled={disabled}
+            >
               <EditIcon />
               Rename
             </DropdownMenuItem>
+            {project.starredAt ? (
+              <DropdownMenuItem
+                onClick={() =>
+                  removeProjectFromSidebarMut.mutate({
+                    projectId: project.id,
+                    workspaceId: project.workspaceId,
+                  })
+                }
+                disabled={disabled}
+              >
+                <StarOffIcon />
+                Remove from Sidebar
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                onClick={() =>
+                  addProjectToSidebarMut.mutate({
+                    projectId: project.id,
+                    workspaceId: project.workspaceId,
+                  })
+                }
+                disabled={disabled}
+              >
+                <StarIcon />
+                Add to Sidebar
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
-              onClick={() => moveToTrashMut.mutate({ projectId: project.id })}
+              onClick={() =>
+                moveToTrashMut.mutate({
+                  projectId: project.id,
+                  workspaceId: project.workspaceId,
+                })
+              }
+              disabled={disabled}
             >
               <TrashIcon />
               Move to Trash

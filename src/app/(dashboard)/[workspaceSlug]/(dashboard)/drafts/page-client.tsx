@@ -24,7 +24,7 @@ export default function PageClient() {
       <AppBar
         title="Drafts"
         trailing={
-          <Button onClick={() => setCreateSnippetModalOpen(true)}>
+          <Button onClick={() => setCreateSnippetModalOpen(true)} size="sm">
             <PlusIcon />
             Create Snippet
           </Button>

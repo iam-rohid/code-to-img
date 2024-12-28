@@ -2,11 +2,10 @@ import { useCallback } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Project } from "@/db/schema";
-import { trpc } from "@/trpc/client";
+import { useUpdateProjectMutation } from "@/hooks/project-mutations";
 import { Button } from "../ui/button";
 import {
   Form,
@@ -40,30 +39,22 @@ export default function RenameProjectForm({
     },
   });
 
-  const utils = trpc.useUtils();
-
-  const updateProjectMut = trpc.projects.updateProject.useMutation({
-    onSuccess: (updatedProject) => {
-      onRenamed?.(updatedProject);
-      toast.success("Project renamed");
-      utils.projects.getProject.setData(
-        { projectId: project.id },
-        updatedProject,
-      );
-    },
-    onError: (error) => {
-      toast.error("Failed to rename project", { description: error.message });
-    },
-  });
+  const updateProjectMut = useUpdateProjectMutation();
 
   const onSubmit = useCallback(
     (data: z.infer<typeof schema>) => {
-      updateProjectMut.mutate({
-        projectId: project.id,
-        dto: { name: data.name },
-      });
+      updateProjectMut.mutate(
+        {
+          projectId: project.id,
+          workspaceId: project.workspaceId,
+          dto: { name: data.name },
+        },
+        {
+          onSuccess: (data) => onRenamed?.(data),
+        },
+      );
     },
-    [project.id, updateProjectMut],
+    [onRenamed, project.id, project.workspaceId, updateProjectMut],
   );
 
   return (
@@ -78,7 +69,6 @@ export default function RenameProjectForm({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}

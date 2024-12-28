@@ -2,11 +2,10 @@ import { useCallback } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Snippet } from "@/db/schema";
-import { trpc } from "@/trpc/client";
+import { useUpdateSnippetMutation } from "@/hooks/snippet-mutations";
 import { Button } from "../ui/button";
 import {
   Form,
@@ -40,30 +39,22 @@ export default function RenameSnippetForm({
     },
   });
 
-  const utils = trpc.useUtils();
-
-  const updateSnippetMut = trpc.snippets.updateSnippet.useMutation({
-    onSuccess: (updatedSnippet) => {
-      onRenamed?.(updatedSnippet);
-      toast.success("Snippet renamed");
-      utils.snippets.getSnippet.setData(
-        { snippetId: snippet.id },
-        updatedSnippet,
-      );
-    },
-    onError: (error) => {
-      toast.error("Failed to rename snippet", { description: error.message });
-    },
-  });
+  const updateSnippetMut = useUpdateSnippetMutation();
 
   const onSubmit = useCallback(
     (data: z.infer<typeof schema>) => {
-      updateSnippetMut.mutate({
-        snippetId: snippet.id,
-        dto: { title: data.title },
-      });
+      updateSnippetMut.mutate(
+        {
+          snippetId: snippet.id,
+          workspaceId: snippet.workspaceId,
+          dto: { title: data.title },
+        },
+        {
+          onSuccess: (data) => onRenamed?.(data),
+        },
+      );
     },
-    [snippet.id, updateSnippetMut],
+    [onRenamed, snippet.id, snippet.workspaceId, updateSnippetMut],
   );
 
   return (

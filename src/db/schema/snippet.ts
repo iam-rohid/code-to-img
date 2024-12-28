@@ -25,6 +25,7 @@ export const snippetTable = pgTable("snippet", {
     .notNull()
     .defaultNow(),
   trashedAt: timestamp("trashed_at", { withTimezone: true, mode: "date" }),
+  starredAt: timestamp("starred_at", { withTimezone: true, mode: "date" }),
   projectId: uuid("project_id").references(() => projectTable.id, {
     onDelete: "cascade",
   }),

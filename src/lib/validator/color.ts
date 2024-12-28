@@ -20,9 +20,9 @@ export const colorSchema = z.discriminatedUnion("type", [
 export type iColor = z.infer<typeof colorSchema>;
 
 export const backgroundSchema = z.object({
-  color: colorSchema.nullish(),
-  image: z.string().nullish(),
-  imageFill: z.enum(["contain", "cover", "fill"]).default("cover").nullish(),
+  color: colorSchema.nullable().default(null),
+  image: z.string().nullable().default(null),
+  imageFill: z.enum(["contain", "cover", "fill"]).default("cover"),
 });
 
 export type iBackground = z.infer<typeof backgroundSchema>;

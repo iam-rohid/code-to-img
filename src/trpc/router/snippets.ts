@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { projectTable, Snippet, snippetTable } from "@/db/schema";
 import { DEFAULT_SNIPPET_TEMPLATE } from "@/lib/constants/templates";
 import { snippetSchema } from "@/lib/validator/snippet";
+import { Context } from "../context";
 import protectedProcedure from "../procedures/protected";
 import { router } from "../trpc";
 
@@ -27,25 +28,34 @@ const parseSnippet = (snippet: Snippet): Snippet => {
   }
 };
 
-export const getSnippet = async (snippetId: string, userId: string) => {
+export const getSnippet = async (
+  snippetId: string,
+  workspaceId: string,
+  ctx: Context,
+) => {
+  if (!ctx.session) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const workspace = await getWorkspaceById(workspaceId, ctx.session.user.id);
+
   const [snippet] = await db
     .select()
     .from(snippetTable)
     .where(eq(snippetTable.id, snippetId));
-  if (!snippet) {
+
+  if (!snippet || snippet.workspaceId !== workspace.workspace.id) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Snippet not found!" });
   }
 
-  await getWorkspaceById(snippet.workspaceId, userId);
   return parseSnippet(snippet);
 };
 
 export const snippetsRouter = router({
   getSnippet: protectedProcedure
-    .input(z.object({ snippetId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return getSnippet(input.snippetId, ctx.session.user.id);
-    }),
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
+    .query(async ({ ctx, input }) =>
+      getSnippet(input.snippetId, input.workspaceId, ctx),
+    ),
   getSnippets: protectedProcedure
     .input(
       z.object({
@@ -166,6 +176,7 @@ export const snippetsRouter = router({
     .input(
       z.object({
         snippetId: z.string(),
+        workspaceId: z.string(),
         dto: z.object({
           title: z.string().optional(),
           data: snippetSchema.optional(),
@@ -173,7 +184,7 @@ export const snippetsRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
       const [updatedSnippet] = await ctx.db
         .update(snippetTable)
         .set({
@@ -189,9 +200,9 @@ export const snippetsRouter = router({
       return updatedSnippet;
     }),
   duplicateSnippet: protectedProcedure
-    .input(z.object({ snippetId: z.string() }))
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
       const [duplicatedSnippet] = await ctx.db
         .insert(snippetTable)
         .values({
@@ -206,9 +217,9 @@ export const snippetsRouter = router({
       return duplicatedSnippet;
     }),
   moveToTrash: protectedProcedure
-    .input(z.object({ snippetId: z.string() }))
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
       const [updateedSnippet] = await ctx.db
         .update(snippetTable)
         .set({ trashedAt: new Date() })
@@ -220,9 +231,9 @@ export const snippetsRouter = router({
       return updateedSnippet;
     }),
   restoreFromTrash: protectedProcedure
-    .input(z.object({ snippetId: z.string() }))
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
       const [updatedSnippet] = await ctx.db
         .update(snippetTable)
         .set({ trashedAt: null })
@@ -234,13 +245,9 @@ export const snippetsRouter = router({
       return updatedSnippet;
     }),
   deleteSnippet: protectedProcedure
-    .input(
-      z.object({
-        snippetId: z.string(),
-      }),
-    )
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const snippet = await getSnippet(input.snippetId, ctx.session.user.id);
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
       const [deletedSnippet] = await ctx.db
         .delete(snippetTable)
         .where(eq(snippetTable.id, snippet.id))
@@ -249,5 +256,33 @@ export const snippetsRouter = router({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
       return deletedSnippet;
+    }),
+  starSnippet: protectedProcedure
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
+      const [updatedSnippet] = await ctx.db
+        .update(snippetTable)
+        .set({ starredAt: new Date() })
+        .where(eq(snippetTable.id, snippet.id))
+        .returning();
+      if (!updatedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return updatedSnippet;
+    }),
+  unstarSnippet: protectedProcedure
+    .input(z.object({ snippetId: z.string(), workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const snippet = await getSnippet(input.snippetId, input.workspaceId, ctx);
+      const [updatedSnippet] = await ctx.db
+        .update(snippetTable)
+        .set({ starredAt: null })
+        .where(eq(snippetTable.id, snippet.id))
+        .returning();
+      if (!updatedSnippet) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+      return updatedSnippet;
     }),
 });

@@ -9,16 +9,22 @@ import { toast } from "sonner";
 import SnippetEditor from "@/components/snippet-editor/snippet-editor";
 import { Button } from "@/components/ui/button";
 import { Snippet } from "@/db/schema";
-import { useSnippetActions } from "@/hooks/use-snippet-actions";
+import {
+  useDeleteSnippetMutation,
+  useRestoreSnippetFromTrashMutation,
+} from "@/hooks/snippet-mutations";
 import { iSnippetData } from "@/lib/validator/snippet";
 import SnippetProvider from "@/providers/snippet-provider";
+import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
 export default function PageClient() {
-  const { snippetId } = useParams<{
-    snippetId: string;
-  }>();
-  const snippetQuery = trpc.snippets.getSnippet.useQuery({ snippetId });
+  const { snippetId } = useParams<{ snippetId: string }>();
+  const { workspace } = useWorkspace();
+  const snippetQuery = trpc.snippets.getSnippet.useQuery({
+    snippetId,
+    workspaceId: workspace.id,
+  });
 
   if (snippetQuery.isPending) {
     return (
@@ -39,21 +45,11 @@ function SnippetLoaded({ snippet }: { snippet: Snippet }) {
   const [newData, setNewData] = useState<iSnippetData | null>(null);
   const utils = trpc.useUtils();
   const { mutate, isPending } = trpc.snippets.updateSnippet.useMutation({
-    // onMutate: (vars) => {
-    //   utils.snippets.getSnippet.setData(
-    //     { snippetId: vars.snippetId },
-    //     (snippet) =>
-    //       snippet
-    //         ? {
-    //             ...snippet,
-    //             data: vars.dto.data ?? snippet.data,
-    //             title: vars.dto.title ?? snippet.title,
-    //           }
-    //         : undefined,
-    //   );
-    // },
     onSuccess: (data) => {
-      utils.snippets.getSnippet.setData({ snippetId: snippet.id }, data);
+      utils.snippets.getSnippet.setData(
+        { snippetId: snippet.id, workspaceId: snippet.workspaceId },
+        data,
+      );
     },
     onError: (error) => {
       toast.error("Failed to save", { description: error.message });
@@ -66,14 +62,18 @@ function SnippetLoaded({ snippet }: { snippet: Snippet }) {
     }
 
     const timeout = setTimeout(() => {
-      mutate({ snippetId: snippet.id, dto: { data: newData } });
+      mutate({
+        snippetId: snippet.id,
+        workspaceId: snippet.workspaceId,
+        dto: { data: newData },
+      });
       setNewData(null);
     }, 1000);
 
     return () => {
       clearTimeout(timeout);
     };
-  }, [isPending, mutate, newData, snippet.id]);
+  }, [isPending, mutate, newData, snippet.id, snippet.workspaceId]);
 
   useEffect(() => {
     if (!newData && !isPending) {
@@ -106,7 +106,8 @@ function SnippetLoaded({ snippet }: { snippet: Snippet }) {
 }
 
 function SnippetTrashedBanner({ snippet }: { snippet: Snippet }) {
-  const { deleteSnippetMut, restoreFromTrashMut } = useSnippetActions(snippet);
+  const deleteSnippetMut = useDeleteSnippetMutation();
+  const restoreFromTrashMut = useRestoreSnippetFromTrashMutation();
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-4 bg-destructive px-4 py-2 text-destructive-foreground">
@@ -120,7 +121,12 @@ function SnippetTrashedBanner({ snippet }: { snippet: Snippet }) {
           variant="outline"
           size="sm"
           className="border-destructive-foreground bg-transparent text-destructive-foreground hover:bg-destructive-foreground/10 hover:text-destructive-foreground"
-          onClick={() => restoreFromTrashMut.mutate({ snippetId: snippet.id })}
+          onClick={() =>
+            restoreFromTrashMut.mutate({
+              snippetId: snippet.id,
+              workspaceId: snippet.workspaceId,
+            })
+          }
         >
           <ArchiveRestoreIcon />
           Restore Snippet
@@ -129,7 +135,12 @@ function SnippetTrashedBanner({ snippet }: { snippet: Snippet }) {
           variant="outline"
           size="sm"
           className="border-destructive-foreground bg-transparent text-destructive-foreground hover:bg-destructive-foreground/10 hover:text-destructive-foreground"
-          onClick={() => deleteSnippetMut.mutate({ snippetId: snippet.id })}
+          onClick={() =>
+            deleteSnippetMut.mutate({
+              snippetId: snippet.id,
+              workspaceId: snippet.workspaceId,
+            })
+          }
         >
           <TrashIcon />
           Delete from Trash

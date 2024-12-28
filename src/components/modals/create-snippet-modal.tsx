@@ -79,20 +79,30 @@ function CreateSnippetForm({
 
   const utils = trpc.useUtils();
   const createSnippetMut = trpc.snippets.createSnippet.useMutation({
-    onSuccess: (snippet, vars) => {
-      toast.success("Snippet created");
+    onMutate: () => {
+      const toastId = toast.loading("Creating snippet...");
+      return { toastId };
+    },
+    onSuccess: (snippet, _vars, ctx) => {
+      toast.success("Snippet created", { id: ctx.toastId });
       utils.snippets.getSnippets.setData(
         {
-          workspaceId: workspace.id,
-          projectId: vars.dto.projectId,
+          workspaceId: snippet.workspaceId,
+          projectId: snippet.projectId ?? undefined,
         },
         (snippets) => [snippet, ...(snippets ?? [])],
       );
-      utils.snippets.getSnippet.setData({ snippetId: snippet.id }, snippet);
+      utils.snippets.getSnippet.setData(
+        { snippetId: snippet.id, workspaceId: snippet.workspaceId },
+        snippet,
+      );
       onCreated?.(snippet);
     },
-    onError: (error) => {
-      toast.error("Failed to create snippet", { description: error.message });
+    onError: (error, _vars, ctx) => {
+      toast.error("Failed to create snippet", {
+        description: error.message,
+        id: ctx?.toastId,
+      });
     },
   });
 

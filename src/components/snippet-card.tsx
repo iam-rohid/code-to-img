@@ -6,13 +6,22 @@ import {
   EditIcon,
   MoreHorizontalIcon,
   MoreVertical,
+  StarIcon,
+  StarOffIcon,
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useDrag } from "react-dnd";
 
 import { Snippet } from "@/db/schema";
-import { useSnippetActions } from "@/hooks/use-snippet-actions";
+import {
+  useAddSnippetToSidebarMutation,
+  useDeleteSnippetMutation,
+  useDuplicateSnippetMutation,
+  useMoveSnippetToTrashMutation,
+  useRemoveSnippetFromSidebarMutation,
+  useRestoreSnippetFromTrashMutation,
+} from "@/hooks/snippet-mutations";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
@@ -24,7 +33,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
@@ -38,7 +46,7 @@ dayjs.extend(relativeTime);
 export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
   const { workspace } = useWorkspace();
   const { data: snippet } = trpc.snippets.getSnippet.useQuery(
-    { snippetId: initSnippet.id },
+    { snippetId: initSnippet.id, workspaceId: workspace.id },
     {
       initialData: initSnippet,
       placeholderData: (data) => {
@@ -119,7 +127,7 @@ export function SnippetSidebarItem({
 }) {
   const { workspace } = useWorkspace();
   const { data: snippet } = trpc.snippets.getSnippet.useQuery(
-    { snippetId: initSnippet.id },
+    { snippetId: initSnippet.id, workspaceId: workspace.id },
     {
       initialData: initSnippet,
       placeholderData: (data) => {
@@ -171,12 +179,20 @@ export function SnippetSidebarItem({
 function SnippetActionDropdownContent({ snippet }: { snippet: Snippet }) {
   const [RenameModal, , setRenameModalOpen] = useRenameSnippetModal();
 
-  const {
-    deleteSnippetMut,
-    moveToTrashMut,
-    restoreFromTrashMut,
-    duplicateSnippetMut,
-  } = useSnippetActions(snippet);
+  const moveToTrashMut = useMoveSnippetToTrashMutation();
+  const restoreFromTrashMut = useRestoreSnippetFromTrashMutation();
+  const deleteSnippetMut = useDeleteSnippetMutation();
+  const duplicateSnippetMut = useDuplicateSnippetMutation();
+  const addSnippetToSidebarMut = useAddSnippetToSidebarMutation();
+  const removeSnippetFromSidebarMut = useRemoveSnippetFromSidebarMutation();
+
+  const disabled =
+    deleteSnippetMut.isPending ||
+    moveToTrashMut.isPending ||
+    restoreFromTrashMut.isPending ||
+    duplicateSnippetMut.isPending ||
+    addSnippetToSidebarMut.isPending ||
+    removeSnippetFromSidebarMut.isPending;
 
   return (
     <>
@@ -185,14 +201,24 @@ function SnippetActionDropdownContent({ snippet }: { snippet: Snippet }) {
           <>
             <DropdownMenuItem
               onClick={() =>
-                restoreFromTrashMut.mutate({ snippetId: snippet.id })
+                restoreFromTrashMut.mutate({
+                  snippetId: snippet.id,
+                  workspaceId: snippet.workspaceId,
+                })
               }
+              disabled={disabled}
             >
               <ArchiveRestoreIcon />
               Restore
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => deleteSnippetMut.mutate({ snippetId: snippet.id })}
+              onClick={() =>
+                deleteSnippetMut.mutate({
+                  snippetId: snippet.id,
+                  workspaceId: snippet.workspaceId,
+                })
+              }
+              disabled={disabled}
             >
               <TrashIcon />
               Permanently Delete
@@ -202,19 +228,58 @@ function SnippetActionDropdownContent({ snippet }: { snippet: Snippet }) {
           <>
             <DropdownMenuItem
               onClick={() =>
-                duplicateSnippetMut.mutate({ snippetId: snippet.id })
+                duplicateSnippetMut.mutate({
+                  snippetId: snippet.id,
+                  workspaceId: snippet.workspaceId,
+                })
               }
+              disabled={disabled}
             >
               <CopyIcon />
               Duplicate
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setRenameModalOpen(true)}>
+            <DropdownMenuItem
+              onClick={() => setRenameModalOpen(true)}
+              disabled={disabled}
+            >
               <EditIcon />
               Rename
             </DropdownMenuItem>
+            {snippet.starredAt ? (
+              <DropdownMenuItem
+                onClick={() =>
+                  removeSnippetFromSidebarMut.mutate({
+                    snippetId: snippet.id,
+                    workspaceId: snippet.workspaceId,
+                  })
+                }
+                disabled={disabled}
+              >
+                <StarOffIcon />
+                Remove from Sidebar
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                onClick={() =>
+                  addSnippetToSidebarMut.mutate({
+                    snippetId: snippet.id,
+                    workspaceId: snippet.workspaceId,
+                  })
+                }
+                disabled={disabled}
+              >
+                <StarIcon />
+                Add to Sidebar
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
-              onClick={() => moveToTrashMut.mutate({ snippetId: snippet.id })}
+              onClick={() =>
+                moveToTrashMut.mutate({
+                  snippetId: snippet.id,
+                  workspaceId: snippet.workspaceId,
+                })
+              }
+              disabled={disabled}
             >
               <TrashIcon />
               Move to Trash

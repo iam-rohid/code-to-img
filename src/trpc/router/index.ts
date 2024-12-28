@@ -4,6 +4,7 @@ import { createCallerFactory, router } from "../trpc";
 import { authRouter } from "./auth";
 import { projectsRouter } from "./projects";
 import { snippetsRouter } from "./snippets";
+import { starsRouter } from "./stars";
 import { usersRouter } from "./users";
 import { workspacesRouter } from "./workspaces";
 
@@ -13,6 +14,7 @@ export const appRouter = router({
   workspaces: workspacesRouter,
   snippets: snippetsRouter,
   projects: projectsRouter,
+  stars: starsRouter,
 });
 
 export type AppRouter = typeof appRouter;

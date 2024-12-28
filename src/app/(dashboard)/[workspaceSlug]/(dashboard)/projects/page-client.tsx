@@ -23,7 +23,7 @@ export default function PageClient() {
       <AppBar
         title="All Projects"
         trailing={
-          <Button onClick={() => setCreateProjectModalOpen(true)}>
+          <Button onClick={() => setCreateProjectModalOpen(true)} size="sm">
             <PlusIcon />
             Create Project
           </Button>

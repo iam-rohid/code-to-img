@@ -68,16 +68,27 @@ function CreateProjectForm({
 
   const utils = trpc.useUtils();
   const createProjectMut = trpc.projects.createProject.useMutation({
-    onSuccess: (project) => {
-      toast.success("Project created");
+    onMutate: () => {
+      const toastId = toast.loading("Creating project...");
+      return { toastId };
+    },
+    onSuccess: (project, _vars, ctx) => {
+      toast.success("Project created", { id: ctx.toastId });
       utils.projects.getAllProjects.setData(
         { workspaceId: workspace.id },
         (projects) => [project, ...(projects ?? [])],
       );
+      utils.projects.getProject.setData(
+        { projectId: project.id, workspaceId: project.workspaceId },
+        project,
+      );
       onCreated?.(project);
     },
-    onError: (error) => {
-      toast.error("Failed to create project", { description: error.message });
+    onError: (error, _vars, ctx) => {
+      toast.error("Failed to create project", {
+        description: error.message,
+        id: ctx?.toastId,
+      });
     },
   });
 

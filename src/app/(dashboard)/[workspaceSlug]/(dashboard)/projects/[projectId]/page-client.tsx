@@ -18,6 +18,7 @@ export default function PageClient() {
 
   const projectQuery = trpc.projects.getProject.useQuery({
     projectId,
+    workspaceId: workspace.id,
   });
 
   const snippetsQuery = trpc.snippets.getSnippets.useQuery({
@@ -38,7 +39,7 @@ export default function PageClient() {
         links={[{ title: "All Projects", url: `/${workspace.slug}/projects` }]}
         title={projectQuery.data?.name ?? ""}
         trailing={
-          <Button onClick={() => setCreateSnippetModalOpen(true)}>
+          <Button onClick={() => setCreateSnippetModalOpen(true)} size="sm">
             <PlusIcon />
             Create Snippet
           </Button>

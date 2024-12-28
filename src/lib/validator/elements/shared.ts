@@ -6,16 +6,16 @@ export const elementBase = z.object({
   name: z.string(),
   width: z.number(),
   height: z.number(),
-  autoWidth: z.boolean().optional().default(false),
-  autoHeight: z.boolean().optional().default(false),
-  widthHeightLinked: z.boolean().optional().default(false),
-  rotation: z.number().optional().default(0),
-  scale: z.number().min(0.1).max(5).optional().default(1),
-  x: z.number().optional().default(0),
-  y: z.number().optional().default(0),
-  hidden: z.boolean().optional().default(false),
-  locked: z.boolean().optional().default(false),
-  boxShadow: z.string().optional().default("none"),
+  autoWidth: z.boolean().default(false),
+  autoHeight: z.boolean().default(false),
+  widthHeightLinked: z.boolean().default(false),
+  rotation: z.number().default(0),
+  scale: z.number().min(0.1).max(5).default(1),
+  x: z.number().default(0),
+  y: z.number().default(0),
+  hidden: z.boolean().default(false),
+  locked: z.boolean().default(false),
+  boxShadow: z.string().default("none"),
 });
 
 export type iElementBase = z.infer<typeof elementBase>;
@@ -25,8 +25,8 @@ export const paddingSchema = z.object({
   top: z.number(),
   right: z.number(),
   bottom: z.number(),
-  horizontalLinked: z.boolean().optional(),
-  verticalLinked: z.boolean().optional(),
+  horizontalLinked: z.boolean().default(false),
+  verticalLinked: z.boolean().default(false),
 });
 
 export type iPadding = z.infer<typeof paddingSchema>;
