@@ -19,7 +19,7 @@ import {
   useRemoveProjectFromSidebarMutation,
   useRestoreProjectFromTrashMutation,
 } from "@/hooks/project-mutations";
-import { cn } from "@/lib/utils";
+import { cn, getProjectUrl } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
@@ -55,7 +55,7 @@ export default function ProjectCard({
       )}
     >
       <Link
-        href={`/${workspace.slug}/projects/${project.id}`}
+        href={getProjectUrl(project, workspace.slug)}
         className="absolute inset-0 z-10 rounded-xl ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       />
       <FolderIcon className="ml-2 h-6 w-6" />

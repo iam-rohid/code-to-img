@@ -22,7 +22,7 @@ import {
   useRemoveSnippetFromSidebarMutation,
   useRestoreSnippetFromTrashMutation,
 } from "@/hooks/snippet-mutations";
-import { cn } from "@/lib/utils";
+import { cn, getSnippetUrl } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
@@ -79,7 +79,7 @@ export function SnippetCard({ snippet: initSnippet }: { snippet: Snippet }) {
         <div className="absolute inset-0 z-10 rounded-xl"></div>
       ) : (
         <Link
-          href={`/${workspace.slug}/editor/${snippet.id}`}
+          href={getSnippetUrl(snippet, workspace.slug)}
           className="absolute inset-0 z-10 rounded-xl ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
       )}
@@ -141,7 +141,7 @@ export function SnippetSidebarItem({
       <SidebarMenuButton asChild className="h-fit p-0" isActive={isActive}>
         <div>
           <Link
-            href={`/${workspace.slug}/editor/${snippet.id}`}
+            href={getSnippetUrl(snippet, workspace.slug)}
             className="absolute inset-0 z-10 rounded-lg ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
 

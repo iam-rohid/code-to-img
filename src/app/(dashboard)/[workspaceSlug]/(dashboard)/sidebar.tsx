@@ -45,6 +45,7 @@ import UserButton from "@/components/user-button";
 import WorkspaceSwitcher from "@/components/workspace-switcher";
 import { useRemoveProjectFromSidebarMutation } from "@/hooks/project-mutations";
 import { useRemoveSnippetFromSidebarMutation } from "@/hooks/snippet-mutations";
+import { getProjectUrl, getSnippetUrl } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { RouterOutput } from "@/trpc";
 import { trpc } from "@/trpc/client";
@@ -185,8 +186,8 @@ export default function WorkspcaeSidebar() {
                 {starsQuery.data.map((star) => {
                   const url =
                     star.type === "project"
-                      ? `/${workspace.slug}/projects/${star.id}`
-                      : `/${workspace.slug}/editor/${star.id}`;
+                      ? getProjectUrl(star, workspace.slug)
+                      : getSnippetUrl(star, workspace.slug);
                   const isActive = pathname === url;
 
                   return (

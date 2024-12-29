@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ChevronLeftIcon, LayoutDashboardIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { useCreateSnippetModal } from "@/components/modals/create-snippet-modal";
 import { SnippetSidebarItem } from "@/components/snippet-card";
@@ -23,6 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import UserButton from "@/components/user-button";
 import WorkspaceSwitcher from "@/components/workspace-switcher";
+import { getSnippetUrl } from "@/lib/utils";
 import { useWorkspace } from "@/providers/workspace-provider";
 import { trpc } from "@/trpc/client";
 
@@ -31,9 +32,18 @@ dayjs.extend(relativeTime);
 export default function EditorSidebar() {
   const { workspace } = useWorkspace();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+
   const snippetsQuery = trpc.snippets.getSnippets.useQuery({
     workspaceId: workspace.id,
+    projectId,
   });
+  const projectQuery = trpc.projects.getProject.useQuery(
+    { projectId: projectId ?? "", workspaceId: workspace.id },
+    { enabled: !!projectId },
+  );
+
   const [CreateSnippetModal, , setCreateSnippetModalOpen] =
     useCreateSnippetModal();
 
@@ -69,7 +79,9 @@ export default function EditorSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Snippets</SidebarGroupLabel>
+          <SidebarGroupLabel>
+            {projectId ? (projectQuery.data?.name ?? "Loading...") : "Snippets"}
+          </SidebarGroupLabel>
           <SidebarGroupAction onClick={() => setCreateSnippetModalOpen(true)}>
             <PlusIcon />
           </SidebarGroupAction>
@@ -96,8 +108,9 @@ export default function EditorSidebar() {
       </SidebarContent>
 
       <CreateSnippetModal
+        projectId={projectId}
         onCreated={(snippet) => {
-          router.push(`/${workspace.slug}/editor/${snippet.id}`);
+          router.push(getSnippetUrl(snippet, workspace.slug));
         }}
       />
     </Sidebar>

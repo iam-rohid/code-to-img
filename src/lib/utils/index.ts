@@ -16,3 +16,26 @@ export function getCenterXYForElement(args: {
     y: args.canvasHeight / 2 - args.height / 2,
   };
 }
+
+export const getSnippetUrl = (
+  snippet: { id: string; projectId?: string | null },
+  workspaceSlug: string,
+) => {
+  let url = `/${workspaceSlug}/editor/${snippet.id}`;
+  const searchParams = new URLSearchParams();
+  if (snippet.projectId) {
+    searchParams.set("projectId", snippet.projectId);
+  }
+  if (searchParams.toString()) {
+    url += "?" + searchParams.toString();
+  }
+  return url;
+};
+
+export const getProjectUrl = (
+  project: { id: string },
+  workspaceSlug: string,
+) => {
+  const url = `/${workspaceSlug}/projects/${project.id}`;
+  return url;
+};
