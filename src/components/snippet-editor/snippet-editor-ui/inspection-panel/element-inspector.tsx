@@ -50,7 +50,7 @@ function ElementInspector({ elementId }: { elementId: string }) {
   }
 
   return (
-    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="bg-card text-card-foreground pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border shadow-sm">
       <ElementAlignment element={element} />
       <Separator />
       <ElementTransformProperties element={element} />
@@ -78,7 +78,7 @@ function ElementAlignment({ element }: { element: iElement }) {
   const alignElement = useStore(snippetStore, (state) => state.alignElement);
   return (
     <div className="p-2">
-      <p className="mb-2 text-xs text-muted-foreground">Alignment</p>
+      <p className="text-muted-foreground mb-2 text-xs">Alignment</p>
       <div className="flex items-center justify-between">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -169,8 +169,8 @@ function ElementTransformProperties({ element }: { element: iElement }) {
 
   return (
     <div className="p-2">
-      <p className="mb-2 text-xs text-muted-foreground">Transform</p>
-      <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
+      <p className="text-muted-foreground mb-2 text-xs">Transform</p>
+      <div className="grid grid-cols-[1fr_24px_1fr_24px] items-center gap-x-1 gap-y-2">
         <InspectorNumberInput
           value={element.x}
           icon={<span>X</span>}
@@ -441,7 +441,7 @@ function ElementActions({ element }: { element: iElement }) {
 
   return (
     <div className="p-2">
-      <p className="mb-2 text-xs text-muted-foreground">Actions</p>
+      <p className="text-muted-foreground mb-2 text-xs">Actions</p>
       <div className="flex items-center gap-1">
         <Tooltip>
           <TooltipTrigger asChild>

@@ -102,7 +102,7 @@ export function NumberField({
   const id = useId();
 
   return (
-    <div className="grid h-12 grid-cols-[1fr,6rem] items-center gap-2 px-2">
+    <div className="grid h-12 grid-cols-[1fr_6rem] items-center gap-2 px-2">
       <Label htmlFor={id}>{label}</Label>
       <InspectorNumberInput
         id={id}
@@ -124,7 +124,7 @@ export function Padding({
   onPaddingChange: (value: iPadding) => void;
 }) {
   return (
-    <div className="grid grid-cols-[1fr,24px,1fr] items-center gap-x-1 gap-y-2">
+    <div className="grid grid-cols-[1fr_24px_1fr] items-center gap-x-1 gap-y-2">
       <InspectorNumberInput
         min={0}
         value={value.top}

@@ -50,8 +50,8 @@ export default function ImagePickerModal({
 
   return (
     <Dialog {...props}>
-      <DialogContent className="flex h-screen max-w-[1024px] flex-col justify-start gap-0 space-y-0 p-0 md:h-[calc(100%-4rem)]">
-        <DialogHeader className="sticky top-0 z-20 space-y-0 border-b bg-card p-6">
+      <DialogContent className="flex h-screen w-full flex-col justify-start gap-0 space-y-0 overflow-hidden p-0 sm:max-w-[1024px] md:h-[calc(100%-4rem)]">
+        <DialogHeader className="bg-card sticky top-0 z-20 space-y-0 border-b p-6">
           <DialogTitle>Add Image</DialogTitle>
           <div className="flex flex-wrap gap-2 pt-4">
             <Button

@@ -13,9 +13,9 @@ import { useSnippetEditor } from "../../snippet-editor";
 
 export function CanvasInspector() {
   return (
-    <div className="pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="bg-card text-card-foreground pointer-events-auto flex h-fit max-h-full w-72 flex-col overflow-y-auto rounded-lg border shadow-sm">
       <div className="p-2">
-        <p className="text-sm font-medium text-muted-foreground">Canvas</p>
+        <p className="text-muted-foreground text-sm font-medium">Canvas</p>
       </div>
       <Separator />
       <CanvasTransform />
@@ -39,8 +39,8 @@ export function CanvasTransform() {
 
   return (
     <div className="p-2">
-      <p className="mb-2 text-xs text-muted-foreground">Transform</p>
-      <div className="grid grid-cols-[1fr,24px,1fr,24px] items-center gap-x-1 gap-y-2">
+      <p className="text-muted-foreground mb-2 text-xs">Transform</p>
+      <div className="grid grid-cols-[1fr_24px_1fr_24px] items-center gap-x-1 gap-y-2">
         <InspectorNumberInput
           value={canvasWidth}
           min={200}
@@ -107,7 +107,7 @@ function CanvasBackground() {
       <p className="mb-2">Fill</p>
       <div className="space-y-2">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">Background Color</p>
+          <p className="text-muted-foreground text-sm">Background Color</p>
           <div className="flex gap-2">
             <BackgroundPicker
               color={background.color}
@@ -128,7 +128,7 @@ function CanvasBackground() {
           </div>
         </div>
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">Background Image</p>
+          <p className="text-muted-foreground text-sm">Background Image</p>
 
           <div className="flex gap-2">
             <ImagePicker
@@ -152,7 +152,7 @@ function CanvasBackground() {
         </div>
         {background.image && (
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">Image Fill Mode</p>
+            <p className="text-muted-foreground text-sm">Image Fill Mode</p>
             <div className="flex h-10 w-fit gap-0.5 rounded-lg border p-0.5">
               {[
                 { label: "Cover", value: "cover" },
