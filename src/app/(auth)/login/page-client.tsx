@@ -38,7 +38,7 @@ export default function PageClient() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              <Button asChild>
+              <Button asChild variant="secondary">
                 <Link href="/login/github">
                   <GithubIcon />
                   Log in with Github
