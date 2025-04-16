@@ -1,4 +1,10 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -37,7 +43,7 @@ export default function EmojiPickerModal({
 }
 
 export const useEmojiPickerModal = (): [
-  (props: EmojiPickerModalProps) => JSX.Element,
+  (props: EmojiPickerModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

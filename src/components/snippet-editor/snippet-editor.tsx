@@ -92,11 +92,11 @@ export default function SnippetEditor({
   defaultValue,
   snippetId,
 }: SnippetEditorProps) {
-  const snippetStoreRef = useRef<SnippetStore>();
+  const snippetStoreRef = useRef<SnippetStore>(null);
   if (!snippetStoreRef.current) {
     snippetStoreRef.current = createSnippetStore(defaultValue);
   }
-  const editorStoreRef = useRef<SnippetEditorStore>();
+  const editorStoreRef = useRef<SnippetEditorStore>(null);
   if (!editorStoreRef.current) {
     let scrollPosition = {
       scrollX: 0,

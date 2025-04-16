@@ -1,6 +1,12 @@
 "use client";
 
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { Loader2 } from "lucide-react";
@@ -116,7 +122,7 @@ function ConfirmationForm() {
 }
 
 export const useDeleteAccountModal = (): [
-  (props: DeleteAccountModalProps) => JSX.Element,
+  (props: DeleteAccountModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

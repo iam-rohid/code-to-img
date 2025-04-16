@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon } from "lucide-react";
+import { LoaderCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -84,7 +84,7 @@ export default function RenameProjectForm({
           </Button>
           <Button type="submit" disabled={updateProjectMut.isPending}>
             {updateProjectMut.isPending ? (
-              <Loader2Icon className="animate-spin" />
+              <LoaderCircleIcon className="animate-spin" />
             ) : null}
             Rename
           </Button>

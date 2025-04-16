@@ -1,6 +1,12 @@
 "use client";
 
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { toBlob, toPng } from "html-to-image";
 import { ClipboardIcon, DownloadIcon, Loader2 } from "lucide-react";
@@ -157,7 +163,7 @@ export default function ExportImageModal({
 }
 
 export const useExportImageModal = (): [
-  (props: ExportImageModalProps) => JSX.Element,
+  (props: ExportImageModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

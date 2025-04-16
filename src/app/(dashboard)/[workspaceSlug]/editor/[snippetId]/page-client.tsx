@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { ArchiveRestoreIcon, Loader2Icon, TrashIcon } from "lucide-react";
+import { ArchiveRestoreIcon, LoaderCircleIcon, TrashIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -29,7 +29,7 @@ export default function PageClient() {
   if (snippetQuery.isPending) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Loader2Icon className="animate-spin" />
+        <LoaderCircleIcon className="animate-spin" />
       </div>
     );
   }

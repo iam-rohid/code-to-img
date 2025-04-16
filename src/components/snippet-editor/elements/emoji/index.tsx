@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 import { ContextMenuTrigger } from "@/components/ui/context-menu";
 import { iEmojiElement } from "@/lib/validator/elements";
 import { useDragElement } from "../../use-drag-element";

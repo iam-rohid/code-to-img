@@ -1,9 +1,15 @@
 "use client";
 
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogProps } from "@radix-ui/react-dialog";
-import { Loader2Icon } from "lucide-react";
+import { LoaderCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -124,7 +130,7 @@ function CreateProjectForm({
 
         <Button disabled={createProjectMut.isPending}>
           {createProjectMut.isPending ? (
-            <Loader2Icon className="animate-spin" />
+            <LoaderCircleIcon className="animate-spin" />
           ) : null}
           Create Project
         </Button>
@@ -134,7 +140,7 @@ function CreateProjectForm({
 }
 
 export const useCreateProjectModal = (): [
-  (props: CreateProjectModalProps) => JSX.Element,
+  (props: CreateProjectModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

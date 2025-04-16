@@ -1,4 +1,10 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 
 import { Snippet } from "@/db/schema";
@@ -35,7 +41,7 @@ export default function RenameSnippetModal({
 }
 
 export const useRenameSnippetModal = (): [
-  (props: RenameSnippetModalProps) => JSX.Element,
+  (props: RenameSnippetModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

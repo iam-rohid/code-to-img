@@ -14,7 +14,7 @@ import CodeMirror, {
   Extension,
   lineNumbers,
 } from "@uiw/react-codemirror";
-import Color from "color";
+import Color, { ColorInstance } from "color";
 import { PlusIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 
@@ -317,10 +317,10 @@ function TitleBar({
   onMouseDown,
 }: {
   element: iCodeEditorElement;
-  background: Color;
-  secondaryBackground: Color;
-  borderColor: Color;
-  secondaryBackground2: Color;
+  background: ColorInstance;
+  secondaryBackground: ColorInstance;
+  borderColor: ColorInstance;
+  secondaryBackground2: ColorInstance;
   theme: CodeEditorTheme;
   readOnly?: boolean;
   onRemoveTabClick: (tabId: string) => void;
@@ -423,8 +423,8 @@ function TabItem({
 }: {
   tab: CodeEditorTab;
   selected: boolean;
-  secondaryBackground: Color;
-  secondaryBackground2: Color;
+  secondaryBackground: ColorInstance;
+  secondaryBackground2: ColorInstance;
   onSelect: (tabId: string) => void;
   readOnly?: boolean;
   tabsCount: number;

@@ -2,6 +2,7 @@
 
 import {
   Dispatch,
+  ReactNode,
   SetStateAction,
   useCallback,
   useMemo,
@@ -110,7 +111,7 @@ export default function ImagePickerModal({
 }
 
 export const useImagePickerModal = (): [
-  (props: ImagePickerModalProps) => JSX.Element,
+  (props: ImagePickerModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

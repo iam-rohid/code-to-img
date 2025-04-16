@@ -1,4 +1,10 @@
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 
 import { Project } from "@/db/schema";
@@ -35,7 +41,7 @@ export default function RenameProjectModal({
 }
 
 export const useRenameProjectModal = (): [
-  (props: RenameProjectModalProps) => JSX.Element,
+  (props: RenameProjectModalProps) => ReactNode,
   boolean,
   Dispatch<SetStateAction<boolean>>,
 ] => {

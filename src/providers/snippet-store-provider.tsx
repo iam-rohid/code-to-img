@@ -19,7 +19,7 @@ export const SnippetStoreProvider = ({
   children: ReactNode;
   snippet: iSnippetData;
 }) => {
-  const storeRef = useRef<SnippetStore>();
+  const storeRef = useRef<SnippetStore>(null);
 
   if (!storeRef.current) {
     storeRef.current = createSnippetStore(snippet);
